@@ -1,0 +1,2467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskSA Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* ASGOS-inspired navy/electric-blue/gold palette */
+  --bg:#020b1a; --bg2:#041020; --bg3:#061628;
+  --surface:#082035; --surface2:#0a2840; --surface3:#0d3050;
+  --primary:#0a6edb; --primary2:#1a8fff; --primary3:#4db0ff;
+  --accent:#f5a623; --accent2:#ffc145;
+  --green:#10b981; --green2:#34d399;
+  --red:#ef4444; --red2:#f87171;
+  --amber:#f5a623; --amber2:#ffc145;
+  --blue:#1a8fff; --blue2:#4db0ff;
+  --teal:#0dd4e8; --teal2:#4de8f5;
+  --border:rgba(26,143,255,0.14); --border2:rgba(26,143,255,0.28); --border3:rgba(26,143,255,0.5);
+  --text:#e8f4ff; --text2:#93b8d8; --text3:#4a7aa0; --text4:#234060;
+  --radius:12px; --radius-lg:18px; --radius-xl:24px;
+  --shadow:0 4px 32px rgba(0,80,200,0.25);
+  --glow:0 0 24px rgba(26,143,255,0.25);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+h1,h2,h3,h4,h5{font-family:'Sora',sans-serif;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--primary);border-radius:2px;}
+
+/* ── LAYOUT ── */
+.shell{display:flex;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:240px;flex-shrink:0;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
+  overflow-y:auto;overflow-x:hidden;
+  transition:width 0.3s;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border2) transparent;
+}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.sidebar.collapsed{width:64px;}
+.sidebar-header{
+  padding:20px 16px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.logo-icon{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Sora',sans-serif;font-weight:800;font-size:14px;color:white;
+  box-shadow:0 0 16px rgba(26,143,255,0.4);
+}
+.logo-text{font-family:'Sora',sans-serif;font-weight:800;font-size:17px;
+  background:linear-gradient(135deg,var(--primary3),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  white-space:nowrap;overflow:hidden;transition:opacity 0.2s;
+}
+.sidebar.collapsed .logo-text,.sidebar.collapsed .nav-label,.sidebar.collapsed .nav-section-title,.sidebar.collapsed .sidebar-user-info{opacity:0;pointer-events:none;}
+.sidebar.collapsed .nav-item{justify-content:center;padding:10px;}
+.sidebar.collapsed .nav-item .nav-badge{display:none;}
+
+.nav-section-title{
+  font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text4);padding:18px 16px 6px;white-space:nowrap;
+  flex-shrink:0;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 14px;margin:1px 8px;border-radius:var(--radius);
+  cursor:pointer;transition:all 0.18s;color:var(--text3);font-size:13px;font-weight:500;
+  position:relative;
+}
+.nav-item:hover{background:var(--surface);color:var(--text2);}
+.nav-item.active{background:linear-gradient(135deg,rgba(10,110,219,0.22),rgba(26,143,255,0.12));color:var(--primary3);border:1px solid rgba(26,143,255,0.25);}
+.nav-item.active::before{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:60%;background:linear-gradient(180deg,var(--primary),var(--primary2));border-radius:0 2px 2px 0;box-shadow:0 0 8px rgba(26,143,255,0.6);}
+.nav-icon{width:18px;height:18px;flex-shrink:0;opacity:0.8;}
+.nav-label{white-space:nowrap;overflow:hidden;}
+.nav-badge{
+  margin-left:auto;background:var(--red);color:white;
+  font-size:10px;font-weight:700;padding:1px 6px;border-radius:50px;
+  min-width:18px;text-align:center;
+}
+.nav-badge.green{background:var(--green);}
+.nav-badge.amber{background:var(--amber);}
+
+.sidebar-user{
+  padding:14px 16px;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+  flex-shrink:0;margin-top:16px;
+}
+.sidebar-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;}
+.sidebar-user-info{overflow:hidden;}
+.sidebar-user-info .name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar-user-info .role{font-size:11px;color:var(--primary3);}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:60px;border-bottom:1px solid var(--border);
+  background:rgba(8,7,20,0.8);backdrop-filter:blur(16px);
+  display:flex;align-items:center;gap:16px;padding:0 28px;
+  position:sticky;top:0;z-index:50;
+}
+.topbar-toggle{
+  width:34px;height:34px;border-radius:10px;border:1px solid var(--border2);
+  background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text3);font-size:16px;transition:all 0.2s;flex-shrink:0;
+}
+.topbar-toggle:hover{color:var(--text);border-color:var(--border3);}
+.topbar-search{
+  flex:1;max-width:360px;display:flex;align-items:center;gap:10px;
+  background:var(--surface);border:1px solid var(--border);border-radius:50px;
+  padding:0 16px;height:36px;
+}
+.topbar-search input{background:transparent;border:none;outline:none;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;flex:1;}
+.topbar-search input::placeholder{color:var(--text4);}
+.topbar-search svg{color:var(--text4);flex-shrink:0;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.topbar-btn{
+  width:36px;height:36px;border-radius:10px;border:1px solid var(--border);
+  background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text3);font-size:16px;transition:all 0.2s;position:relative;
+}
+.topbar-btn:hover{color:var(--text);border-color:var(--border3);}
+.topbar-notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--bg);}
+.topbar-date{font-size:12px;color:var(--text3);white-space:nowrap;}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+.page-content{flex:1;padding:28px;overflow-x:hidden;}
+.page-content.hidden{display:none;}
+
+/* ── PAGE HEADER ── */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:28px;flex-wrap:wrap;}
+.page-title{font-size:24px;font-weight:700;}
+.page-sub{font-size:13px;color:var(--text3);margin-top:3px;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;box-shadow:0 0 16px rgba(26,143,255,0.3);}
+.btn-primary:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 0 24px rgba(26,143,255,0.45);}
+.btn-ghost{background:var(--surface2);border:1px solid var(--border2);color:var(--text2);}
+.btn-ghost:hover{color:var(--text);border-color:var(--border3);}
+.btn-danger{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.2);color:var(--red2);}
+.btn-danger:hover{background:rgba(239,68,68,0.22);}
+.btn-success{background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.2);color:var(--green2);}
+.btn-success:hover{background:rgba(16,185,129,0.22);}
+.btn-sm{padding:6px 14px;font-size:12px;}
+
+/* ── METRIC CARDS ── */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+@media(max-width:900px){.metrics-grid{grid-template-columns:repeat(2,1fr);}}
+.metric{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:20px;position:relative;overflow:hidden;
+}
+.metric::after{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;opacity:0.07;}
+.metric.purple::after{background:var(--primary2);}
+.metric.green::after{background:var(--green);}
+.metric.amber::after{background:var(--amber);}
+.metric.red::after{background:var(--red);}
+.metric.blue::after{background:var(--blue);}
+.metric.teal::after{background:var(--teal);}
+/* Blue glow on metric cards */
+.metric{box-shadow:inset 0 0 40px rgba(26,143,255,0.04);}
+.metric-icon{font-size:22px;margin-bottom:12px;}
+.metric-value{font-family:'Sora',sans-serif;font-size:28px;font-weight:800;line-height:1;}
+.metric-label{font-size:11px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;}
+.metric-change{font-size:12px;margin-top:6px;display:flex;align-items:center;gap:4px;}
+.metric-change.up{color:var(--green2);}
+.metric-change.down{color:var(--red2);}
+.metric-change.neutral{color:var(--amber2);}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+.card-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.card-header h3{font-size:15px;font-weight:600;}
+.card-body{padding:20px;}
+.card-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text3);}
+
+/* ── TABLES ── */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:middle;}
+tbody tr:last-child td{border:none;}
+tbody tr:hover td{background:rgba(255,255,255,0.02);}
+.td-user{display:flex;align-items:center;gap:10px;}
+.td-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.td-name{font-weight:500;}
+.td-sub{font-size:11px;color:var(--text3);}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:600;white-space:nowrap;}
+.badge-purple{background:rgba(163,122,250,0.12);color:var(--primary3);border:1px solid rgba(163,122,250,0.2);}
+.badge-green{background:rgba(16,185,129,0.1);color:var(--green2);border:1px solid rgba(16,185,129,0.2);}
+.badge-red{background:rgba(239,68,68,0.1);color:var(--red2);border:1px solid rgba(239,68,68,0.2);}
+.badge-amber{background:rgba(245,158,11,0.1);color:var(--amber2);border:1px solid rgba(245,158,11,0.2);}
+.badge-blue{background:rgba(59,130,246,0.1);color:var(--blue2);border:1px solid rgba(59,130,246,0.2);}
+.badge-gray{background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);}
+.badge-teal{background:rgba(20,184,166,0.1);color:var(--teal2);border:1px solid rgba(20,184,166,0.2);}
+.badge .dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+
+/* ── FILTERS ── */
+.filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+.filter-tab{padding:7px 16px;border-radius:50px;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.18s;color:var(--text3);background:var(--surface);border:1px solid var(--border);}
+.filter-tab.active{background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;border-color:transparent;}
+.filter-tab:hover:not(.active){color:var(--text2);border-color:var(--border2);}
+.search-input{background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:7px 16px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s;min-width:200px;}
+.search-input:focus{border-color:var(--border3);}
+.search-input::placeholder{color:var(--text4);}
+
+/* ── FORM ELEMENTS ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group{margin-bottom:0;}
+.form-label{display:block;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.form-control{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 14px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s;}
+.form-control:focus{border-color:var(--border3);}
+.form-control::placeholder{color:var(--text4);}
+select.form-control{appearance:none;cursor:pointer;}
+select.form-control option{background:var(--bg3);}
+textarea.form-control{resize:vertical;min-height:80px;}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border3);border-radius:var(--radius-xl);padding:32px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 40px 100px rgba(0,0,0,0.6);position:relative;}
+.modal h2{font-size:20px;font-weight:700;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--text3);margin-bottom:24px;}
+.modal-close{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--text3);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.modal-close:hover{color:var(--text);border-color:var(--border2);}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;z-index:999;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:500;transform:translateY(60px);opacity:0;transition:all 0.35s;box-shadow:0 8px 32px rgba(0,0,0,0.5);max-width:320px;}
+.toast.success{background:var(--surface2);border:1px solid rgba(16,185,129,0.3);color:var(--green2);}
+.toast.error{background:var(--surface2);border:1px solid rgba(239,68,68,0.3);color:var(--red2);}
+.toast.info{background:var(--surface2);border:1px solid var(--border3);color:var(--primary3);}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* ── STAT DONUT ── */
+.donut-wrap{display:flex;gap:24px;align-items:center;flex-wrap:wrap;}
+.donut{position:relative;width:100px;height:100px;flex-shrink:0;}
+.donut svg{transform:rotate(-90deg);}
+.donut-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.donut-val{font-family:'Sora',sans-serif;font-size:20px;font-weight:800;}
+.donut-sub{font-size:10px;color:var(--text3);}
+.donut-legend{display:flex;flex-direction:column;gap:8px;}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px;}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* ── CHART BARS ── */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:120px;padding-bottom:4px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.bar-fill{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--primary2),var(--primary));transition:all 0.3s;min-height:4px;box-shadow:0 0 8px rgba(26,143,255,0.3);}
+.bar-fill:hover{filter:brightness(1.2);box-shadow:0 0 16px rgba(26,143,255,0.5);}
+.bar-label{font-size:10px;color:var(--text4);}
+
+/* ── ACTIVITY FEED ── */
+.activity-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.activity-item:last-child{border:none;}
+.activity-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.activity-body{flex:1;min-width:0;}
+.activity-body .msg{font-size:13px;line-height:1.5;}
+.activity-body .msg strong{color:var(--primary3);}
+.activity-body .time{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* ── APPROVAL CARD ── */
+.approval-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:14px;}
+.approval-card:last-child{margin:0;}
+.approval-info{flex:1;min-width:0;}
+.approval-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.approval-sub{font-size:12px;color:var(--text3);}
+.approval-actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;}
+
+/* ── PROGRESS ── */
+.progress{background:var(--surface2);border-radius:50px;height:6px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--primary2));}
+.progress-fill.green{background:linear-gradient(90deg,var(--green),var(--green2));}
+.progress-fill.amber{background:linear-gradient(90deg,var(--amber),var(--amber2));}
+.progress-fill.red{background:linear-gradient(90deg,var(--red),var(--red2));}
+
+/* ── REVENUE TABLE ── */
+.rev-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.rev-row:last-child{border:none;}
+.rev-left{display:flex;align-items:center;gap:10px;}
+.rev-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.rev-amount{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{position:fixed;z-index:100;height:100vh;transform:translateX(-100%);transition:transform 0.3s;}
+  .sidebar.mobile-open{transform:translateX(0);}
+  .metrics-grid{grid-template-columns:1fr 1fr;}
+  .form-grid{grid-template-columns:1fr;}
+  .page-content{padding:16px;}
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.page-content{animation:fadeIn 0.25s ease;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;display:inline-block;margin-right:6px;}
+
+/* ── TOGGLE SWITCH ── */
+.toggle-sw{width:40px;height:22px;border-radius:50px;background:var(--surface3);border:1px solid var(--border2);position:relative;cursor:pointer;transition:all 0.3s;flex-shrink:0;}
+.toggle-sw::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--text3);transition:all 0.3s;}
+.toggle-sw.on{background:linear-gradient(135deg,var(--primary),var(--primary2));border-color:var(--primary2);box-shadow:0 0 10px rgba(26,143,255,0.35);}
+.toggle-sw.on::after{left:20px;background:white;}
+
+/* ── PLAN PREVIEW CARD ── */
+.plan-prev{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+.plan-prev.featured{border-color:var(--border3);box-shadow:0 0 20px rgba(26,143,255,0.15);}
+.plan-prev-name{font-size:13px;font-weight:700;margin-bottom:2px;}
+.plan-prev-price{font-family:'Sora';font-size:22px;font-weight:800;}
+.plan-prev-price span{font-size:13px;color:var(--text3);font-weight:400;}
+.plan-prev-feat{font-size:11px;color:var(--text3);margin-top:8px;line-height:1.8;}
+
+/* ── TRIAL CARD ── */
+.trial-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.trial-item:last-child{border:none;}
+.trial-avatar{width:32px;height:32px;border-radius:50%;background:rgba(26,143,255,0.15);color:var(--primary3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.trial-info{flex:1;min-width:0;}
+.trial-info .name{font-size:13px;font-weight:500;}
+.trial-info .sub{font-size:11px;color:var(--text3);}
+.trial-days{font-size:11px;font-weight:700;padding:3px 10px;border-radius:50px;}
+.trial-days.ok{background:rgba(16,185,129,0.1);color:var(--green2);}
+.trial-days.warn{background:rgba(245,158,11,0.1);color:var(--amber2);}
+.trial-days.urgent{background:rgba(239,68,68,0.1);color:var(--red2);}
+
+/* ── MRR ROW ── */
+.mrr-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border-radius:var(--radius-sm);}
+.mrr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+.status-active    {color:var(--green2);}
+.status-pending   {color:var(--amber2);}
+.status-suspended {color:var(--red2);}
+.status-completed {color:var(--primary3);}
+
+/* ── OVERVIEW GRID ── */
+.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.overview-grid.three{grid-template-columns:2fr 1fr;}
+@media(max-width:900px){.overview-grid,.overview-grid.three{grid-template-columns:1fr;}}
+
+/* ── MAP PLACEHOLDER ── */
+.map-placeholder{background:linear-gradient(135deg,var(--bg3),var(--surface));border-radius:var(--radius);height:200px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--text3);font-size:13px;border:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODALS -->
+<!-- User detail modal -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('userModal')">✕</button>
+    <input type="hidden" id="modalUserId" value="">
+    <h2 id="modalUserName">User Details</h2>
+    <div class="modal-sub" id="modalUserEmail">user[at]example.co.za</div>
+    <div id="modalUserBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" onclick="suspendUser();closeModal('userModal')">Suspend Account</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('userModal')">Close</button>
+    </div>
+  </div>
+</div>
+<!-- Verify provider modal -->
+<div class="modal-overlay" id="verifyModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('verifyModal')">✕</button>
+    <h2>Verify Provider</h2>
+    <div class="modal-sub" id="verifyProvName">Review documents and approve</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;font-size:13px;">
+        <div style="font-weight:600;margin-bottom:4px;">📄 ID Document</div>
+        <div style="color:var(--text3);">South African ID — uploaded 2 days ago</div>
+        <button onclick="toast('Opening document viewer...','info')" style="margin-top:8px;font-size:11px;color:var(--primary3);background:none;border:none;cursor:pointer;padding:0;">View Document →</button>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;font-size:13px;">
+        <div style="font-weight:600;margin-bottom:4px;">🏆 Trade Certificate</div>
+        <div style="color:var(--text3);">PIRB Registration — uploaded 2 days ago</div>
+        <button onclick="toast('Opening document viewer...','info')" style="margin-top:8px;font-size:11px;color:var(--primary3);background:none;border:none;cursor:pointer;padding:0;">View Certificate →</button>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Verification Notes (optional)</label><textarea class="form-control" placeholder="Any notes about this provider verification..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" onclick="closeModal('verifyModal');toast('Provider rejected','error')">Reject</button>
+      <button class="btn btn-success btn-sm" onclick="closeModal('verifyModal');toast('✓ Provider verified successfully!','success')">Approve & Verify</button>
+    </div>
+  </div>
+</div>
+<!-- Dispute modal -->
+<div class="modal-overlay" id="disputeModal">
+  <div class="modal" style="max-width:600px;">
+    <button class="modal-close" onclick="closeModal('disputeModal')">✕</button>
+    <h2>Resolve Dispute</h2>
+    <div class="modal-sub">Booking #B-008821 - Plumbing - R850</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+      <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius);padding:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--blue2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Customer says</div>
+        <div style="font-size:13px;color:var(--text2);">The plumber did not fix the leak properly. Water is still coming through the ceiling. I want a full refund.</div>
+      </div>
+      <div style="background:rgba(91,63,212,0.06);border:1px solid rgba(91,63,212,0.15);border-radius:var(--radius);padding:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--primary3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Provider says</div>
+        <div style="font-size:13px;color:var(--text2);">I fixed the pipe as agreed. The new leak is from a different location. The job was completed as per the quote.</div>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Admin Decision</label>
+      <select class="form-control">
+        <option>Full refund to customer (R850)</option>
+        <option>Partial refund to customer (R425)</option>
+        <option>Release full payment to provider</option>
+        <option>Request more evidence from both parties</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Notes to both parties</label><textarea class="form-control" placeholder="Explain your decision..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('disputeModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="closeModal('disputeModal');toast('✓ Dispute resolved. Both parties notified via SMS.','success')">Resolve & Notify</button>
+    </div>
+  </div>
+</div>
+<!-- Add banner modal -->
+<div class="modal-overlay" id="bannerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('bannerModal')">✕</button>
+    <h2>New Banner Ad</h2>
+    <div class="modal-sub">Create a new advertising placement</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="form-group"><label class="form-label">Advertiser Name</label><input class="form-control" placeholder="e.g. Cape Town Plumbing Co."></div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Ad Title</label><input class="form-control" placeholder="Short headline"></div>
+        <div class="form-group"><label class="form-label">Subtitle</label><input class="form-control" placeholder="Supporting text"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Link URL</label><input class="form-control" placeholder="https://"></div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Position</label><select class="form-control"><option>HOME</option><option>SERVICES</option><option>SHOP</option><option>COURIER</option></select></div>
+        <div class="form-group"><label class="form-label">Monthly Price (R)</label><input class="form-control" type="number" placeholder="499"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Start Date</label><input class="form-control" type="date"></div>
+        <div class="form-group"><label class="form-label">End Date</label><input class="form-control" type="date"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('bannerModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="closeModal('bannerModal');toast('✓ Banner ad created and scheduled!','success')">Create Banner</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal-overlay" id="createUserModal">
+  <div class="modal-box" style="max-width:460px;">
+    <button class="modal-close" onclick="closeModal('createUserModal')">✕</button>
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:6px;">Create New User</h2>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px;">User will receive a welcome email with login instructions</p>
+    <div class="form-group"><label class="form-label">Full Name *</label><input class="form-control" id="newUserName" placeholder="e.g. Sipho Dlamini"></div>
+    <div class="form-group"><label class="form-label">Email Address *</label><input class="form-control" type="email" id="newUserEmail" placeholder="user[at]example.co.za"></div>
+    <div class="form-group"><label class="form-label">Role</label>
+      <select class="form-control" id="newUserRole">
+        <option>CUSTOMER</option><option>PROVIDER</option><option>SHOP_OWNER</option><option>ADMIN</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Province</label>
+      <select class="form-control"><option>Gauteng</option><option>Western Cape</option><option>KwaZulu-Natal</option><option>Eastern Cape</option><option>Limpopo</option></select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-ghost" onclick="closeModal('createUserModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createUser()">Create User</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="trialModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('trialModal')">✕</button>
+    <h2>Grant Trial Access</h2>
+    <div class="modal-sub">Give a provider free access to a plan for a set period</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div><label class="form-label">Provider Name or Email</label><input class="form-control" placeholder="Search for provider..."></div>
+      <div><label class="form-label">Trial Plan</label>
+        <select class="form-control">
+          <option>Starter Plan</option><option selected>Professional Plan</option><option>Business Plan</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label class="form-label">Trial Duration</label>
+          <select class="form-control"><option>7 days</option><option selected>14 days</option><option>21 days</option><option>30 days</option><option>60 days</option><option>90 days</option></select>
+        </div>
+        <div><label class="form-label">Start Date</label><input class="form-control" type="date"></div>
+      </div>
+      <div><label class="form-label">Reason / Notes (internal only)</label><textarea class="form-control" placeholder="e.g. Sales lead, friend of owner, conference promotion..."></textarea></div>
+      <div style="background:rgba(26,143,255,0.06);border:1px solid var(--border2);border-radius:var(--radius);padding:12px;font-size:12px;color:var(--text2);">
+        📱 The provider will receive an SMS notification: <em>"Welcome to TaskSA! Your 14-day Professional trial is now active. Log in at tasksa.co.za to get started."</em>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('trialModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="grantTrial()">Grant Trial</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SHELL ════ -->
+<div class="shell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon">T</div>
+      <div class="logo-text">TaskSA Admin</div>
+    </div>
+
+    <div class="nav-section-title">Main</div>
+    <div class="nav-item active" onclick="showPage('overview',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+      <span class="nav-label">Overview</span>
+    </div>
+    <div class="nav-item" onclick="showPage('analytics',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      <span class="nav-label">Analytics</span>
+    </div>
+
+    <div class="nav-section-title">People</div>
+    <div class="nav-item" onclick="showPage('users',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+      <span class="nav-label">Users</span>
+    </div>
+    <div class="nav-item" onclick="showPage('providers',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      <span class="nav-label">Providers</span>
+      <span class="nav-badge amber">7</span>
+    </div>
+
+    <div class="nav-section-title">Operations</div>
+    <div class="nav-item" onclick="showPage('bookings',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      <span class="nav-label">Bookings</span>
+    </div>
+    <div class="nav-item" onclick="showPage('orders',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+      <span class="nav-label">Orders</span>
+    </div>
+    <div class="nav-item" onclick="showPage('disputes',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      <span class="nav-label">Disputes</span>
+      <span class="nav-badge">3</span>
+    </div>
+
+    <div class="nav-section-title">Finance</div>
+    <div class="nav-item" onclick="showPage('payments',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+      <span class="nav-label">Payments</span>
+    </div>
+    <div class="nav-item" onclick="showPage('payouts',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      <span class="nav-label">Payouts</span>
+      <span class="nav-badge amber">5</span>
+    </div>
+
+    <div class="nav-section-title">Marketing</div>
+    <div class="nav-item" onclick="showPage('subscriptions',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+      <span class="nav-label">Subscriptions</span>
+      <span class="nav-badge green">Trial</span>
+    </div>
+    <div class="nav-item" onclick="showPage('ads',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+      <span class="nav-label">Banner Ads</span>
+    </div>
+    <div class="nav-item" onclick="showPage('reviews',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+      <span class="nav-label">Reviews</span>
+    </div>
+
+    <div class="nav-section-title">System</div>
+    <div class="nav-item" onclick="showPage('settings',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      <span class="nav-label">Settings</span>
+    </div>
+
+    <div class="sidebar-user" onclick="showPage('settings',null)">
+      <div class="sidebar-avatar">AD</div>
+      <div class="sidebar-user-info">
+        <div class="name">Admin User</div>
+        <div class="role">Super Admin</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <button class="topbar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">☰</button>
+      <div class="topbar-search">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input placeholder="Search users, bookings, orders..." id="globalSearch" onkeyup="globalSearch(this.value)">
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-date" id="topbarDate"></div>
+        <button class="topbar-btn" onclick="showAlerts()">
+          🔔<div class="topbar-notif-dot"></div>
+        </button>
+        <button class="topbar-btn" onclick="exportData('report')">📥</button>
+        <button class="topbar-btn" onclick="showPage('settings',null)">⚙️</button>
+      </div>
+    </div>
+
+    <!-- ════ OVERVIEW PAGE ════ -->
+    <div class="page-content" id="page-overview">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Platform Overview</div>
+          <div class="page-sub"><span class="live-dot"></span>Live data - Last updated just now</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" onclick="exportData('full-report')">📄 Export Report</button>
+          <button class="btn btn-primary" onclick="openAnnounceModal()">📢 Announce</button>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metrics-grid">
+        <div class="metric purple">
+          <div class="metric-icon">👥</div>
+          <div class="metric-value">14,832</div>
+          <div class="metric-label">Total Users</div>
+          <div class="metric-change up">↑ 12.4% this month</div>
+        </div>
+        <div class="metric green">
+          <div class="metric-icon">✅</div>
+          <div class="metric-value">2,341</div>
+          <div class="metric-label">Completed Bookings</div>
+          <div class="metric-change up">↑ 8.1% vs last month</div>
+        </div>
+        <div class="metric amber">
+          <div class="metric-icon">💰</div>
+          <div class="metric-value">R89,420</div>
+          <div class="metric-label">Commission Earned</div>
+          <div class="metric-change up">↑ 21.3% vs last month</div>
+        </div>
+        <div class="metric red">
+          <div class="metric-icon">⚠️</div>
+          <div class="metric-value">3</div>
+          <div class="metric-label">Open Disputes</div>
+          <div class="metric-change neutral">Needs attention</div>
+        </div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric blue">
+          <div class="metric-icon">🔧</div>
+          <div class="metric-value">1,284</div>
+          <div class="metric-label">Active Providers</div>
+          <div class="metric-change up">↑ 7 new today</div>
+        </div>
+        <div class="metric teal">
+          <div class="metric-icon">🛒</div>
+          <div class="metric-value">R42,180</div>
+          <div class="metric-label">Shop Sales (MTD)</div>
+          <div class="metric-change up">↑ 15.2%</div>
+        </div>
+        <div class="metric purple">
+          <div class="metric-icon">📦</div>
+          <div class="metric-value">318</div>
+          <div class="metric-label">Courier Bookings</div>
+          <div class="metric-change up">↑ 4.8%</div>
+        </div>
+        <div class="metric amber">
+          <div class="metric-icon">📢</div>
+          <div class="metric-value">R14,970</div>
+          <div class="metric-label">Ad Revenue (MTD)</div>
+          <div class="metric-change up">↑ 3 new advertisers</div>
+        </div>
+      </div>
+
+      <div class="overview-grid three" style="margin-bottom:20px;">
+        <!-- Revenue Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Monthly Revenue</h3>
+            <div style="display:flex;gap:6px;">
+              <span class="filter-tab active">6M</span>
+              <span class="filter-tab" onclick="setActiveFilter(this)">12M</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;">
+              <div><div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:800;">R89,420</div><div style="font-size:12px;color:var(--green2);margin-top:2px;">↑ 21.3% vs last month</div></div>
+              <div style="text-align:right;font-size:12px;color:var(--text3);">Subscriptions + Commission<br>+ Advertising</div>
+            </div>
+            <div class="bar-chart" id="revenueChart"></div>
+          </div>
+        </div>
+        <!-- Revenue breakdown donut -->
+        <div class="card">
+          <div class="card-header"><h3>Revenue Breakdown</h3></div>
+          <div class="card-body">
+            <div class="donut-wrap">
+              <div class="donut">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="var(--surface2)" stroke-width="12"/>
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="var(--primary2)" stroke-width="12" stroke-dasharray="143 96" stroke-linecap="round"/>
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="var(--green)" stroke-width="12" stroke-dasharray="72 167" stroke-dashoffset="-143" stroke-linecap="round"/>
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="var(--amber)" stroke-width="12" stroke-dasharray="24 215" stroke-dashoffset="-215" stroke-linecap="round"/>
+                </svg>
+                <div class="donut-label"><div class="donut-val">R89K</div><div class="donut-sub">Total</div></div>
+              </div>
+              <div class="donut-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--primary2)"></div><div><div style="font-size:12px;font-weight:600;">Commission</div><div style="font-size:11px;color:var(--text3);">R59,420 - 59%</div></div></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><div><div style="font-size:12px;font-weight:600;">Subscriptions</div><div style="font-size:11px;color:var(--text3);">R30,000 - 34%</div></div></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div><div><div style="font-size:12px;font-weight:600;">Advertising</div><div style="font-size:11px;color:var(--text3);">R14,970 - 7%</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="overview-grid" style="margin-bottom:20px;">
+        <!-- Recent activity -->
+        <div class="card">
+          <div class="card-header"><h3>Live Activity Feed</h3><span class="badge badge-green"><span class="dot"></span>Live</span></div>
+          <div class="card-body" style="max-height:320px;overflow-y:auto;">
+            <div id="activityFeed"></div>
+          </div>
+        </div>
+        <!-- Pending approvals -->
+        <div class="card">
+          <div class="card-header"><h3>Pending Actions</h3><span class="badge badge-amber">8 items</span></div>
+          <div class="card-body">
+            <div class="approval-card">
+              <div class="activity-icon" style="background:rgba(245,158,11,0.12);color:var(--amber2);">📄</div>
+              <div class="approval-info">
+                <div class="approval-title">Thabo Sithole — Provider Verification</div>
+                <div class="approval-sub">Electrician - Gauteng - Submitted 1 day ago</div>
+              </div>
+              <div class="approval-actions">
+                <button class="btn btn-success btn-sm" onclick="openModal('verifyModal');document.getElementById('verifyProvName').textContent='Thabo Sithole - Electrician - Gauteng'">Review</button>
+              </div>
+            </div>
+            <div class="approval-card">
+              <div class="activity-icon" style="background:rgba(239,68,68,0.1);color:var(--red2);">⚠️</div>
+              <div class="approval-info">
+                <div class="approval-title">Dispute #D-003 — Cleaning Service</div>
+                <div class="approval-sub">R650 held in escrow - 2 days unresolved</div>
+              </div>
+              <div class="approval-actions">
+                <button class="btn btn-danger btn-sm" onclick="openModal('disputeModal')">Resolve</button>
+              </div>
+            </div>
+            <div class="approval-card">
+              <div class="activity-icon" style="background:rgba(16,185,129,0.1);color:var(--green2);">💸</div>
+              <div class="approval-info">
+                <div class="approval-title">Payout Request — Sarah Ndlovu</div>
+                <div class="approval-sub">R3,200 - FNB account - Requested 3hrs ago</div>
+              </div>
+              <div class="approval-actions">
+                <button class="btn btn-success btn-sm" onclick="quickApprovePayout(this)">Approve</button>
+                <button class="btn btn-danger btn-sm" onclick="quickRejectPayout(this)">Reject</button>
+              </div>
+            </div>
+            <div class="approval-card">
+              <div class="activity-icon" style="background:rgba(59,130,246,0.1);color:var(--blue2);">📢</div>
+              <div class="approval-info">
+                <div class="approval-title">New Banner Ad Request</div>
+                <div class="approval-sub">BuildRight Hardware - R499/month - HOME position</div>
+              </div>
+              <div class="approval-actions">
+                <button class="btn btn-success btn-sm" onclick="toast('✓ Banner ad approved and now live!','success')">Approve</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Province map + top providers -->
+      <div class="overview-grid">
+        <div class="card">
+          <div class="card-header"><h3>Province Breakdown</h3></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div id="provinceBreakdown"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Top Earning Providers</h3><a style="font-size:12px;color:var(--primary3);cursor:pointer;" onclick="showPage('providers',null)">View all →</a></div>
+          <div class="card-body">
+            <div id="topProviders"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ ANALYTICS PAGE ════ -->
+    <div class="page-content hidden" id="page-analytics">
+      <div class="page-header">
+        <div><div class="page-title">Analytics</div><div class="page-sub">Platform performance metrics and trends</div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <select class="search-input" style="min-width:140px;"><option>Last 30 days</option><option>Last 90 days</option><option>This year</option><option>All time</option></select>
+          <button class="btn btn-ghost" onclick="exportData('analytics')">📥 Export</button>
+        </div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric purple"><div class="metric-icon">👁️</div><div class="metric-value">124K</div><div class="metric-label">Page Views</div><div class="metric-change up">↑ 18.2%</div></div>
+        <div class="metric green"><div class="metric-icon">🎯</div><div class="metric-value">8.4%</div><div class="metric-label">Conversion Rate</div><div class="metric-change up">↑ 1.2pp</div></div>
+        <div class="metric amber"><div class="metric-icon">⏱️</div><div class="metric-value">4m 32s</div><div class="metric-label">Avg Session</div><div class="metric-change up">↑ 22s</div></div>
+        <div class="metric blue"><div class="metric-icon">📱</div><div class="metric-value">68%</div><div class="metric-label">Mobile Traffic</div><div class="metric-change neutral">Stable</div></div>
+      </div>
+      <div class="overview-grid" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><h3>User Registrations (Daily)</h3></div>
+          <div class="card-body"><div class="bar-chart" id="regChart"></div></div>
+          <div class="card-footer"><span>Average: 48 registrations/day</span><span style="color:var(--green2);">↑ 12.3% vs prev period</span></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Bookings by Category</h3></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:12px;" id="categoryChart"></div>
+          </div>
+        </div>
+      </div>
+      <div class="overview-grid">
+        <div class="card">
+          <div class="card-header"><h3>Revenue Trend (12 months)</h3></div>
+          <div class="card-body"><div class="bar-chart" id="revTrendChart"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Platform Health</h3></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span>API Uptime</span><span style="color:var(--green2);font-weight:600;">99.97%</span></div><div class="progress"><div class="progress-fill green" style="width:99.97%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span>Payment Success Rate</span><span style="color:var(--green2);font-weight:600;">98.2%</span></div><div class="progress"><div class="progress-fill green" style="width:98.2%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span>SMS Delivery Rate</span><span style="color:var(--amber2);font-weight:600;">94.1%</span></div><div class="progress"><div class="progress-fill amber" style="width:94.1%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span>Dispute Resolution Rate</span><span style="color:var(--green2);font-weight:600;">96.8%</span></div><div class="progress"><div class="progress-fill green" style="width:96.8%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span>Provider Satisfaction</span><span style="color:var(--green2);font-weight:600;">91.3%</span></div><div class="progress"><div class="progress-fill" style="width:91.3%"></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ USERS PAGE ════ -->
+    <div class="page-content hidden" id="page-users">
+      <div class="page-header">
+        <div><div class="page-title">User Management</div><div class="page-sub">14,832 registered users across all roles</div></div>
+        <button class="btn btn-primary" onclick="openModal('createUserModal')">+ Create User</button>
+      </div>
+      <div class="filter-bar">
+        <span class="filter-tab active" onclick="setActiveFilter(this)">All Users</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">Customers</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">Providers</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">Shop Owners</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">Suspended</span>
+        <input class="search-input" placeholder="🔍  Search by name, email or phone..." oninput="filterTable('usersTable', this.value)">
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="usersTable">
+            <thead><tr><th>User</th><th>Role</th><th>Province</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer"><span>Showing 10 of 14,832 users</span><div style="display:flex;gap:6px;"><button class="btn btn-ghost btn-sm">← Prev</button><button class="btn btn-ghost btn-sm">Next →</button></div></div>
+      </div>
+    </div>
+
+    <!-- ════ PROVIDERS PAGE ════ -->
+    <div class="page-content hidden" id="page-providers">
+      <div class="page-header">
+        <div><div class="page-title">Service Providers</div><div class="page-sub">1,284 active providers - 7 pending verification</div></div>
+        <button class="btn btn-primary" onclick="showPage('providers',null);toast('Showing pending verifications','info')">🕐 Pending (7)</button>
+      </div>
+      <div class="filter-bar">
+        <span class="filter-tab active" onclick="setActiveFilter(this)">All</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">✅ Verified</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">⏳ Pending</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">⭐ Top Rated</span>
+        <input class="search-input" placeholder="🔍  Search providers..." oninput="filterTable('providersTable', this.value)">
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="providersTable">
+            <thead><tr><th>Provider</th><th>Category</th><th>Rating</th><th>Jobs</th><th>Earnings</th><th>Plan</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="providersBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer"><span>Showing 8 of 1,284 providers</span></div>
+      </div>
+    </div>
+
+    <!-- ════ BOOKINGS PAGE ════ -->
+    <div class="page-content hidden" id="page-bookings">
+      <div class="page-header">
+        <div><div class="page-title">Bookings</div><div class="page-sub">2,341 total bookings this month</div></div>
+        <button class="btn btn-ghost" onclick="exportData('bookings')">📥 Export</button>
+      </div>
+      <div class="filter-bar">
+        <span class="filter-tab active" onclick="setActiveFilter(this)">All</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">Pending</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">Active</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">Completed</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">Cancelled</span>
+        <input class="search-input" placeholder="🔍  Search bookings..." oninput="filterTable('bookingsTable', this.value)">
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="bookingsTable">
+            <thead><tr><th>Booking ID</th><th>Customer</th><th>Provider</th><th>Service</th><th>Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="bookingsBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer"><span>Showing 10 of 2,341 bookings</span></div>
+      </div>
+    </div>
+
+    <!-- ════ ORDERS PAGE ════ -->
+    <div class="page-content hidden" id="page-orders">
+      <div class="page-header">
+        <div><div class="page-title">Shop Orders</div><div class="page-sub">R42,180 in sales this month</div></div>
+        <button class="btn btn-ghost" onclick="exportData('orders')">📥 Export</button>
+      </div>
+      <div class="filter-bar">
+        <span class="filter-tab active" onclick="setActiveFilter(this)">All Orders</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">Pending</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">Processing</span>
+        <span class="filter-tab" onclick="setActiveFilter(this)">Delivered</span>
+        <input class="search-input" placeholder="🔍  Search orders..." oninput="filterTable('ordersTable', this.value)">
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="ordersTable">
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Shop</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer"><span>Showing 8 of 892 orders</span></div>
+      </div>
+    </div>
+
+    <!-- ════ DISPUTES PAGE ════ -->
+    <div class="page-content hidden" id="page-disputes">
+      <div class="page-header">
+        <div><div class="page-title">Disputes</div><div class="page-sub">3 open disputes require your attention</div></div>
+      </div>
+      <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="metric red"><div class="metric-icon">🔴</div><div class="metric-value">3</div><div class="metric-label">Open</div><div class="metric-change down">Need attention</div></div>
+        <div class="metric amber"><div class="metric-icon">🟡</div><div class="metric-value">8</div><div class="metric-label">Under Review</div><div class="metric-change neutral">In progress</div></div>
+        <div class="metric green"><div class="metric-icon">🟢</div><div class="metric-value">142</div><div class="metric-label">Resolved (30d)</div><div class="metric-change up">96.8% resolution rate</div></div>
+      </div>
+      <div id="disputesList"></div>
+    </div>
+
+    <!-- ════ PAYMENTS PAGE ════ -->
+    <div class="page-content hidden" id="page-payments">
+      <div class="page-header">
+        <div><div class="page-title">Payment Transactions</div><div class="page-sub">R548,200 processed this month</div></div>
+        <button class="btn btn-ghost" onclick="exportData('payments')">📥 Export</button>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric green"><div class="metric-icon">💳</div><div class="metric-value">R548K</div><div class="metric-label">Total Processed</div><div class="metric-change up">↑ 19.4%</div></div>
+        <div class="metric purple"><div class="metric-icon">🔒</div><div class="metric-value">R42K</div><div class="metric-label">Held in Escrow</div><div class="metric-change neutral">124 bookings</div></div>
+        <div class="metric amber"><div class="metric-icon">💰</div><div class="metric-value">R89K</div><div class="metric-label">Commission</div><div class="metric-change up">↑ 21.3%</div></div>
+        <div class="metric red"><div class="metric-icon">↩️</div><div class="metric-value">R4,200</div><div class="metric-label">Refunds</div><div class="metric-change neutral">0.77% refund rate</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Recent Transactions</h3>
+          <div style="display:flex;gap:6px;">
+            <span class="filter-tab active" onclick="setActiveFilter(this)">All</span>
+            <span class="filter-tab" onclick="setActiveFilter(this)">Completed</span>
+            <span class="filter-tab" onclick="setActiveFilter(this)">Escrow</span>
+            <span class="filter-tab" onclick="setActiveFilter(this)">Refunded</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Transaction ID</th><th>User</th><th>Type</th><th>Amount</th><th>Gateway</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="paymentsBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer"><span>Showing 10 of 4,821 transactions</span></div>
+      </div>
+    </div>
+
+    <!-- ════ PAYOUTS PAGE ════ -->
+    <div class="page-content hidden" id="page-payouts">
+      <div class="page-header">
+        <div><div class="page-title">Provider Payouts</div><div class="page-sub">5 payout requests waiting for approval</div></div>
+        <button class="btn btn-primary" onclick="approveAllPayouts()">✅ Approve All Verified</button>
+      </div>
+      <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="metric amber"><div class="metric-icon">⏳</div><div class="metric-value">5</div><div class="metric-label">Pending</div><div class="metric-change neutral">R28,400 total</div></div>
+        <div class="metric green"><div class="metric-icon">✅</div><div class="metric-value">R184K</div><div class="metric-label">Paid Out (MTD)</div><div class="metric-change up">↑ 14.2%</div></div>
+        <div class="metric blue"><div class="metric-icon">🏦</div><div class="metric-value">R42K</div><div class="metric-label">Provider Balances</div><div class="metric-change neutral">Available</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Payout Requests</h3></div>
+        <div class="card-body" id="payoutsList"></div>
+      </div>
+      <div style="margin-top:20px;" class="card">
+        <div class="card-header"><h3>Payout History</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Provider</th><th>Amount</th><th>Bank</th><th>Reference</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="payoutHistoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ BANNER ADS PAGE ════ -->
+    <div class="page-content hidden" id="page-ads">
+      <div class="page-header">
+        <div><div class="page-title">Banner Advertisements</div><div class="page-sub">R14,970 ad revenue this month</div></div>
+        <button class="btn btn-primary" onclick="openModal('bannerModal')">+ New Banner</button>
+      </div>
+      <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="metric purple"><div class="metric-icon">📢</div><div class="metric-value">12</div><div class="metric-label">Active Banners</div></div>
+        <div class="metric green"><div class="metric-icon">👁️</div><div class="metric-value">284K</div><div class="metric-label">Total Impressions</div><div class="metric-change up">↑ 18%</div></div>
+        <div class="metric amber"><div class="metric-icon">👆</div><div class="metric-value">4,820</div><div class="metric-label">Total Clicks</div><div class="metric-change up">1.7% CTR</div></div>
+        <div class="metric blue"><div class="metric-icon">💰</div><div class="metric-value">R14,970</div><div class="metric-label">Ad Revenue</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Active Banners</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Advertiser</th><th>Position</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Period</th><th>Revenue</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="adsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ REVIEWS PAGE ════ -->
+    <div class="page-content hidden" id="page-reviews">
+      <div class="page-header">
+        <div><div class="page-title">Review Moderation</div><div class="page-sub">4.8★ platform average - 2 flagged reviews</div></div>
+      </div>
+      <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="metric green"><div class="metric-icon">⭐</div><div class="metric-value">4.8</div><div class="metric-label">Platform Avg</div><div class="metric-change up">47,200 reviews</div></div>
+        <div class="metric red"><div class="metric-icon">🚩</div><div class="metric-value">2</div><div class="metric-label">Flagged</div><div class="metric-change down">Need review</div></div>
+        <div class="metric amber"><div class="metric-icon">🗑️</div><div class="metric-value">14</div><div class="metric-label">Removed (30d)</div><div class="metric-change neutral">Policy violations</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Flagged Reviews</h3><span class="badge badge-red">2 flagged</span></div>
+        <div class="card-body" id="reviewsList"></div>
+      </div>
+      <div style="margin-top:20px;" class="card">
+        <div class="card-header"><h3>Recent Reviews</h3></div>
+        <div class="card-body" id="recentReviewsList"></div>
+      </div>
+    </div>
+
+    <!-- ════ SETTINGS PAGE ════ -->
+    <div class="page-content hidden" id="page-settings">
+      <div class="page-header">
+        <div><div class="page-title">Platform Settings</div><div class="page-sub">Configure TaskSA platform behaviour</div></div>
+        <button class="btn btn-primary" onclick="saveSettings()">💾 Save Changes</button>
+      </div>
+
+      <!-- Saved confirmation banner (hidden by default) -->
+      <div id="settingsSavedBanner" style="display:none;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:var(--radius);padding:14px 20px;margin-bottom:20px;font-size:13px;color:var(--green2);display:none;align-items:center;gap:10px;">
+        <span style="font-size:18px;">✓</span>
+        <div>
+          <strong>Settings saved.</strong> Changes are stored locally in this session.
+          <span style="color:var(--text3);margin-left:8px;">When you connect the real backend, these values will be written to the database.</span>
+        </div>
+      </div>
+
+      <div class="overview-grid">
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header"><h3>💰 Commission & Fees</h3></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+              <div class="form-group"><label class="form-label">Starter Plan Commission (%)</label><input id="set_comm_starter" class="form-control" type="number" value="12" min="0" max="30"></div>
+              <div class="form-group"><label class="form-label">Professional Plan Commission (%)</label><input id="set_comm_pro" class="form-control" type="number" value="8" min="0" max="30"></div>
+              <div class="form-group"><label class="form-label">Business Plan Commission (%)</label><input id="set_comm_biz" class="form-control" type="number" value="5" min="0" max="30"></div>
+              <div class="form-group"><label class="form-label">Base Delivery Fee (R)</label><input id="set_delivery_fee" class="form-control" type="number" value="59" min="0"></div>
+              <div class="form-group"><label class="form-label">Minimum Payout Amount (R)</label><input id="set_min_payout" class="form-control" type="number" value="100" min="50"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>📱 Subscription Pricing</h3></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+              <div class="form-group"><label class="form-label">Starter Plan Price (R/month)</label><input id="set_price_starter" class="form-control" type="number" value="199"></div>
+              <div class="form-group"><label class="form-label">Professional Plan Price (R/month)</label><input id="set_price_pro" class="form-control" type="number" value="499"></div>
+              <div class="form-group"><label class="form-label">Business Plan Price (R/month)</label><input id="set_price_biz" class="form-control" type="number" value="999"></div>
+              <div class="form-group"><label class="form-label">Banner Ad Base Price (R/month)</label><input id="set_price_banner" class="form-control" type="number" value="499"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header"><h3>🔒 Security Settings</h3></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+              <div class="form-group"><label class="form-label">Max Login Attempts Before Lockout</label><input id="set_max_login" class="form-control" type="number" value="5"></div>
+              <div class="form-group"><label class="form-label">Account Lockout Duration (minutes)</label><input id="set_lockout_mins" class="form-control" type="number" value="30"></div>
+              <div class="form-group"><label class="form-label">JWT Access Token Expiry</label>
+                <select id="set_jwt_expiry" class="form-control"><option>15 minutes</option><option>30 minutes</option><option>1 hour</option></select>
+              </div>
+              <div class="form-group"><label class="form-label">Require OTP for Provider Payouts</label>
+                <select id="set_otp_payouts" class="form-control"><option>Yes (Recommended)</option><option>No</option></select>
+              </div>
+              <div class="form-group"><label class="form-label">Admin 2FA</label>
+                <select id="set_2fa" class="form-control"><option>Enabled (Recommended)</option><option>Disabled</option></select>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>🌍 Platform Info</h3></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+              <div class="form-group"><label class="form-label">Platform Name</label><input id="set_platform_name" class="form-control" value="TaskSA"></div>
+              <div class="form-group"><label class="form-label">Support Email</label><input id="set_support_email" class="form-control" type="email" value="support[at]tasksa.co.za"></div>
+              <div class="form-group"><label class="form-label">Support Phone</label><input id="set_support_phone" class="form-control" value="+27 21 000 0000"></div>
+              <div class="form-group"><label class="form-label">Default Currency</label>
+                <select id="set_currency" class="form-control"><option>ZAR (R)</option></select>
+              </div>
+              <div class="form-group"><label class="form-label">Platform Timezone</label>
+                <select id="set_timezone" class="form-control"><option>Africa/Johannesburg (SAST, UTC+2)</option></select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SUBSCRIPTIONS PAGE ════ -->
+    <div class="page-content hidden" id="page-subscriptions">
+      <div class="page-header">
+        <div><div class="page-title">Subscription Management</div><div class="page-sub">Manage plans, pricing, trial periods and active subscribers</div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-ghost" onclick="exportData('subscribers')">📥 Export</button>
+          <button class="btn btn-primary" onclick="openModal('trialModal')">+ Grant Trial Access</button>
+        </div>
+      </div>
+
+      <!-- Summary metrics -->
+      <div class="metrics-grid" style="margin-bottom:20px;">
+        <div class="metric blue"><div class="metric-icon">📋</div><div class="metric-value">1,284</div><div class="metric-label">Active Subscribers</div><div class="metric-change up">↑ 48 this month</div></div>
+        <div class="metric amber"><div class="metric-icon">🎟️</div><div class="metric-value">23</div><div class="metric-label">Active Trials</div><div class="metric-change neutral">12 expiring this week</div></div>
+        <div class="metric green"><div class="metric-icon">💰</div><div class="metric-value">R184,200</div><div class="metric-label">Monthly Recurring</div><div class="metric-change up">↑ 14.2%</div></div>
+        <div class="metric red"><div class="metric-icon">📉</div><div class="metric-value">18</div><div class="metric-label">Cancelled (30d)</div><div class="metric-change down">1.4% churn rate</div></div>
+      </div>
+
+      <!-- Plan Editor -->
+      <div class="overview-grid three" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><h3>⚙️ Plan Configuration</h3><span class="badge badge-blue">Live — changes apply immediately</span></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:20px;">
+
+              <!-- STARTER -->
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:18px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:10px;height:10px;border-radius:50%;background:var(--text3);"></div>
+                    <span style="font-size:15px;font-weight:700;">Starter Plan</span>
+                    <span class="badge badge-gray">342 subscribers</span>
+                  </div>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text3);">
+                    <span>Active</span>
+                    <div class="toggle-sw on" id="starter-toggle" onclick="togglePlan(this,'Starter')"></div>
+                  </label>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  <div><label class="form-label">Monthly Price (R)</label><input class="form-control" type="number" id="starter-price" value="199" min="0" onchange="recalcMRR()"></div>
+                  <div><label class="form-label">Commission (%)</label><input class="form-control" type="number" id="starter-comm" value="12" min="0" max="30"></div>
+                  <div><label class="form-label">Max Listings</label><input class="form-control" type="number" value="10" min="1"></div>
+                  <div><label class="form-label">Banner Ads/month</label><input class="form-control" type="number" value="0" min="0"></div>
+                </div>
+                <div style="margin-top:12px;"><label class="form-label">Features (one per line)</label><textarea class="form-control" rows="3" id="starter-features">Up to 10 active listings
+Basic profile page
+Customer messaging
+Ratings & reviews</textarea></div>
+                <div style="margin-top:12px;display:flex;gap:8px;">
+                  <div style="flex:1;"><label class="form-label">Trial Period (days)</label><input class="form-control" type="number" id="starter-trial" value="14" min="0" max="90"></div>
+                  <div style="flex:1;"><label class="form-label">Trial Requires Card?</label><select class="form-control"><option>No — free trial</option><option>Yes — card on file</option></select></div>
+                </div>
+              </div>
+
+              <!-- PROFESSIONAL -->
+              <div style="background:var(--bg3);border:2px solid var(--border2);border-radius:var(--radius);padding:18px;position:relative;">
+                <div style="position:absolute;top:-10px;left:16px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;font-size:10px;font-weight:700;padding:3px 12px;border-radius:50px;letter-spacing:0.5px;">MOST POPULAR</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:10px;height:10px;border-radius:50%;background:var(--primary2);box-shadow:0 0 8px var(--primary2);"></div>
+                    <span style="font-size:15px;font-weight:700;">Professional Plan</span>
+                    <span class="badge badge-blue">786 subscribers</span>
+                  </div>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text3);">
+                    <span>Active</span>
+                    <div class="toggle-sw on" id="pro-toggle" onclick="togglePlan(this,'Professional')"></div>
+                  </label>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  <div><label class="form-label">Monthly Price (R)</label><input class="form-control" type="number" id="pro-price" value="499" min="0" onchange="recalcMRR()"></div>
+                  <div><label class="form-label">Commission (%)</label><input class="form-control" type="number" id="pro-comm" value="8" min="0" max="30"></div>
+                  <div><label class="form-label">Max Listings</label><input class="form-control" type="number" value="999" min="1"></div>
+                  <div><label class="form-label">Banner Ads/month</label><input class="form-control" type="number" value="1" min="0"></div>
+                </div>
+                <div style="margin-top:12px;"><label class="form-label">Features (one per line)</label><textarea class="form-control" rows="4" id="pro-features">Unlimited listings
+Featured profile placement
+Priority customer support
+Analytics dashboard
+1 free banner ad/month</textarea></div>
+                <div style="margin-top:12px;display:flex;gap:8px;">
+                  <div style="flex:1;"><label class="form-label">Trial Period (days)</label><input class="form-control" type="number" id="pro-trial" value="14" min="0" max="90"></div>
+                  <div style="flex:1;"><label class="form-label">Trial Requires Card?</label><select class="form-control"><option>No — free trial</option><option>Yes — card on file</option></select></div>
+                </div>
+              </div>
+
+              <!-- BUSINESS -->
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:18px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);"></div>
+                    <span style="font-size:15px;font-weight:700;">Business Plan</span>
+                    <span class="badge badge-amber">156 subscribers</span>
+                  </div>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text3);">
+                    <span>Active</span>
+                    <div class="toggle-sw on" id="biz-toggle" onclick="togglePlan(this,'Business')"></div>
+                  </label>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  <div><label class="form-label">Monthly Price (R)</label><input class="form-control" type="number" id="biz-price" value="999" min="0" onchange="recalcMRR()"></div>
+                  <div><label class="form-label">Commission (%)</label><input class="form-control" type="number" id="biz-comm" value="5" min="0" max="30"></div>
+                  <div><label class="form-label">Team Members</label><input class="form-control" type="number" value="5" min="1"></div>
+                  <div><label class="form-label">Banner Ads/month</label><input class="form-control" type="number" value="3" min="0"></div>
+                </div>
+                <div style="margin-top:12px;"><label class="form-label">Features (one per line)</label><textarea class="form-control" rows="4" id="biz-features">Full store/shop setup
+5 team member accounts
+API access & webhooks
+Dedicated account manager
+3 banner ads/month</textarea></div>
+                <div style="margin-top:12px;display:flex;gap:8px;">
+                  <div style="flex:1;"><label class="form-label">Trial Period (days)</label><input class="form-control" type="number" id="biz-trial" value="7" min="0" max="90"></div>
+                  <div style="flex:1;"><label class="form-label">Trial Requires Card?</label><select class="form-control"><option>Yes — card on file</option><option>No — free trial</option></select></div>
+                </div>
+              </div>
+
+              <button class="btn btn-primary" onclick="savePlans()" style="width:100%;justify-content:center;">💾 Save All Plan Changes</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live preview + MRR calculator -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header"><h3>📊 MRR Calculator</h3></div>
+            <div class="card-body">
+              <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Updates automatically as you edit prices</div>
+              <div id="mrrBreakdown" style="display:flex;flex-direction:column;gap:10px;"></div>
+              <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                  <span style="font-size:13px;color:var(--text2);">Total MRR</span>
+                  <span style="font-family:'Sora';font-size:24px;font-weight:800;color:var(--green2);" id="totalMRR">R0</span>
+                </div>
+                <div style="font-size:11px;color:var(--text3);margin-top:4px;">Monthly Recurring Revenue from subscriptions only</div>
+              </div>
+              <div style="background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:var(--radius);padding:12px;margin-top:14px;">
+                <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">+ Commission Revenue</div>
+                <div style="font-size:12px;color:var(--text2);">Estimated R89,420/month based on current booking volume and commission rates</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live plan preview card -->
+          <div class="card">
+            <div class="card-header"><h3>👁️ Customer-Facing Preview</h3><span style="font-size:11px;color:var(--text3);">How plans appear to providers</span></div>
+            <div class="card-body" id="planPreview" style="display:flex;flex-direction:column;gap:12px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trial Management -->
+      <div class="overview-grid" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><h3>🎟️ Active Trials</h3><span class="badge badge-amber">23 active</span></div>
+          <div class="card-body" id="trialsList"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>⚙️ Trial Settings</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+            <div><label class="form-label">Default Trial Duration</label>
+              <select class="form-control">
+                <option>7 days</option><option selected>14 days</option><option>21 days</option><option>30 days</option>
+              </select>
+            </div>
+            <div><label class="form-label">Trial Plan (what new providers get)</label>
+              <select class="form-control">
+                <option>Starter Plan features</option><option selected>Professional Plan features</option><option>Business Plan features</option>
+              </select>
+            </div>
+            <div><label class="form-label">Auto-convert trial to paid?</label>
+              <select class="form-control"><option>Yes — charge card on file</option><option selected>No — trial just expires</option></select>
+            </div>
+            <div><label class="form-label">Reminder SMS before trial ends</label>
+              <select class="form-control"><option selected>3 days before + 1 day before</option><option>1 day before only</option><option>No reminders</option></select>
+            </div>
+            <div><label class="form-label">Max trials per phone number</label>
+              <input class="form-control" type="number" value="1" min="1">
+            </div>
+            <div style="background:rgba(26,143,255,0.06);border:1px solid var(--border2);border-radius:var(--radius);padding:12px;font-size:12px;color:var(--text2);">
+              💡 Trials give providers full access to the selected plan features. After expiry they are moved to Starter or prompted to subscribe.
+            </div>
+            <button class="btn btn-primary" onclick="saveTrialSettings()" style="width:100%;justify-content:center;">Save Trial Settings</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscriber table -->
+      <div class="card">
+        <div class="card-header">
+          <h3>All Subscribers</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="filter-tab active" onclick="setActiveFilter(this)">All</span>
+            <span class="filter-tab" onclick="setActiveFilter(this)">Starter</span>
+            <span class="filter-tab" onclick="setActiveFilter(this)">Professional</span>
+            <span class="filter-tab" onclick="setActiveFilter(this)">Business</span>
+            <span class="filter-tab" onclick="setActiveFilter(this)">Trial</span>
+            <span class="filter-tab" onclick="setActiveFilter(this)">Cancelled</span>
+            <input class="search-input" placeholder="🔍  Search subscribers..." oninput="filterTable('subscriberTable',this.value)" style="min-width:160px;">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="subscriberTable">
+            <thead><tr><th>Provider</th><th>Plan</th><th>Status</th><th>Price/mo</th><th>Started</th><th>Renews</th><th>Commission</th><th>Actions</th></tr></thead>
+            <tbody id="subscriberBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer"><span>Showing 10 of 1,284 subscribers</span></div>
+      </div>
+    </div>
+
+  </div><!-- end main -->
+</div><!-- end shell -->
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// TASKSA ADMIN PANEL — COMPLETE WORKING JAVASCRIPT
+// ════════════════════════════════════════════════════════════════
+
+// ── DATA ─────────────────────────────────────────────────────────
+var USERS = [
+  {id:1, name:'Sipho Dlamini',    email:'sipho@gmail.com',          role:'CUSTOMER',  province:'Gauteng',       joined:'12 Jan 2025', status:'Active'},
+  {id:2, name:'Thabo Mokoena',    email:'thabo@plumbing.co.za',     role:'PROVIDER',  province:'Gauteng',       joined:'3 Feb 2025',  status:'Active'},
+  {id:3, name:'Sarah Ndlovu',     email:'sarah@clean.co.za',        role:'PROVIDER',  province:'Western Cape',  joined:'8 Feb 2025',  status:'Active'},
+  {id:4, name:'Kobus du Plessis', email:'kobus@electric.co.za',     role:'PROVIDER',  province:'Western Cape',  joined:'14 Feb 2025', status:'Active'},
+  {id:5, name:'Lindiwe Mthembu',  email:'lindiwe@pets.co.za',       role:'PROVIDER',  province:'KwaZulu-Natal', joined:'19 Feb 2025', status:'Active'},
+  {id:6, name:'Ayanda Pillay',    email:'ayanda@garden.co.za',      role:'PROVIDER',  province:'Gauteng',       joined:'22 Feb 2025', status:'Active'},
+  {id:7, name:'Priya Naidoo',     email:'priya@test.co.za',         role:'CUSTOMER',  province:'KwaZulu-Natal', joined:'28 Feb 2025', status:'Active'},
+  {id:8, name:'Jan van der Berg', email:'jan@buildright.co.za',     role:'SHOP_OWNER',province:'Western Cape',  joined:'1 Mar 2025',  status:'Active'},
+  {id:9, name:'Fatima Davids',    email:'fatima@spam.com',          role:'CUSTOMER',  province:'Western Cape',  joined:'5 Mar 2025',  status:'Suspended'},
+  {id:10,name:'Michael Johnson',  email:'mike@test.co.za',          role:'CUSTOMER',  province:'Gauteng',       joined:'8 Mar 2025',  status:'Active'},
+];
+
+var PROVIDERS = [
+  {id:1, name:'Thabo Mokoena',    cat:'Plumbing',    rating:4.9, jobs:248, earnings:'R48,200', plan:'Professional', verified:true,  status:'Active'},
+  {id:2, name:'Sarah Ndlovu',     cat:'Cleaning',    rating:4.8, jobs:189, earnings:'R28,000', plan:'Starter',      verified:true,  status:'Active'},
+  {id:3, name:'Kobus du Plessis', cat:'Electrical',  rating:4.7, jobs:312, earnings:'R62,400', plan:'Professional', verified:true,  status:'Active'},
+  {id:4, name:'Lindiwe Mthembu',  cat:'Dog Sitting', rating:4.9, jobs:97,  earnings:'R14,100', plan:'Starter',      verified:true,  status:'Active'},
+  {id:5, name:'Ayanda Pillay',    cat:'Gardening',   rating:4.8, jobs:155, earnings:'R24,800', plan:'Starter',      verified:true,  status:'Active'},
+  {id:6, name:'Brendan Jansen',   cat:'Painting',    rating:4.4, jobs:78,  earnings:'R18,200', plan:'Starter',      verified:false, status:'Pending'},
+  {id:7, name:'Nokuthula Zulu',   cat:'Ironing',     rating:5.0, jobs:210, earnings:'R21,000', plan:'Starter',      verified:true,  status:'Active'},
+  {id:8, name:'Thabo Sithole',    cat:'Electrical',  rating:0,   jobs:0,   earnings:'R0',      plan:'Starter',      verified:false, status:'Pending'},
+];
+
+var BOOKINGS = [
+  {id:'B-008821',customer:'Sipho Dlamini',    provider:'Thabo Mokoena',    service:'Burst pipe repair',   date:'Today 14:00',     amount:'R350',   status:'IN_PROGRESS'},
+  {id:'B-008820',customer:'Priya Naidoo',     provider:'Sarah Ndlovu',     service:'House cleaning',      date:'Today 10:00',     amount:'R850',   status:'COMPLETED'},
+  {id:'B-008819',customer:'Michael Johnson',  provider:'Kobus du Plessis', service:'Geyser install',      date:'Tomorrow 09:00',  amount:'R1,200', status:'ACCEPTED'},
+  {id:'B-008818',customer:'Fatima Davids',    provider:'Ayanda Pillay',    service:'Garden service',      date:'24 Mar 08:00',    amount:'R400',   status:'PENDING'},
+  {id:'B-008817',customer:'Sipho Dlamini',    provider:'Lindiwe Mthembu',  service:'Dog sitting',         date:'25 Mar',          amount:'R200',   status:'PENDING'},
+  {id:'B-008816',customer:'Priya Naidoo',     provider:'Brendan Jansen',   service:'Interior painting',   date:'22 Mar',          amount:'R2,800', status:'COMPLETED'},
+  {id:'B-008815',customer:'Michael Johnson',  provider:'Nokuthula Zulu',   service:'Ironing x3 loads',    date:'21 Mar',          amount:'R450',   status:'COMPLETED'},
+  {id:'B-008814',customer:'Sipho Dlamini',    provider:'Thabo Mokoena',    service:'Leak inspection',     date:'20 Mar',          amount:'R350',   status:'CANCELLED'},
+];
+
+var PAYOUTS = [
+  {id:1, name:'Sarah Ndlovu',     amount:'R3,200', bank:'FNB ****1234',           requested:'3 hrs ago',  status:'Pending'},
+  {id:2, name:'Thabo Mokoena',    amount:'R8,989', bank:'ABSA ****8821',          requested:'6 hrs ago',  status:'Pending'},
+  {id:3, name:'Kobus du Plessis', amount:'R5,420', bank:'Standard Bank ****4412', requested:'1 day ago',  status:'Pending'},
+  {id:4, name:'Ayanda Pillay',    amount:'R2,100', bank:'Capitec ****9930',       requested:'1 day ago',  status:'Pending'},
+  {id:5, name:'Nokuthula Zulu',   amount:'R4,800', bank:'Nedbank ****2211',       requested:'2 days ago', status:'Pending'},
+];
+
+var SUBSCRIBERS = [
+  {id:1, name:'Thabo Mokoena',    plan:'Professional', status:'Active',   price:'R499', started:'1 Feb 2025',  renews:'1 Apr 2025',  comm:'8%'},
+  {id:2, name:'Sarah Ndlovu',     plan:'Starter',      status:'Active',   price:'R199', started:'8 Feb 2025',  renews:'8 Apr 2025',  comm:'12%'},
+  {id:3, name:'Kobus du Plessis', plan:'Professional', status:'Active',   price:'R499', started:'14 Feb 2025', renews:'14 Apr 2025', comm:'8%'},
+  {id:4, name:'Lindiwe Mthembu',  plan:'Starter',      status:'Trial',    price:'R0',   started:'18 Mar 2025', renews:'1 Apr 2025',  comm:'12%'},
+  {id:5, name:'Ayanda Pillay',    plan:'Starter',      status:'Active',   price:'R199', started:'22 Feb 2025', renews:'22 Apr 2025', comm:'12%'},
+  {id:6, name:'Brendan Jansen',   plan:'Starter',      status:'Active',   price:'R199', started:'1 Mar 2025',  renews:'1 Apr 2025',  comm:'12%'},
+  {id:7, name:'Nokuthula Zulu',   plan:'Professional', status:'Active',   price:'R499', started:'5 Mar 2025',  renews:'5 Apr 2025',  comm:'8%'},
+  {id:8, name:'Rudi Smit',        plan:'Business',     status:'Active',   price:'R999', started:'10 Jan 2025', renews:'10 Apr 2025', comm:'5%'},
+  {id:9, name:'Thabo Sithole',    plan:'Professional', status:'Trial',    price:'R0',   started:'20 Mar 2025', renews:'3 Apr 2025',  comm:'8%'},
+  {id:10,name:'Priya Hardware',   plan:'Business',     status:'Cancelled',price:'R0',   started:'1 Dec 2024',  renews:'—',           comm:'5%'},
+];
+
+var TRIALS = [
+  {id:1, name:'Lindiwe Mthembu',        plan:'Starter',      started:'18 Mar', daysLeft:9,  urgency:'ok'},
+  {id:2, name:'Thabo Sithole',          plan:'Professional', started:'20 Mar', daysLeft:3,  urgency:'urgent'},
+  {id:3, name:'Cape Cleaning Co.',       plan:'Professional', started:'15 Mar', daysLeft:6,  urgency:'warn'},
+  {id:4, name:'Johannesburg Electrics',  plan:'Business',     started:'10 Mar', daysLeft:1,  urgency:'urgent'},
+  {id:5, name:'Garden Kings',           plan:'Starter',      started:'22 Mar', daysLeft:12, urgency:'ok'},
+];
+
+var PLANS = {
+  starter:     {name:'Starter',      price:199, comm:12, trial:14, subs:342,  active:true},
+  professional:{name:'Professional', price:499, comm:8,  trial:14, subs:786,  active:true},
+  business:    {name:'Business',     price:999, comm:5,  trial:7,  subs:156,  active:true},
+};
+
+// ── TOAST ────────────────────────────────────────────────────────
+function toast(msg, type) {
+  type = type || 'success';
+  var t = document.getElementById('toast');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(function(){ t.classList.remove('show'); }, 3500);
+}
+
+// ── PAGE NAVIGATION ──────────────────────────────────────────────
+function showPage(id, navEl) {
+  document.querySelectorAll('.page-content').forEach(function(p){ p.classList.add('hidden'); });
+  var pg = document.getElementById('page-' + id);
+  if(pg) pg.classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  if(navEl) {
+    var ni = navEl.closest ? navEl.closest('.nav-item') : navEl;
+    if(ni) ni.classList.add('active');
+  } else {
+    document.querySelectorAll('.nav-item').forEach(function(n){
+      var oc = n.getAttribute('onclick') || '';
+      if(oc.indexOf("'" + id + "'") !== -1) n.classList.add('active');
+    });
+  }
+  if(window.innerWidth < 768) document.getElementById('sidebar').classList.remove('mobile-open');
+  // Render data for the page
+  if(id === 'users')         renderUsers();
+  if(id === 'providers')     renderProviders();
+  if(id === 'bookings')      renderBookings();
+  if(id === 'payouts')       renderPayouts();
+  if(id === 'subscriptions') { renderSubscribers(); renderTrials(); recalcMRR(); }
+  if(id === 'disputes')      renderDisputes();
+  if(id === 'reviews')       renderReviews();
+  if(id === 'ads')           renderAds();
+  if(id === 'payments')      renderPayments();
+}
+
+// ── MODALS ───────────────────────────────────────────────────────
+function openModal(id) {
+  var el = document.getElementById(id);
+  if(el) el.classList.add('open');
+}
+function closeModal(id) {
+  var el = document.getElementById(id);
+  if(el) el.classList.remove('open');
+}
+document.addEventListener('click', function(e){
+  if(e.target.classList && e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('open');
+  }
+});
+
+// ── SIDEBAR ──────────────────────────────────────────────────────
+function toggleSidebar() {
+  var sb = document.getElementById('sidebar');
+  if(window.innerWidth < 768) sb.classList.toggle('mobile-open');
+  else sb.classList.toggle('collapsed');
+}
+
+// ── FILTERS ──────────────────────────────────────────────────────
+function setActiveFilter(el) {
+  var parent = el.closest('.filter-bar') || el.parentElement;
+  if(parent) parent.querySelectorAll('.filter-tab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+function filterTable(tableId, query) {
+  var q = query.toLowerCase();
+  var rows = document.querySelectorAll('#' + tableId + ' tbody tr');
+  rows.forEach(function(row){
+    row.style.display = row.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  });
+}
+
+function globalSearch(val) {
+  if(val.trim()) toast('Searching for "' + val + '"...', 'info');
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────
+function badge(text, cls) {
+  var map = {
+    'Active':'badge-green','Suspended':'badge-red','Pending':'badge-amber',
+    'Active':'badge-green','Trial':'badge-amber','Cancelled':'badge-red',
+    'COMPLETED':'badge-purple','PENDING':'badge-amber','ACCEPTED':'badge-blue',
+    'IN_PROGRESS':'badge-blue','CANCELLED':'badge-red','DISPUTED':'badge-red',
+    'Verified':'badge-green','Starter':'badge-gray','Professional':'badge-blue','Business':'badge-amber',
+    'RELEASED':'badge-green','HELD_IN_ESCROW':'badge-amber','REFUNDED':'badge-red',
+    'DELIVERED':'badge-green','SHIPPED':'badge-blue','PROCESSING':'badge-purple',
+    'Open':'badge-red','Under Review':'badge-amber'
+  };
+  var c = cls || map[text] || 'badge-gray';
+  return '<span class="badge ' + c + '">' + text + '</span>';
+}
+
+function initials(name) {
+  return name.split(' ').map(function(n){ return n[0]; }).join('').slice(0,2).toUpperCase();
+}
+
+var COLORS = [
+  'rgba(26,143,255,0.15)','rgba(16,185,129,0.12)','rgba(245,158,11,0.12)',
+  'rgba(239,68,68,0.1)','rgba(167,139,250,0.12)','rgba(20,184,166,0.1)'
+];
+function avatarColor(name) { return COLORS[name.charCodeAt(0) % COLORS.length]; }
+
+// ── USERS ────────────────────────────────────────────────────────
+function renderUsers() {
+  var tbody = document.getElementById('usersBody');
+  if(!tbody) return;
+  tbody.innerHTML = USERS.map(function(u){
+    var ini = initials(u.name);
+    var col = avatarColor(u.name);
+    var actionBtn = u.status === 'Active'
+      ? '<button class="btn btn-danger btn-sm" onclick="toggleUserStatus(' + u.id + ')">Suspend</button>'
+      : '<button class="btn btn-success btn-sm" onclick="toggleUserStatus(' + u.id + ')">Restore</button>';
+    return '<tr id="user-row-' + u.id + '">'
+      + '<td><div class="td-user"><div class="td-avatar" style="background:' + col + ';color:var(--primary3)">' + ini + '</div>'
+      + '<div><div class="td-name">' + u.name + '</div><div class="td-sub">' + u.email + '</div></div></div></td>'
+      + '<td>' + badge(u.role) + '</td>'
+      + '<td><span style="font-size:12px;color:var(--text3)">' + u.province + '</span></td>'
+      + '<td><span style="font-size:12px;color:var(--text3)">' + u.joined + '</span></td>'
+      + '<td id="user-status-' + u.id + '">' + badge(u.status) + '</td>'
+      + '<td><div style="display:flex;gap:5px;">'
+      + '<button class="btn btn-ghost btn-sm" onclick="openUserModal(' + u.id + ')">View</button>'
+      + actionBtn
+      + '<button class="btn btn-danger btn-sm" onclick="deleteUser(' + u.id + ')" style="background:rgba(239,68,68,0.08);">Delete</button>'
+      + '</div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+// suspendUser is called by the static modal button before openUserModal rewires it
+// It reads the currently displayed user id from the modal
+function suspendUser() {
+  var idEl = document.getElementById('modalUserId');
+  if(idEl) { toggleUserStatus(parseInt(idEl.value)); return; }
+  // Fallback: find the user from the modal title
+  var title = document.querySelector('#userModal h2');
+  if(title) {
+    var name = title.textContent.trim();
+    var u = USERS.find(function(x){ return x.name === name; });
+    if(u) toggleUserStatus(u.id);
+  }
+}
+
+function toggleUserStatus(id) {
+  var u = USERS.find(function(x){ return x.id === id; });
+  if(!u) return;
+  u.status = u.status === 'Active' ? 'Suspended' : 'Active';
+  renderUsers();
+  toast(u.status === 'Suspended'
+    ? u.name + ' account suspended. They have been notified by SMS.'
+    : u.name + ' account restored successfully.', 
+    u.status === 'Suspended' ? 'error' : 'success');
+}
+
+function deleteUser(id) {
+  var u = USERS.find(function(x){ return x.id === id; });
+  if(!u) return;
+  if(!confirm('Permanently delete ' + u.name + '? This cannot be undone.')) return;
+  USERS = USERS.filter(function(x){ return x.id !== id; });
+  renderUsers();
+  toast(u.name + ' account permanently deleted.', 'error');
+}
+
+function openUserModal(id) {
+  var u = USERS.find(function(x){ return x.id === id; });
+  if(!u) return;
+  document.getElementById('modalUserName').textContent  = u.name;
+  document.getElementById('modalUserEmail').textContent = u.email + ' · ' + u.role;
+  document.getElementById('modalUserBody').innerHTML =
+    '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;">'
+    + '<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Account Info</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">'
+    + '<div><span style="color:var(--text3)">Role:</span> <strong>' + u.role + '</strong></div>'
+    + '<div><span style="color:var(--text3)">Status:</span> <strong style="color:' + (u.status==='Active'?'var(--green2)':'var(--red2)') + '">' + u.status + '</strong></div>'
+    + '<div><span style="color:var(--text3)">Province:</span> <strong>' + u.province + '</strong></div>'
+    + '<div><span style="color:var(--text3)">Joined:</span> <strong>' + u.joined + '</strong></div>'
+    + '</div></div>'
+    + '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;">'
+    + '<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Actions</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+    + '<button class="btn btn-ghost btn-sm" onclick="toast(\'Password reset email sent to ' + u.email + '\',\'success\')">Reset Password</button>'
+    + '<button class="btn btn-ghost btn-sm" onclick="toast(\'Verification email sent\',\'success\')">Send Verification</button>'
+    + '</div></div>';
+  // Update suspend button in modal
+  document.querySelector('#userModal .modal-footer .btn-danger').textContent
+    = u.status === 'Active' ? 'Suspend Account' : 'Restore Account';
+  document.querySelector('#userModal .modal-footer .btn-danger').onclick = function(){
+    toggleUserStatus(id); closeModal('userModal');
+  };
+  document.getElementById('modalUserId').value = id;
+  document.getElementById('modalUserName').textContent = u.name;
+  document.getElementById('modalUserEmail').textContent = u.email;
+  openModal('userModal');
+}
+
+// ── PROVIDERS ────────────────────────────────────────────────────
+function renderProviders() {
+  var tbody = document.getElementById('providersBody');
+  if(!tbody) return;
+  tbody.innerHTML = PROVIDERS.map(function(p){
+    var ini = initials(p.name);
+    var verifyBtn = !p.verified
+      ? '<button class="btn btn-success btn-sm" onclick="verifyProvider(' + p.id + ')">Verify</button>'
+      : '';
+    var suspendBtn = p.status === 'Active'
+      ? '<button class="btn btn-danger btn-sm" onclick="suspendProvider(' + p.id + ')">Suspend</button>'
+      : '<button class="btn btn-success btn-sm" onclick="restoreProvider(' + p.id + ')">Restore</button>';
+    return '<tr id="prov-row-' + p.id + '">'
+      + '<td><div class="td-user"><div class="td-avatar" style="background:rgba(26,143,255,0.15);color:var(--primary3)">' + ini + '</div>'
+      + '<div><div class="td-name">' + p.name + '</div><div class="td-sub">' + (p.verified ? '✓ Verified' : 'Pending verification') + '</div></div></div></td>'
+      + '<td><span style="font-size:12px">' + p.cat + '</span></td>'
+      + '<td><span style="color:var(--amber2);font-size:12px">' + (p.rating > 0 ? '★'.repeat(Math.round(p.rating)) + ' ' + p.rating : '—') + '</span></td>'
+      + '<td><span style="font-size:12px">' + p.jobs + '</span></td>'
+      + '<td><span style="font-size:12px;color:var(--green2);font-weight:600">' + p.earnings + '</span></td>'
+      + '<td>' + badge(p.plan, 'badge-blue') + '</td>'
+      + '<td id="prov-status-' + p.id + '">' + badge(p.verified ? 'Verified' : 'Pending', p.verified ? 'badge-green' : 'badge-amber') + '</td>'
+      + '<td><div style="display:flex;gap:5px;flex-wrap:wrap;">'
+      + verifyBtn + suspendBtn
+      + '</div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function verifyProvider(id) {
+  var p = PROVIDERS.find(function(x){ return x.id === id; });
+  if(!p) return;
+  p.verified = true;
+  p.status = 'Active';
+  renderProviders();
+  toast('✓ ' + p.name + ' verified! They have been notified via SMS.', 'success');
+  closeModal('verifyModal');
+}
+
+function suspendProvider(id) {
+  var p = PROVIDERS.find(function(x){ return x.id === id; });
+  if(!p) return;
+  p.status = 'Suspended';
+  renderProviders();
+  toast(p.name + ' provider account suspended.', 'error');
+}
+
+function restoreProvider(id) {
+  var p = PROVIDERS.find(function(x){ return x.id === id; });
+  if(!p) return;
+  p.status = 'Active';
+  renderProviders();
+  toast(p.name + ' provider account restored.', 'success');
+}
+
+// ── BOOKINGS ─────────────────────────────────────────────────────
+function renderBookings() {
+  var tbody = document.getElementById('bookingsBody');
+  if(!tbody) return;
+  var STATUS = {Active:'badge-green',Suspended:'badge-red',COMPLETED:'badge-purple',PENDING:'badge-amber',ACCEPTED:'badge-blue',IN_PROGRESS:'badge-blue',CANCELLED:'badge-red',DISPUTED:'badge-red'};
+  tbody.innerHTML = BOOKINGS.map(function(b){
+    return '<tr id="booking-row-' + b.id + '">'
+      + '<td><span style="font-size:12px;color:var(--primary3)">' + b.id + '</span></td>'
+      + '<td>' + b.customer + '</td>'
+      + '<td>' + b.provider + '</td>'
+      + '<td style="font-size:12px;color:var(--text2)">' + b.service + '</td>'
+      + '<td style="font-size:11px;color:var(--text3)">' + b.date + '</td>'
+      + '<td style="font-weight:700;color:var(--primary3)">' + b.amount + '</td>'
+      + '<td id="booking-status-' + b.id + '">' + badge(b.status, STATUS[b.status]) + '</td>'
+      + '<td><div style="display:flex;gap:5px;">'
+      + (b.status === 'PENDING' ? '<button class="btn btn-success btn-sm" onclick="updateBookingStatus(\'' + b.id + '\',\'ACCEPTED\')">Accept</button>' : '')
+      + (b.status === 'PENDING' || b.status === 'ACCEPTED' ? '<button class="btn btn-danger btn-sm" onclick="updateBookingStatus(\'' + b.id + '\',\'CANCELLED\')">Cancel</button>' : '')
+      + '<button class="btn btn-ghost btn-sm" onclick="openBookingDetail(b.id)">View</button>'
+      + '</div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function updateBookingStatus(id, newStatus) {
+  var b = BOOKINGS.find(function(x){ return x.id === id; });
+  if(!b) return;
+  b.status = newStatus;
+  renderBookings();
+  toast('Booking ' + id + ' ' + newStatus.toLowerCase() + '. Customer and provider notified.', newStatus === 'CANCELLED' ? 'error' : 'success');
+}
+
+// ── PAYOUTS ──────────────────────────────────────────────────────
+function renderPayouts() {
+  var container = document.getElementById('payoutsList');
+  if(!container) return;
+  if(PAYOUTS.filter(function(p){ return p.status === 'Pending'; }).length === 0) {
+    container.innerHTML = '<p style="color:var(--text3);font-size:13px;text-align:center;padding:20px;">No pending payouts</p>';
+    return;
+  }
+  container.innerHTML = PAYOUTS.filter(function(p){ return p.status === 'Pending'; }).map(function(p){
+    return '<div class="approval-card" id="payout-' + p.id + '">'
+      + '<div class="activity-icon" style="background:rgba(16,185,129,0.1);color:var(--green2);">💸</div>'
+      + '<div class="approval-info"><div class="approval-title">' + p.name + '</div>'
+      + '<div class="approval-sub">' + p.bank + ' · Requested ' + p.requested + '</div></div>'
+      + '<div style="font-family:\'Sora\',sans-serif;font-weight:800;font-size:16px;color:var(--green2);margin:0 12px;">' + p.amount + '</div>'
+      + '<div class="approval-actions">'
+      + '<button class="btn btn-success btn-sm" onclick="approvePayout(' + p.id + ')">Approve</button>'
+      + '<button class="btn btn-danger btn-sm" onclick="rejectPayout(' + p.id + ')">Reject</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function approvePayout(id) {
+  var p = PAYOUTS.find(function(x){ return x.id === id; });
+  if(!p) return;
+  p.status = 'Approved';
+  var el = document.getElementById('payout-' + id);
+  if(el) { el.style.opacity = '0.4'; el.style.pointerEvents = 'none'; }
+  toast('✓ Payout of ' + p.amount + ' approved for ' + p.name + '. Processing within 24hrs.', 'success');
+  setTimeout(function(){ renderPayouts(); }, 600);
+}
+
+function rejectPayout(id) {
+  var p = PAYOUTS.find(function(x){ return x.id === id; });
+  if(!p) return;
+  p.status = 'Rejected';
+  var el = document.getElementById('payout-' + id);
+  if(el) { el.style.opacity = '0.4'; el.style.pointerEvents = 'none'; }
+  toast('Payout rejected for ' + p.name + '. Provider notified.', 'error');
+  setTimeout(function(){ renderPayouts(); }, 600);
+}
+
+// ── SUBSCRIPTIONS ────────────────────────────────────────────────
+function renderSubscribers() {
+  var tbody = document.getElementById('subscriberBody');
+  if(!tbody) return;
+  var SCLS = {Active:'badge-green', Trial:'badge-amber', Cancelled:'badge-red'};
+  var PCLS = {Business:'badge-amber', Professional:'badge-blue', Starter:'badge-gray'};
+  tbody.innerHTML = SUBSCRIBERS.map(function(s){
+    var ini = initials(s.name);
+    return '<tr id="sub-row-' + s.id + '">'
+      + '<td><div class="td-user"><div class="td-avatar" style="background:rgba(26,143,255,0.15);color:var(--primary3)">' + ini + '</div>'
+      + '<div class="td-name">' + s.name + '</div></div></td>'
+      + '<td>' + badge(s.plan, PCLS[s.plan]) + '</td>'
+      + '<td id="sub-status-' + s.id + '">' + badge(s.status, SCLS[s.status]) + '</td>'
+      + '<td><strong style="color:var(--green2)">' + s.price + '</strong></td>'
+      + '<td style="font-size:11px;color:var(--text3)">' + s.started + '</td>'
+      + '<td style="font-size:11px;color:var(--text3)">' + s.renews + '</td>'
+      + '<td style="color:var(--amber2);font-weight:600;font-size:12px">' + s.comm + '</td>'
+      + '<td><div style="display:flex;gap:5px;flex-wrap:wrap;">'
+      + (s.status === 'Trial' ? '<button class="btn btn-ghost btn-sm" onclick="extendTrial(' + s.id + ')">+7 Days</button>' : '')
+      + (s.status === 'Active' ? '<button class="btn btn-danger btn-sm" onclick="cancelSubscription(' + s.id + ')">Cancel</button>' : '')
+      + (s.status === 'Cancelled' ? '<button class="btn btn-success btn-sm" onclick="reactivateSubscription(' + s.id + ')">Reactivate</button>' : '')
+      + '<button class="btn btn-ghost btn-sm" onclick="grantTrialToSub(' + s.id + ')">Grant Trial</button>'
+      + '</div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function cancelSubscription(id) {
+  var s = SUBSCRIBERS.find(function(x){ return x.id === id; });
+  if(!s) return;
+  s.status = 'Cancelled'; s.price = 'R0'; s.renews = '—';
+  renderSubscribers();
+  toast(s.name + ' subscription cancelled. They have been notified.', 'error');
+}
+
+function reactivateSubscription(id) {
+  var s = SUBSCRIBERS.find(function(x){ return x.id === id; });
+  if(!s) return;
+  s.status = 'Active';
+  var planKey = s.plan.toLowerCase();
+  s.price = 'R' + (PLANS[planKey] ? PLANS[planKey].price : 199);
+  renderSubscribers();
+  toast(s.name + ' subscription reactivated!', 'success');
+}
+
+function extendTrial(id) {
+  var s = SUBSCRIBERS.find(function(x){ return x.id === id; });
+  if(!s) return;
+  toast('Trial extended by 7 days for ' + s.name + '. SMS sent.', 'success');
+}
+
+function grantTrialToSub(id) {
+  var s = SUBSCRIBERS.find(function(x){ return x.id === id; });
+  if(!s) return;
+  document.getElementById('trialModal').querySelector('input') && 
+  (document.getElementById('trialModal').querySelector('input').value = s.name);
+  openModal('trialModal');
+}
+
+function renderTrials() {
+  var container = document.getElementById('trialsList');
+  if(!container) return;
+  container.innerHTML = TRIALS.map(function(t){
+    var dayClass = t.urgency === 'urgent' ? 'urgent' : t.urgency === 'warn' ? 'warn' : 'ok';
+    return '<div class="trial-item" id="trial-' + t.id + '">'
+      + '<div class="trial-avatar">' + initials(t.name) + '</div>'
+      + '<div class="trial-info"><div class="name">' + t.name + '</div>'
+      + '<div class="sub">' + t.plan + ' trial · started ' + t.started + '</div></div>'
+      + '<div class="trial-days ' + dayClass + '">' + t.daysLeft + 'd left</div>'
+      + '<div style="display:flex;gap:5px;">'
+      + '<button class="btn btn-ghost btn-sm" onclick="extendTrialItem(' + t.id + ')">+7d</button>'
+      + '<button class="btn btn-danger btn-sm" onclick="endTrial(' + t.id + ')">End</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function extendTrialItem(id) {
+  var t = TRIALS.find(function(x){ return x.id === id; });
+  if(!t) return;
+  t.daysLeft += 7;
+  t.urgency = t.daysLeft > 7 ? 'ok' : t.daysLeft > 3 ? 'warn' : 'urgent';
+  renderTrials();
+  toast('Trial extended by 7 days for ' + t.name + '.', 'success');
+}
+
+function endTrial(id) {
+  var t = TRIALS.find(function(x){ return x.id === id; });
+  if(!t) return;
+  TRIALS = TRIALS.filter(function(x){ return x.id !== id; });
+  renderTrials();
+  toast('Trial ended for ' + t.name + '. Account downgraded.', 'error');
+}
+
+function recalcMRR() {
+  var container = document.getElementById('mrrBreakdown');
+  if(!container) return;
+  var plans = [
+    {key:'starter',      color:'var(--text3)'},
+    {key:'professional', color:'var(--primary2)'},
+    {key:'business',     color:'var(--accent)'},
+  ];
+  var total = 0;
+  var html = '';
+  plans.forEach(function(p){
+    var plan = PLANS[p.key];
+    var priceEl = document.getElementById(p.key + '-price');
+    var price = priceEl ? parseInt(priceEl.value) : plan.price;
+    var mrr = price * plan.subs;
+    total += mrr;
+    html += '<div class="mrr-row">'
+      + '<div style="display:flex;align-items:center;gap:8px;">'
+      + '<div style="width:8px;height:8px;border-radius:50%;background:' + p.color + ';flex-shrink:0;"></div>'
+      + '<span style="font-size:13px;">' + plan.name + '</span>'
+      + '<span style="font-size:11px;color:var(--text3)">' + plan.subs + ' subs × R' + price + '</span>'
+      + '</div>'
+      + '<span style="font-weight:700;color:var(--green2)">R' + total.toLocaleString() + '</span>'
+      + '</div>';
+  });
+  container.innerHTML = html;
+  var totalEl = document.getElementById('totalMRR');
+  if(totalEl) totalEl.textContent = 'R' + total.toLocaleString();
+  renderPlanPreview();
+}
+
+function renderPlanPreview() {
+  var container = document.getElementById('planPreview');
+  if(!container) return;
+  var plans = [
+    {key:'starter', color:'var(--text2)', featured:false},
+    {key:'professional', color:'var(--primary2)', featured:true},
+    {key:'business', color:'var(--accent)', featured:false},
+  ];
+  container.innerHTML = plans.map(function(p){
+    var plan = PLANS[p.key];
+    var priceEl = document.getElementById(p.key + '-price');
+    var price = priceEl ? priceEl.value : plan.price;
+    var featsEl = document.getElementById(p.key + '-features');
+    var feats = featsEl ? featsEl.value.split('\n').filter(Boolean) : [];
+    return '<div class="plan-prev' + (p.featured ? ' featured' : '') + '">'
+      + '<div class="plan-prev-name" style="color:' + p.color + '">' + plan.name + '</div>'
+      + '<div class="plan-prev-price">R' + price + '<span>/month</span></div>'
+      + '<div class="plan-prev-feat">' + feats.map(function(f){ return '✓ ' + f; }).join('<br>') + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function togglePlan(el, name) {
+  el.classList.toggle('on');
+  var isOn = el.classList.contains('on');
+  var key = name.toLowerCase();
+  if(PLANS[key]) PLANS[key].active = isOn;
+  toast(name + ' plan ' + (isOn ? 'enabled' : 'disabled') + '.', isOn ? 'success' : 'error');
+}
+
+function savePlans() {
+  ['starter','professional','business'].forEach(function(key){
+    var priceEl = document.getElementById(key + '-price');
+    var commEl  = document.getElementById(key + '-comm');
+    var trialEl = document.getElementById(key + '-trial');
+    if(priceEl && PLANS[key]) PLANS[key].price = parseInt(priceEl.value) || PLANS[key].price;
+    if(commEl  && PLANS[key]) PLANS[key].comm  = parseInt(commEl.value)  || PLANS[key].comm;
+    if(trialEl && PLANS[key]) PLANS[key].trial  = parseInt(trialEl.value) || PLANS[key].trial;
+  });
+  recalcMRR();
+  toast('✓ All plan changes saved! Changes are now live.', 'success');
+}
+
+// Grant trial from modal
+function grantTrial() {
+  closeModal('trialModal');
+  toast('✓ Trial access granted! Provider notified via SMS.', 'success');
+}
+
+// ── DISPUTES ─────────────────────────────────────────────────────
+var DISPUTES = [
+  {id:'D-003',booking:'B-008821',service:'Plumbing — Burst pipe',amount:'R850',customer:'Sipho Dlamini',provider:'Thabo Mokoena',days:2,status:'Open'},
+  {id:'D-002',booking:'B-008790',service:'Cleaning — House clean',amount:'R650',customer:'Priya Naidoo',provider:'Sarah Ndlovu',days:1,status:'Open'},
+  {id:'D-001',booking:'B-008755',service:'Painting — Interior',amount:'R2,800',customer:'Michael Johnson',provider:'Brendan Jansen',days:5,status:'Under Review'},
+];
+
+function renderDisputes() {
+  var container = document.getElementById('disputesList');
+  if(!container) return;
+  container.innerHTML = DISPUTES.map(function(d){
+    return '<div class="card" style="margin-bottom:14px;">'
+      + '<div class="card-header"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+      + '<span style="font-family:\'Sora\',sans-serif;font-weight:700;color:var(--primary3)">' + d.id + '</span>'
+      + badge(d.status, d.status === 'Open' ? 'badge-red' : 'badge-amber')
+      + '<span style="font-size:12px;color:var(--text3)">' + d.service + '</span>'
+      + '</div><span style="font-size:12px;color:' + (d.days > 3 ? 'var(--red2)' : 'var(--amber2)') + '">' + d.days + ' day' + (d.days !== 1 ? 's' : '') + ' open</span></div>'
+      + '<div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:14px;">'
+      + '<div><div style="font-size:10px;color:var(--text3);margin-bottom:3px;">CUSTOMER</div>' + d.customer + '</div>'
+      + '<div><div style="font-size:10px;color:var(--text3);margin-bottom:3px;">PROVIDER</div>' + d.provider + '</div>'
+      + '<div><div style="font-size:10px;color:var(--text3);margin-bottom:3px;">AMOUNT IN ESCROW</div><strong style="color:var(--amber2)">' + d.amount + '</strong></div>'
+      + '</div></div>'
+      + '<div class="card-footer"><span></span><div style="display:flex;gap:8px;">'
+      + '<button class="btn btn-success btn-sm" onclick="resolveDispute(\'' + d.id + '\',\'provider\')">Release to Provider</button>'
+      + '<button class="btn btn-danger btn-sm" onclick="resolveDispute(\'' + d.id + '\',\'customer\')">Refund Customer</button>'
+      + '<button class="btn btn-ghost btn-sm" onclick="openModal(\'disputeModal\')">Full Review</button>'
+      + '</div></div>'
+      + '</div>';
+  }).join('');
+}
+
+function resolveDispute(id, direction) {
+  DISPUTES = DISPUTES.filter(function(x){ return x.id !== id; });
+  renderDisputes();
+  toast('✓ Dispute ' + id + ' resolved. ' + (direction === 'provider' ? 'Payment released to provider.' : 'Refund issued to customer.') + ' Both parties notified.', 'success');
+}
+
+// ── REVIEWS ──────────────────────────────────────────────────────
+function renderReviews() {
+  var fl = document.getElementById('reviewsList');
+  if(!fl) return;
+  var flagged = [
+    {id:1, reviewer:'Anonymous',    reviewee:'Thabo Mokoena',  score:1, body:'This man never showed up and stole my deposit!! SCAMMER!!!', flag:'Flagged by provider'},
+    {id:2, reviewer:'Sipho Dlamini',reviewee:'Brendan Jansen', score:1, body:'Worst service ever. Paint peeling after 2 days. Do NOT use.', flag:'Flagged by provider'},
+  ];
+  fl.innerHTML = flagged.map(function(r){
+    return '<div id="review-' + r.id + '" style="background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.15);border-radius:var(--radius);padding:16px;margin-bottom:10px;">'
+      + '<div style="display:flex;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">'
+      + '<div><strong>' + r.reviewer + '</strong> <span style="color:var(--text3);font-size:12px;">reviewed</span> <strong style="color:var(--primary3)">' + r.reviewee + '</strong></div>'
+      + '<div style="display:flex;gap:8px;align-items:center;"><span style="color:var(--amber2)">' + '★'.repeat(r.score) + '</span>' + badge('Flagged', 'badge-red') + '</div>'
+      + '</div>'
+      + '<p style="font-size:13px;color:var(--text2);margin-bottom:6px;">"' + r.body + '"</p>'
+      + '<div style="font-size:11px;color:var(--red2);margin-bottom:12px;">' + r.flag + '</div>'
+      + '<div style="display:flex;gap:8px;">'
+      + '<button class="btn btn-success btn-sm" onclick="keepReview(' + r.id + ')">Keep Review</button>'
+      + '<button class="btn btn-danger btn-sm" onclick="removeReview(' + r.id + ')">Remove Review</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function keepReview(id) {
+  var el = document.getElementById('review-' + id);
+  if(el) el.remove();
+  toast('Review kept. Provider has been notified.', 'success');
+}
+
+function removeReview(id) {
+  var el = document.getElementById('review-' + id);
+  if(el) el.remove();
+  toast('Review removed from platform. Both parties notified.', 'error');
+}
+
+// ── ADS ──────────────────────────────────────────────────────────
+var ADS = [
+  {id:1, advertiser:'Thabo Mokoena Plumbing', pos:'HOME',     impressions:'14,820', clicks:'312', ctr:'2.1%', period:'1-31 Mar', rev:'R499', status:'Active'},
+  {id:2, advertiser:'Cape Spice Market',       pos:'SHOP',     impressions:'8,420',  clicks:'194', ctr:'2.3%', period:'15 Mar-15 Apr', rev:'R499', status:'Active'},
+  {id:3, advertiser:'BuildRight Hardware',     pos:'SERVICES', impressions:'11,200', clicks:'228', ctr:'2.0%', period:'1-31 Mar', rev:'R499', status:'Active'},
+  {id:4, advertiser:'SwiftMove Express',        pos:'COURIER',  impressions:'6,840',  clicks:'88',  ctr:'1.3%', period:'20 Mar-20 Apr', rev:'R499', status:'Active'},
+];
+
+function renderAds() {
+  var tbody = document.getElementById('adsBody');
+  if(!tbody) return;
+  tbody.innerHTML = ADS.map(function(a){
+    return '<tr id="ad-row-' + a.id + '">'
+      + '<td><strong style="font-size:13px">' + a.advertiser + '</strong></td>'
+      + '<td>' + badge(a.pos, 'badge-purple') + '</td>'
+      + '<td>' + a.impressions + '</td>'
+      + '<td>' + a.clicks + '</td>'
+      + '<td style="color:var(--green2);font-weight:600">' + a.ctr + '</td>'
+      + '<td style="font-size:11px;color:var(--text3)">' + a.period + '</td>'
+      + '<td style="font-weight:700;color:var(--primary3)">' + a.rev + '</td>'
+      + '<td id="ad-status-' + a.id + '">' + badge(a.status, 'badge-green') + '</td>'
+      + '<td><div style="display:flex;gap:5px;">'
+      + '<button class="btn btn-ghost btn-sm" onclick="openEditAdModal(this)">Edit</button>'
+      + (a.status === 'Active'
+          ? '<button class="btn btn-danger btn-sm" onclick="pauseAd(' + a.id + ')">Pause</button>'
+          : '<button class="btn btn-success btn-sm" onclick="resumeAd(' + a.id + ')">Resume</button>')
+      + '<button class="btn btn-danger btn-sm" onclick="deleteAd(' + a.id + ')" style="background:rgba(239,68,68,0.06);">Delete</button>'
+      + '</div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function pauseAd(id) {
+  var a = ADS.find(function(x){ return x.id === id; });
+  if(!a) return;
+  a.status = 'Paused';
+  renderAds();
+  toast('Banner ad paused. Advertiser notified.', 'error');
+}
+
+function resumeAd(id) {
+  var a = ADS.find(function(x){ return x.id === id; });
+  if(!a) return;
+  a.status = 'Active';
+  renderAds();
+  toast('Banner ad resumed!', 'success');
+}
+
+function deleteAd(id) {
+  if(!confirm('Delete this banner ad? This cannot be undone.')) return;
+  ADS = ADS.filter(function(x){ return x.id !== id; });
+  renderAds();
+  toast('Banner ad deleted.', 'error');
+}
+
+// ── PAYMENTS ─────────────────────────────────────────────────────
+var PAYMENTS = [
+  {id:'PAY-9841',user:'Sipho Dlamini',   type:'Booking', amount:'R850',  gateway:'PayFast',   status:'HELD_IN_ESCROW', date:'Today'},
+  {id:'PAY-9840',user:'Priya Naidoo',    type:'Order',   amount:'R317',  gateway:'PayFast',   status:'RELEASED',       date:'Today'},
+  {id:'PAY-9839',user:'Michael Johnson', type:'Booking', amount:'R1,200',gateway:'Ozow EFT',  status:'RELEASED',       date:'Yesterday'},
+  {id:'PAY-9838',user:'Jan van der Berg',type:'Subscription',amount:'R499',gateway:'PayFast', status:'RELEASED',       date:'Yesterday'},
+  {id:'PAY-9837',user:'Fatima Davids',   type:'Booking', amount:'R400',  gateway:'SnapScan',  status:'REFUNDED',       date:'22 Mar'},
+  {id:'PAY-9836',user:'Sipho Dlamini',   type:'Order',   amount:'R248',  gateway:'PayFast',   status:'RELEASED',       date:'22 Mar'},
+];
+
+function renderPayments() {
+  var tbody = document.getElementById('paymentsBody');
+  if(!tbody) return;
+  var SCLS = {RELEASED:'badge-green',HELD_IN_ESCROW:'badge-amber',REFUNDED:'badge-red'};
+  tbody.innerHTML = PAYMENTS.map(function(p){
+    return '<tr>'
+      + '<td style="font-size:12px;color:var(--primary3)">' + p.id + '</td>'
+      + '<td>' + p.user + '</td>'
+      + '<td style="font-size:12px;color:var(--text2)">' + p.type + '</td>'
+      + '<td style="font-weight:700;color:var(--green2)">' + p.amount + '</td>'
+      + '<td style="font-size:11px;color:var(--text3)">' + p.gateway + '</td>'
+      + '<td>' + badge(p.status, SCLS[p.status] || 'badge-gray') + '</td>'
+      + '<td style="font-size:11px;color:var(--text3)">' + p.date + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+// ── OVERVIEW ACTIVITY ────────────────────────────────────────────
+function renderActivity() {
+  var container = document.getElementById('activityFeed');
+  if(!container) return;
+  var events = [
+    {icon:'💳',bg:'rgba(16,185,129,0.12)',color:'var(--green2)',msg:'<strong>Sipho Dlamini</strong> paid R850 for house cleaning booking',time:'2m ago'},
+    {icon:'🔧',bg:'rgba(26,143,255,0.12)',color:'var(--primary3)',msg:'<strong>Thabo Sithole</strong> registered as a new provider (Electrician)',time:'8m ago'},
+    {icon:'⭐',bg:'rgba(245,158,11,0.12)',color:'var(--amber2)',msg:'<strong>Priya Naidoo</strong> left a 5-star review for Sarah Ndlovu',time:'14m ago'},
+    {icon:'📦',bg:'rgba(59,130,246,0.12)',color:'var(--blue2)',msg:'<strong>Order #ORD-4421</strong> delivered — BuildRight Hardware',time:'22m ago'},
+    {icon:'⚠️',bg:'rgba(239,68,68,0.1)',color:'var(--red2)',msg:'<strong>Dispute #D-003</strong> opened — R850 held in escrow',time:'1h ago'},
+    {icon:'💸',bg:'rgba(16,185,129,0.12)',color:'var(--green2)',msg:'<strong>Thabo Mokoena</strong> requested payout of R8,989',time:'3h ago'},
+  ];
+  container.innerHTML = events.map(function(e){
+    return '<div class="activity-item">'
+      + '<div class="activity-icon" style="background:' + e.bg + ';color:' + e.color + '">' + e.icon + '</div>'
+      + '<div class="activity-body"><div class="msg">' + e.msg + '</div><div class="time">' + e.time + '</div></div>'
+      + '</div>';
+  }).join('');
+}
+
+function renderCharts() {
+  var months = ['Oct','Nov','Dec','Jan','Feb','Mar'];
+  var vals   = [42000,51000,68000,74000,73800,89420];
+  var maxV   = Math.max.apply(null, vals);
+  var rc = document.getElementById('revenueChart');
+  if(rc) rc.innerHTML = months.map(function(m,i){
+    return '<div class="bar-col"><div class="bar-fill" style="height:' + Math.round(vals[i]/maxV*100) + '%" title="R' + vals[i].toLocaleString() + '"></div><span class="bar-label">' + m + '</span></div>';
+  }).join('');
+
+  var days   = ['M','T','W','T','F','S','S'];
+  var regV   = [38,52,44,61,58,30,22];
+  var maxR   = Math.max.apply(null, regV);
+  var reg = document.getElementById('regChart');
+  if(reg) reg.innerHTML = days.map(function(d,i){
+    return '<div class="bar-col"><div class="bar-fill" style="height:' + Math.round(regV[i]/maxR*100) + '%" title="' + regV[i] + ' registrations"></div><span class="bar-label">' + d + '</span></div>';
+  }).join('');
+
+  var m12  = ['A','M','J','J','A','S','O','N','D','J','F','M'];
+  var v12  = [28,31,35,38,44,40,42,51,68,74,74,89];
+  var max12 = Math.max.apply(null, v12);
+  var rt = document.getElementById('revTrendChart');
+  if(rt) rt.innerHTML = m12.map(function(m,i){
+    return '<div class="bar-col"><div class="bar-fill" style="height:' + Math.round(v12[i]/max12*100) + '%"></div><span class="bar-label">' + m + '</span></div>';
+  }).join('');
+
+  var cats = [
+    {name:'Plumbing',pct:28,color:'var(--primary2)'},
+    {name:'Cleaning',pct:22,color:'var(--teal)'},
+    {name:'Electrical',pct:18,color:'var(--amber)'},
+    {name:'Gardening',pct:12,color:'var(--green)'},
+    {name:'Painting',pct:10,color:'var(--blue)'},
+    {name:'Other',pct:10,color:'var(--text4)'},
+  ];
+  var cc = document.getElementById('categoryChart');
+  if(cc) cc.innerHTML = cats.map(function(c){
+    return '<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;"><span>' + c.name + '</span><span style="font-weight:600">' + c.pct + '%</span></div>'
+      + '<div class="progress"><div style="width:' + c.pct + '%;height:100%;border-radius:50px;background:' + c.color + ';"></div></div></div>';
+  }).join('');
+}
+
+function renderProvinces() {
+  var container = document.getElementById('provinceBreakdown');
+  if(!container) return;
+  var provs = [
+    {name:'Gauteng',pct:38,users:5636},{name:'Western Cape',pct:24,users:3560},
+    {name:'KwaZulu-Natal',pct:16,users:2373},{name:'Eastern Cape',pct:9,users:1335},
+    {name:'Limpopo',pct:5,users:742},{name:'Others',pct:8,users:1186},
+  ];
+  container.innerHTML = provs.map(function(p){
+    return '<div style="margin-bottom:14px;">'
+      + '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;">'
+      + '<span>' + p.name + '</span>'
+      + '<span style="color:var(--text3)">' + p.users.toLocaleString() + ' users · <strong style="color:var(--primary3)">' + p.pct + '%</strong></span>'
+      + '</div>'
+      + '<div class="progress"><div class="progress-fill" style="width:' + (p.pct * 2.6) + '%"></div></div>'
+      + '</div>';
+  }).join('');
+}
+
+function renderTopProviders() {
+  var container = document.getElementById('topProviders');
+  if(!container) return;
+  container.innerHTML = PROVIDERS.filter(function(p){ return p.jobs > 0; }).slice(0,5).map(function(p,i){
+    return '<div class="rev-row">'
+      + '<div class="rev-left">'
+      + '<div style="width:20px;font-size:13px;font-weight:700;color:var(--text3)">' + (i+1) + '</div>'
+      + '<div class="td-avatar" style="width:32px;height:32px;background:rgba(26,143,255,0.15);color:var(--primary3);font-size:12px">' + initials(p.name) + '</div>'
+      + '<div><div style="font-size:13px;font-weight:500">' + p.name + '</div><div style="font-size:11px;color:var(--text3)">' + p.cat + ' · ' + p.jobs + ' jobs</div></div>'
+      + '</div>'
+      + '<div class="rev-amount" style="color:var(--green2)">' + p.earnings + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+// ── DATE ─────────────────────────────────────────────────────────
+function updateDate() {
+  var el = document.getElementById('topbarDate');
+  if(el) el.textContent = new Date().toLocaleDateString('en-ZA', {weekday:'short',day:'numeric',month:'short',year:'numeric'});
+}
+
+// ── SETTINGS SAVE ────────────────────────────────────────────────
+function saveSettings() {
+  // Read every field
+  var fields = {
+    'Starter Commission':     {id:'set_comm_starter',   min:0,   max:30,  type:'number'},
+    'Professional Commission':{id:'set_comm_pro',        min:0,   max:30,  type:'number'},
+    'Business Commission':    {id:'set_comm_biz',        min:0,   max:30,  type:'number'},
+    'Base Delivery Fee':      {id:'set_delivery_fee',   min:0,   max:500, type:'number'},
+    'Minimum Payout':         {id:'set_min_payout',     min:1,   max:9999,type:'number'},
+    'Starter Plan Price':     {id:'set_price_starter',  min:1,   max:9999,type:'number'},
+    'Professional Plan Price':{id:'set_price_pro',       min:1,   max:9999,type:'number'},
+    'Business Plan Price':    {id:'set_price_biz',       min:1,   max:9999,type:'number'},
+    'Banner Ad Price':        {id:'set_price_banner',   min:1,   max:9999,type:'number'},
+    'Max Login Attempts':     {id:'set_max_login',      min:1,   max:20,  type:'number'},
+    'Lockout Duration':       {id:'set_lockout_mins',   min:1,   max:1440,type:'number'},
+    'Platform Name':          {id:'set_platform_name',  type:'text'},
+    'Support Phone':          {id:'set_support_phone',  type:'text'},
+  };
+
+  // Validate all numeric fields
+  var errors = [];
+  Object.keys(fields).forEach(function(label) {
+    var f  = fields[label];
+    var el = document.getElementById(f.id);
+    if(!el) return;
+    if(f.type === 'number') {
+      var val = parseInt(el.value);
+      if(isNaN(val) || val < f.min || val > f.max) {
+        errors.push(label + ' must be between ' + f.min + ' and ' + f.max);
+        el.style.borderColor = 'var(--red2)';
+      } else {
+        el.style.borderColor = '';
+      }
+    } else {
+      if(!el.value.trim()) {
+        errors.push(label + ' cannot be empty');
+        el.style.borderColor = 'var(--red2)';
+      } else {
+        el.style.borderColor = '';
+      }
+    }
+  });
+
+  if(errors.length > 0) {
+    toast('Please fix: ' + errors[0], 'error');
+    return;
+  }
+
+  // Business logic checks
+  var cs = parseInt(document.getElementById('set_comm_starter').value);
+  var cp = parseInt(document.getElementById('set_comm_pro').value);
+  var cb = parseInt(document.getElementById('set_comm_biz').value);
+  if(cp >= cs) {
+    toast('Professional commission should be lower than Starter commission', 'error');
+    document.getElementById('set_comm_pro').style.borderColor = 'var(--red2)';
+    return;
+  }
+  if(cb >= cp) {
+    toast('Business commission should be lower than Professional commission', 'error');
+    document.getElementById('set_comm_biz').style.borderColor = 'var(--red2)';
+    return;
+  }
+
+  var ps = parseInt(document.getElementById('set_price_starter').value);
+  var pp = parseInt(document.getElementById('set_price_pro').value);
+  var pb = parseInt(document.getElementById('set_price_biz').value);
+  if(ps >= pp) {
+    toast('Professional plan price should be higher than Starter price', 'error');
+    return;
+  }
+  if(pp >= pb) {
+    toast('Business plan price should be higher than Professional price', 'error');
+    return;
+  }
+
+  // All valid — store in memory and update the Subscriptions plan editor if it has those fields
+  var saved = {
+    comm_starter:   cs,
+    comm_pro:       cp,
+    comm_biz:       cb,
+    delivery_fee:   parseInt(document.getElementById('set_delivery_fee').value),
+    min_payout:     parseInt(document.getElementById('set_min_payout').value),
+    price_starter:  ps,
+    price_pro:      pp,
+    price_biz:      pb,
+    price_banner:   parseInt(document.getElementById('set_price_banner').value),
+    platform_name:  document.getElementById('set_platform_name').value.trim(),
+    support_phone:  document.getElementById('set_support_phone').value.trim(),
+    jwt_expiry:     (document.getElementById('set_jwt_expiry') || {}).value || '15 minutes',
+    otp_payouts:    (document.getElementById('set_otp_payouts') || {}).value || 'Yes',
+    admin_2fa:      (document.getElementById('set_2fa') || {}).value || 'Enabled',
+  };
+
+  // Sync values to the Subscriptions plan editor if those inputs exist
+  var starterPriceEl = document.getElementById('starter-price');
+  var proPriceEl     = document.getElementById('pro-price');
+  var bizPriceEl     = document.getElementById('biz-price');
+  var starterCommEl  = document.getElementById('starter-comm');
+  var proCommEl      = document.getElementById('pro-comm');
+  var bizCommEl      = document.getElementById('biz-comm');
+  if(starterPriceEl) starterPriceEl.value = saved.price_starter;
+  if(proPriceEl)     proPriceEl.value     = saved.price_pro;
+  if(bizPriceEl)     bizPriceEl.value     = saved.price_biz;
+  if(starterCommEl)  starterCommEl.value  = saved.comm_starter;
+  if(proCommEl)      proCommEl.value      = saved.comm_pro;
+  if(bizCommEl)      bizCommEl.value      = saved.comm_biz;
+
+  // Show the saved banner
+  var banner = document.getElementById('settingsSavedBanner');
+  if(banner) {
+    banner.style.display = 'flex';
+    setTimeout(function(){ banner.style.display = 'none'; }, 6000);
+  }
+
+  // Recalc MRR if on subscriptions page
+  if(typeof recalcMRR === 'function') recalcMRR();
+
+  toast('✓ Settings saved — ' + Object.keys(saved).length + ' values updated', 'success');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+// ── ORDERS ───────────────────────────────────────────────────────
+var ORDERS_DATA = [
+  {id:'ORD-4421',customer:'Sipho Dlamini',    shop:'BuildRight Hardware',items:'Stanley Hammer, Paint 5L',total:'R538', status:'DELIVERED', date:'Today'},
+  {id:'ORD-4420',customer:'Priya Naidoo',     shop:'Cape Spice Market',  items:'Cape Masala x3',          total:'R237', status:'SHIPPED',   date:'Today'},
+  {id:'ORD-4419',customer:'Michael Johnson',  shop:'BuildRight Hardware',items:'Makita Drill 18V',         total:'R1,299',status:'PROCESSING',date:'Yesterday'},
+  {id:'ORD-4418',customer:'Fatima Davids',    shop:'GreenGrow Garden',   items:'Garden Hose 30m, Pots',   total:'R389', status:'DELIVERED', date:'Yesterday'},
+  {id:'ORD-4417',customer:'Jan van der Berg', shop:'CleanPro Supplies',  items:'Cleaner x5, Mop',         total:'R645', status:'PENDING',   date:'22 Mar'},
+  {id:'ORD-4416',customer:'Nokuthula Zulu',   shop:'PawPerfect Pets',    items:'Dog Shampoo x2, Collar',  total:'R267', status:'DELIVERED', date:'22 Mar'},
+  {id:'ORD-4415',customer:'Sipho Dlamini',    shop:'BuildRight Hardware',items:'Tile Adhesive 20kg',       total:'R189', status:'SHIPPED',   date:'21 Mar'},
+  {id:'ORD-4414',customer:'Kobus du Plessis', shop:'PaintPerfect SA',    items:'White Paint 5L x2',        total:'R698', status:'DELIVERED', date:'20 Mar'},
+];
+
+function renderOrders() {
+  var tbody = document.getElementById('ordersBody');
+  if(!tbody) return;
+  var SCLS = {DELIVERED:'badge-green',SHIPPED:'badge-blue',PROCESSING:'badge-purple',PENDING:'badge-amber'};
+  tbody.innerHTML = ORDERS_DATA.map(function(o){
+    return '<tr>'
+      + '<td style="font-size:12px;color:var(--primary3);font-weight:600;">' + o.id + '</td>'
+      + '<td>' + o.customer + '</td>'
+      + '<td style="font-size:12px;color:var(--text2);">' + o.shop + '</td>'
+      + '<td style="font-size:11px;color:var(--text3);">' + o.items + '</td>'
+      + '<td style="font-weight:700;color:var(--primary3);">' + o.total + '</td>'
+      + '<td>' + badge(o.status, SCLS[o.status] || 'badge-gray') + '</td>'
+      + '<td style="font-size:11px;color:var(--text3);">' + o.date + '</td>'
+      + '<td><button class="btn btn-ghost btn-sm" onclick="openOrderDetail(\'' + o.id + '\')">View</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function openOrderDetail(id) {
+  var o = ORDERS_DATA.find(function(x){ return x.id === id; });
+  if(!o) return;
+  toast('Order ' + id + ' — ' + o.customer + ' · ' + o.total + ' · Status: ' + o.status, 'info');
+}
+
+// ── ANALYTICS RENDER ─────────────────────────────────────────────
+function renderAnalyticsCharts() {
+  renderCharts(); // reuse existing chart renderer
+  var cc = document.getElementById('categoryChart');
+  if(cc && !cc.innerHTML) {
+    var cats = [
+      {name:'Plumbing',pct:28},{name:'Cleaning',pct:22},{name:'Electrical',pct:18},
+      {name:'Gardening',pct:12},{name:'Painting',pct:10},{name:'Other',pct:10}
+    ];
+    cc.innerHTML = cats.map(function(c){
+      return '<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;"><span>' + c.name + '</span><span style="font-weight:600">' + c.pct + '%</span></div>'
+        + '<div class="progress"><div class="progress-fill" style="width:' + (c.pct * 3.3) + '%;"></div></div></div>';
+    }).join('');
+  }
+}
+
+// ── EXPORT ───────────────────────────────────────────────────────
+function exportData(type) {
+  toast('Preparing ' + type + ' export… download will start shortly.', 'success');
+  // Simulate a CSV download after a short delay
+  setTimeout(function(){
+    var csvContent = 'data:text/csv;charset=utf-8,ID,Date,Amount,Status\n1,2025-03-18,R850,COMPLETED\n2,2025-03-17,R1200,COMPLETED\n3,2025-03-16,R350,PENDING';
+    var link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', 'tasksa-' + type + '-export.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast('✓ ' + type + ' export downloaded!', 'success');
+  }, 1200);
+}
+
+// ── QUICK OVERVIEW ACTIONS ────────────────────────────────────────
+function quickApprovePayout(btn) {
+  var card = btn.closest('.approval-card');
+  if(card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
+  toast('✓ Payout approved and processing within 24hrs.', 'success');
+}
+function quickRejectPayout(btn) {
+  var card = btn.closest('.approval-card');
+  if(card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
+  toast('Payout rejected. Provider has been notified.', 'error');
+}
+function approveAllPayouts() {
+  if(!confirm('Approve all verified pending payouts? This will process all payments.')) return;
+  document.querySelectorAll('#payoutsList .approval-card').forEach(function(c){
+    c.style.opacity = '0.4'; c.style.pointerEvents = 'none';
+  });
+  PAYOUTS.forEach(function(p){ p.status = 'Approved'; });
+  toast('✓ All verified payouts approved! Processing in batch.', 'success');
+}
+
+// ── ANNOUNCE MODAL ────────────────────────────────────────────────
+function openAnnounceModal() {
+  var msg = prompt('Platform Announcement\n\nEnter message to send to all users via SMS and email:');
+  if(msg && msg.trim()) {
+    toast('📢 Announcement sent to 14,832 users: "' + msg.trim().substring(0,60) + (msg.length > 60 ? '…' : '') + '"', 'success');
+  }
+}
+
+// ── ALERTS ───────────────────────────────────────────────────────
+function showAlerts() {
+  var alerts = [
+    '🔴 Dispute #D-003 — Sipho Dlamini vs Thabo Mokoena — R850 in escrow',
+    '🟡 Thabo Sithole trial expires in 3 days — no payment method on file',
+    '🟢 Platform revenue milestone: R500K total processed this month!',
+  ];
+  alert('TaskSA Alerts (3)\n\n' + alerts.join('\n\n'));
+}
+
+// ── SAVE TRIAL SETTINGS ───────────────────────────────────────────
+function saveTrialSettings() {
+  var el = document.getElementById('trialDuration');
+  var val = el ? el.value : '14';
+  toast('✓ Trial settings saved — new trial period: ' + val + ' days', 'success');
+}
+
+// ── CREATE USER MODAL ─────────────────────────────────────────────
+function createUser() {
+  var name  = document.getElementById('newUserName').value.trim();
+  var email = document.getElementById('newUserEmail').value.trim();
+  var role  = document.getElementById('newUserRole').value;
+  if(!name)  { toast('Please enter a name', 'error'); return; }
+  if(!email) { toast('Please enter an email', 'error'); return; }
+  var newUser = {
+    id: USERS.length + 1, name: name, email: email, role: role,
+    province: 'Gauteng', joined: 'Today', status: 'Active'
+  };
+  USERS.push(newUser);
+  closeModal('createUserModal');
+  renderUsers();
+  showPage('users', null);
+  toast('✓ User ' + name + ' created and notified via email.', 'success');
+  document.getElementById('newUserName').value = '';
+  document.getElementById('newUserEmail').value = '';
+}
+
+// ── OPEN BOOKING DETAIL ───────────────────────────────────────────
+function openBookingDetail(id) {
+  var b = BOOKINGS.find(function(x){ return x.id === id; });
+  if(!b) return;
+  alert('Booking: ' + id + '\nCustomer: ' + b.customer + '\nProvider: ' + b.provider + '\nService: ' + b.service + '\nDate: ' + b.date + '\nAmount: ' + b.amount + '\nStatus: ' + b.status);
+}
+
+// ── OPEN EDIT AD MODAL ────────────────────────────────────────────
+function openEditAdModal(btn) {
+  var row = btn.closest('tr');
+  var advertiser = row ? row.cells[0].textContent.trim() : 'Banner Ad';
+  toast('Opening editor for "' + advertiser + '"…', 'info');
+}
+
+window.onload = function() {
+  renderUsers();
+  renderProviders();
+  renderBookings();
+  renderOrders();
+  renderPayments();
+  renderActivity();
+  renderCharts();
+  renderProvinces();
+  renderTopProviders();
+  updateDate();
+  setInterval(updateDate, 60000);
+
+  // patch showPage to also call renderOrders and renderAnalyticsCharts
+  var _orig = showPage;
+  showPage = function(id, navEl) {
+    _orig(id, navEl);
+    if(id === 'orders')    renderOrders();
+    if(id === 'analytics') renderAnalyticsCharts();
+  };
+};
+</script>
+</body>
+</html>

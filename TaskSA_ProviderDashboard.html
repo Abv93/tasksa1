@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskSA — Provider Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#020b1a;--bg2:#041020;--bg3:#061628;
+  --surf:#082035;--surf2:#0a2840;
+  --blue:#0a6edb;--blue2:#1a8fff;--blue3:#4db0ff;
+  --gold:#F5A623;--green:#22C55E;--green2:#4ade80;
+  --red:#ef4444;--red2:#f87171;--amber:#f59e0b;--amber2:#fbbf24;
+  --bd:rgba(26,143,255,0.15);--bd2:rgba(26,143,255,0.3);
+  --t:#e8f4ff;--t2:#93b8d8;--t3:#4a7aa0;
+}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--t);min-height:100vh;}
+
+.shell{display:flex;min-height:100vh;}
+
+.sidebar{width:210px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;}
+.sb-top{padding:20px 14px 16px;border-bottom:1px solid var(--bd);}
+.sb-av{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue2));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;margin-bottom:10px;}
+.sb-name{font-size:14px;font-weight:700;}
+.sb-plan{font-size:11px;color:var(--blue3);margin-top:2px;}
+.sb-status{display:inline-flex;align-items:center;gap:5px;margin-top:10px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);padding:4px 12px;border-radius:50px;font-size:11px;color:var(--green2);cursor:pointer;}
+.sb-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+
+.nav-group{padding:10px 8px;}
+.nav-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t3);padding:8px 8px 4px;}
+.si{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--t2);font-size:13px;margin-bottom:2px;transition:all 0.15s;position:relative;}
+.si:hover{background:var(--surf);color:var(--t);}
+.si.active{background:rgba(26,143,255,0.14);color:var(--blue3);}
+.si.active::before{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--blue2);border-radius:0 2px 2px 0;}
+.si-ic{font-size:15px;width:20px;text-align:center;}
+.si-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 6px;border-radius:50px;color:white;}
+.si-badge.red{background:var(--red);}
+.si-badge.blue{background:var(--blue);}
+.sb-back{margin-top:auto;padding:12px 8px;border-top:1px solid var(--bd);}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--bd);background:rgba(4,16,32,0.9);position:sticky;top:0;z-index:50;}
+.topbar-left h2{font-size:18px;font-weight:700;}
+.topbar-left p{font-size:12px;color:var(--t2);margin-top:3px;}
+.topbar-right{display:flex;gap:8px;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:Arial,sans-serif;transition:all 0.15s;}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;}
+.btn-ghost{background:var(--surf);border:1px solid var(--bd2);color:var(--t2);}
+.btn-ghost:hover{color:var(--t);}
+.btn-success{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);color:var(--green2);}
+.btn-danger{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:var(--red2);}
+.btn-sm{padding:7px 14px;font-size:12px;}
+
+.tab-content{display:none;padding:24px;}
+.tab-content.active{display:block;}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+@media(max-width:900px){.metrics{grid-template-columns:1fr 1fr;}}
+.metric{background:var(--surf);border:1px solid var(--bd);border-radius:14px;padding:18px;}
+.m-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;font-weight:700;}
+.m-val{font-size:24px;font-weight:700;}
+.m-change{font-size:11px;margin-top:5px;}
+.m-up{color:var(--green2);}
+.m-neutral{color:var(--t3);}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:800px){.grid2{grid-template-columns:1fr;}}
+.card{background:var(--surf);border:1px solid var(--bd);border-radius:14px;overflow:hidden;}
+.card-hdr{padding:16px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
+.card-hdr h3{font-size:14px;font-weight:700;}
+.card-body{padding:16px 18px;}
+
+.bk-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--bd);cursor:pointer;transition:opacity 0.15s;}
+.bk-item:last-child{border:none;padding-bottom:0;}
+.bk-item:hover{opacity:0.8;}
+.bkav{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.bk-info{flex:1;min-width:0;}
+.bk-name{font-size:13px;font-weight:700;}
+.bk-desc{font-size:11px;color:var(--t3);margin-top:2px;}
+.bk-status{font-size:10px;padding:3px 10px;border-radius:50px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.s-ok{background:rgba(34,197,94,0.12);color:var(--green2);}
+.s-pend{background:rgba(245,158,11,0.1);color:var(--amber2);}
+.s-done{background:rgba(26,143,255,0.1);color:var(--blue3);}
+
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px;margin-bottom:6px;}
+.bar{flex:1;border-radius:4px 4px 0 0;background:var(--blue2);min-height:4px;cursor:pointer;}
+.bar:hover{opacity:0.75;}
+.bar-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--t3);}
+
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-day{padding:6px 0;text-align:center;font-size:11px;border-radius:5px;cursor:pointer;}
+.cal-day.hdr{color:var(--t3);font-weight:700;cursor:default;font-size:10px;}
+.cal-day.booked{background:rgba(26,143,255,0.15);color:var(--blue3);font-weight:700;}
+.cal-day.today{background:var(--blue2);color:white;font-weight:700;}
+.cal-day:not(.hdr):not(.booked):not(.today){color:var(--t3);}
+.cal-day:not(.hdr):hover{background:var(--surf2);}
+
+.review-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--bd);}
+.review-item:last-child{border:none;padding-bottom:0;}
+.rev-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.rev-body{flex:1;}
+.rev-name{font-size:13px;font-weight:700;}
+.rev-stars{color:var(--gold);font-size:12px;margin:3px 0;}
+.rev-text{font-size:12px;color:var(--t2);line-height:1.6;}
+.rev-time{font-size:10px;color:var(--t3);margin-top:4px;}
+
+.star-bar{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.sbl{font-size:11px;color:var(--t2);width:22px;text-align:right;flex-shrink:0;}
+.sb-track{flex:1;background:var(--surf2);border-radius:50px;height:6px;overflow:hidden;}
+.sb-fill{height:100%;border-radius:50px;background:var(--gold);}
+.sb-pct{font-size:10px;color:var(--t3);width:30px;flex-shrink:0;}
+
+.listing-card{background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px;}
+.listing-card:last-of-type{margin-bottom:0;}
+.lc-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.lc-title{font-size:14px;font-weight:700;}
+.lc-cat{font-size:11px;color:var(--t3);margin-top:2px;}
+.lc-badge{font-size:10px;padding:3px 10px;border-radius:50px;font-weight:700;background:rgba(34,197,94,0.12);color:var(--green2);flex-shrink:0;}
+.lc-stats{display:flex;gap:18px;font-size:12px;color:var(--t2);}
+.lc-stat span{color:var(--blue3);font-weight:700;}
+
+.earn-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--bd);font-size:13px;}
+.earn-row:last-child{border:none;padding-bottom:0;}
+.earn-ref{font-size:10px;color:var(--t3);margin-top:2px;}
+.earn-amount.positive{color:var(--green2);font-weight:700;}
+.earn-amount.pending{color:var(--amber2);font-weight:700;}
+
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--t3);margin-bottom:5px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 14px;color:var(--t);font-size:13px;font-family:Arial,sans-serif;outline:none;transition:border 0.2s;}
+.form-group input:focus,.form-group select,.form-group textarea:focus{border-color:var(--blue2);}
+.form-group textarea{resize:vertical;min-height:80px;}
+
+.conv-item{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background 0.15s;}
+.conv-item:hover,.conv-item.active{background:rgba(26,143,255,0.07);}
+.conv-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.conv-name{font-size:13px;font-weight:700;}
+.conv-prev{font-size:11px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.unread-dot{width:8px;height:8px;background:var(--blue2);border-radius:50%;margin-top:6px;flex-shrink:0;}
+.bubble{max-width:65%;padding:11px 15px;border-radius:18px;font-size:13px;line-height:1.5;}
+.bubble.sent{align-self:flex-end;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border-bottom-right-radius:4px;}
+.bubble.recv{align-self:flex-start;background:var(--surf);color:var(--t);border-bottom-left-radius:4px;}
+.btime{font-size:10px;opacity:0.6;margin-top:3px;}
+.btime.r{text-align:left;}
+
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--surf2);border:1px solid var(--bd2);color:var(--blue3);padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;opacity:0;transform:translateY(10px);transition:all 0.3s;pointer-events:none;max-width:320px;}
+#toast.show{opacity:1;transform:translateY(0);}
+#toast.success{border-color:rgba(34,197,94,0.3);color:var(--green2);}
+#toast.error{border-color:rgba(239,68,68,0.3);color:var(--red2);}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div class="shell">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-top">
+    <div class="sb-av">TM</div>
+    <div class="sb-name">Thabo Mokoena</div>
+    <div class="sb-plan">Professional Plan · Plumber</div>
+    <div class="sb-status" onclick="toggleStatus(this)">
+      <span class="sb-dot"></span><span id="statusText">Available for bookings</span>
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Main</div>
+    <div class="si active" onclick="showTab('overview',this)"><span class="si-ic">📊</span>Overview</div>
+    <div class="si" onclick="showTab('bookings',this)"><span class="si-ic">📋</span>Bookings<span class="si-badge red">3</span></div>
+    <div class="si" onclick="showTab('earnings',this)"><span class="si-ic">💰</span>Earnings</div>
+    <div class="si" onclick="showTab('listings',this)"><span class="si-ic">📝</span>My Listings</div>
+    <div class="si" onclick="showTab('reviews',this)"><span class="si-ic">⭐</span>Reviews</div>
+    <div class="si" onclick="showTab('calendar',this)"><span class="si-ic">📅</span>Calendar</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Account</div>
+    <div class="si" onclick="showTab('messages',this)"><span class="si-ic">💬</span>Messages<span class="si-badge blue">5</span></div>
+    <div class="si" onclick="showTab('profile',this)"><span class="si-ic">👤</span>Profile</div>
+    <div class="si" onclick="showTab('plan',this)"><span class="si-ic">🎟️</span>My Plan</div>
+  </div>
+  <div class="sb-back">
+    <div class="si" onclick="backToSite()"><span class="si-ic">←</span>Back to site</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <h2 id="tabTitle">Good morning, Thabo 👋</h2>
+      <p id="tabSub">Wednesday, 18 March 2025 · Professional Plan</p>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost" onclick="showTab('profile',null)">✏️ Edit Profile</button>
+      <button class="btn btn-primary" onclick="showTab('listings',null);setTimeout(function(){toast('Add Listing form is ready below','success')},200)">+ Add Listing</button>
+    </div>
+  </div>
+
+  <!-- OVERVIEW TAB -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="metrics">
+      <div class="metric"><div class="m-label">This Month</div><div class="m-val">R8,420</div><div class="m-change m-up">↑ +18% vs last month</div></div>
+      <div class="metric"><div class="m-label">Total Bookings</div><div class="m-val">34</div><div class="m-change m-up">↑ 6 new this week</div></div>
+      <div class="metric"><div class="m-label">Rating</div><div class="m-val">4.9★</div><div class="m-change m-neutral">248 reviews</div></div>
+      <div class="metric"><div class="m-label">Completion Rate</div><div class="m-val">97%</div><div class="m-change m-up">Top 5% of providers</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-hdr"><h3>Upcoming Bookings</h3><span style="font-size:11px;color:var(--t3);">Click any to manage</span></div>
+        <div class="card-body">
+          <div class="bk-item" onclick="showTab('bookings',null);setTimeout(function(){toast('Opening booking for John Michaels','success')},100)">
+            <div class="bkav" style="background:rgba(34,197,94,0.12);color:var(--green2);">JM</div>
+            <div class="bk-info"><div class="bk-name">John Michaels</div><div class="bk-desc">Burst pipe fix · Thu 20 Mar · 9:00am · Sandton</div></div>
+            <span class="bk-status s-ok">Confirmed</span>
+          </div>
+          <div class="bk-item" onclick="showTab('bookings',null);setTimeout(function(){toast('Opening booking for Nomsa Petersen','success')},100)">
+            <div class="bkav" style="background:rgba(245,158,11,0.1);color:var(--amber2);">NP</div>
+            <div class="bk-info"><div class="bk-name">Nomsa Petersen</div><div class="bk-desc">Bathroom install · Fri 21 Mar · 2:00pm · Randburg</div></div>
+            <span class="bk-status s-pend">Pending</span>
+          </div>
+          <div class="bk-item" onclick="showTab('bookings',null);setTimeout(function(){toast('Opening booking for Deon Cronje','success')},100)">
+            <div class="bkav" style="background:rgba(26,143,255,0.15);color:var(--blue3);">DC</div>
+            <div class="bk-info"><div class="bk-name">Deon Cronje</div><div class="bk-desc">Leak inspection · Mon 24 Mar · 10:00am · Fourways</div></div>
+            <span class="bk-status s-pend">Pending</span>
+          </div>
+          <div class="bk-item">
+            <div class="bkav" style="background:rgba(212,83,126,0.12);color:#f472b6;">AS</div>
+            <div class="bk-info"><div class="bk-name">Ayesha Salie</div><div class="bk-desc">Geyser replacement · Completed · Wed 18 Mar</div></div>
+            <span class="bk-status s-done">Done</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><h3>Weekly Earnings</h3><span style="font-size:13px;color:var(--blue3);font-weight:700;">R2,140 this week</span></div>
+        <div class="card-body">
+          <div class="bar-chart" id="overviewBar"></div>
+          <div class="bar-labels"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+          <div style="display:flex;gap:10px;margin-top:16px;">
+            <button class="btn btn-success" style="flex:1;justify-content:center;" onclick="showTab('earnings',null)">💸 Request Payout</button>
+            <button class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="showTab('plan',null)">Manage Plan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOKINGS TAB -->
+  <div class="tab-content" id="tab-bookings">
+    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;" id="bkFilters">
+      <button class="btn btn-primary btn-sm" onclick="filterBk('all',this)">All (7)</button>
+      <button class="btn btn-ghost btn-sm" onclick="filterBk('pending',this)">Pending (2)</button>
+      <button class="btn btn-ghost btn-sm" onclick="filterBk('confirmed',this)">Confirmed (2)</button>
+      <button class="btn btn-ghost btn-sm" onclick="filterBk('completed',this)">Completed (3)</button>
+    </div>
+    <div id="bookingsList"></div>
+  </div>
+
+  <!-- EARNINGS TAB -->
+  <div class="tab-content" id="tab-earnings">
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr);">
+      <div class="metric"><div class="m-label">Total Earned</div><div class="m-val">R48,200</div><div class="m-change m-up">Since Feb 2025</div></div>
+      <div class="metric"><div class="m-label">Available Balance</div><div class="m-val" style="color:var(--green2);">R6,200</div><div class="m-change m-up">Ready to withdraw</div></div>
+      <div class="metric"><div class="m-label">Commission Rate</div><div class="m-val">8%</div><div class="m-change m-neutral">Professional plan</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-hdr"><h3>Request Payout</h3></div>
+        <div class="card-body">
+          <div style="background:rgba(26,143,255,0.07);border:1px solid var(--bd2);border-radius:12px;padding:16px;text-align:center;margin-bottom:16px;">
+            <div style="font-size:11px;color:var(--t3);margin-bottom:5px;">AVAILABLE TO WITHDRAW</div>
+            <div style="font-size:32px;font-weight:700;color:var(--green2);">R6,200</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:4px;">After 8% platform commission</div>
+          </div>
+          <div class="form-group"><label>Payout Amount (R)</label><input type="number" value="6200" max="6200"></div>
+          <div class="form-group"><label>Bank</label><select><option>FNB</option><option>ABSA</option><option>Standard Bank</option><option>Capitec</option><option>Nedbank</option><option>Investec</option><option>TymeBank</option></select></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label>Account Number</label><input placeholder="Account number"></div>
+            <div class="form-group"><label>Branch Code</label><input placeholder="e.g. 250655"></div>
+          </div>
+          <button class="btn btn-success" style="width:100%;justify-content:center;padding:13px;" onclick="requestPayout()">💸 Request Payout</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><h3>Payment History</h3></div>
+        <div class="card-body">
+          <div class="earn-row"><div><div>John Michaels · Burst pipe repair</div><div class="earn-ref">B-008821 · Completed 18 Mar</div></div><div class="earn-amount positive">+R318</div></div>
+          <div class="earn-row"><div><div>Nomsa Petersen · Bathroom install</div><div class="earn-ref">B-008790 · Completed 15 Mar</div></div><div class="earn-amount positive">+R1,104</div></div>
+          <div class="earn-row"><div><div>Deon Cronje · Leak inspection</div><div class="earn-ref">B-008755 · Pending release</div></div><div class="earn-amount pending">Pending R322</div></div>
+          <div class="earn-row"><div><div>Ayesha Salie · Geyser installation</div><div class="earn-ref">B-008720 · Completed 10 Mar</div></div><div class="earn-amount positive">+R1,104</div></div>
+          <div class="earn-row"><div><div>Monthly Payout</div><div class="earn-ref">1 March 2025 · FNB ****1234</div></div><div class="earn-amount positive">+R8,989</div></div>
+          <div class="earn-row"><div><div>Sipho Petersen · Emergency repair</div><div class="earn-ref">B-008698 · Completed 5 Mar</div></div><div class="earn-amount positive">+R414</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTINGS TAB -->
+  <div class="tab-content" id="tab-listings">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <span style="font-size:14px;color:var(--t2);">2 active listings</span>
+      <button class="btn btn-primary" onclick="openAddListingForm()">+ Add New Listing</button>
+    </div>
+    <div class="listing-card">
+      <div class="lc-hdr">
+        <div><div class="lc-title">Emergency Plumbing Repairs</div><div class="lc-cat">Plumbing · Johannesburg &amp; surrounds · R350/hr</div></div>
+        <span class="lc-badge">Active</span>
+      </div>
+      <div class="lc-stats">
+        <span>Views: <span>842</span></span>
+        <span>Bookings: <span>34</span></span>
+        <span>Rating: <span>4.9★</span></span>
+        <span>Revenue: <span>R32,400</span></span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="btn btn-ghost btn-sm" onclick="openListingEditor(this)">✏️ Edit</button>
+        <button class="btn btn-ghost btn-sm" onclick="pauseListing(this)">⏸ Pause</button>
+        <button class="btn btn-ghost btn-sm" onclick="shareListing()">🔗 Share</button>
+      </div>
+    </div>
+    <div class="listing-card">
+      <div class="lc-hdr">
+        <div><div class="lc-title">Geyser Installation &amp; Repair</div><div class="lc-cat">Plumbing · Gauteng Province · R800/job</div></div>
+        <span class="lc-badge">Active</span>
+      </div>
+      <div class="lc-stats">
+        <span>Views: <span>421</span></span>
+        <span>Bookings: <span>18</span></span>
+        <span>Rating: <span>5.0★</span></span>
+        <span>Revenue: <span>R15,800</span></span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="btn btn-ghost btn-sm" onclick="openListingEditor(this)">✏️ Edit</button>
+        <button class="btn btn-ghost btn-sm" onclick="pauseListing(this)">⏸ Pause</button>
+        <button class="btn btn-ghost btn-sm" onclick="shareListing()">🔗 Share</button>
+      </div>
+    </div>
+    <div style="border:2px dashed var(--bd2);border-radius:14px;padding:28px;text-align:center;cursor:pointer;margin-top:12px;" onclick="openAddListingForm()">
+      <div style="font-size:28px;margin-bottom:10px;color:var(--t3);">+</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:5px;">Add a new listing</div>
+      <div style="font-size:12px;color:var(--t3);">More listings = more visibility = more bookings</div>
+    </div>
+  </div>
+
+  <!-- REVIEWS TAB -->
+  <div class="tab-content" id="tab-reviews">
+    <div style="display:grid;grid-template-columns:220px 1fr;gap:18px;">
+      <div class="card">
+        <div class="card-body" style="text-align:center;">
+          <div style="font-size:52px;font-weight:700;line-height:1;color:var(--t);">4.9</div>
+          <div style="color:var(--gold);font-size:18px;margin:8px 0;">★★★★★</div>
+          <div style="font-size:12px;color:var(--t3);">Based on 248 reviews</div>
+          <div style="margin-top:18px;">
+            <div class="star-bar"><span class="sbl">5★</span><div class="sb-track"><div class="sb-fill" style="width:91%;"></div></div><span class="sb-pct">91%</span></div>
+            <div class="star-bar"><span class="sbl">4★</span><div class="sb-track"><div class="sb-fill" style="width:7%;"></div></div><span class="sb-pct">7%</span></div>
+            <div class="star-bar"><span class="sbl">3★</span><div class="sb-track"><div class="sb-fill" style="width:2%;"></div></div><span class="sb-pct">2%</span></div>
+            <div class="star-bar"><span class="sbl">2★</span><div class="sb-track"><div class="sb-fill" style="width:0%;"></div></div><span class="sb-pct">0%</span></div>
+            <div class="star-bar"><span class="sbl">1★</span><div class="sb-track"><div class="sb-fill" style="width:0%;"></div></div><span class="sb-pct">0%</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><h3>Recent Reviews</h3></div>
+        <div class="card-body">
+          <div class="review-item">
+            <div class="rev-av" style="background:rgba(34,197,94,0.12);color:var(--green2);">JM</div>
+            <div class="rev-body"><div class="rev-name">John Michaels</div><div class="rev-stars">★★★★★</div><div class="rev-text">"Thabo was amazing! Fixed the burst pipe in under an hour, cleaned up afterwards and charged exactly what was quoted. Will definitely use again."</div><div class="rev-time">2 days ago · Burst pipe repair</div></div>
+          </div>
+          <div class="review-item">
+            <div class="rev-av" style="background:rgba(245,158,11,0.1);color:var(--amber2);">AS</div>
+            <div class="rev-body"><div class="rev-name">Ayesha Salie</div><div class="rev-stars">★★★★★</div><div class="rev-text">"Professional, on time and very knowledgeable. The geyser installation was done perfectly. Highly recommended to anyone in Gauteng."</div><div class="rev-time">5 days ago · Geyser installation</div></div>
+          </div>
+          <div class="review-item">
+            <div class="rev-av" style="background:rgba(26,143,255,0.15);color:var(--blue3);">SP</div>
+            <div class="rev-body"><div class="rev-name">Sipho Petersen</div><div class="rev-stars">★★★★☆</div><div class="rev-text">"Good work overall. Arrived slightly late but communicated well. The repair is holding up perfectly. Would book again."</div><div class="rev-time">1 week ago · Leak inspection</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALENDAR TAB -->
+  <div class="tab-content" id="tab-calendar">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-hdr"><h3>March 2025</h3><span style="font-size:12px;color:var(--blue3);">8 bookings this month</span></div>
+        <div class="card-body">
+          <div class="cal-grid" id="calGrid"></div>
+          <div style="display:flex;gap:16px;margin-top:14px;font-size:12px;color:var(--t3);">
+            <div style="display:flex;align-items:center;gap:6px;"><div style="width:12px;height:12px;border-radius:3px;background:var(--blue2);"></div>Today</div>
+            <div style="display:flex;align-items:center;gap:6px;"><div style="width:12px;height:12px;border-radius:3px;background:rgba(26,143,255,0.15);"></div>Booked</div>
+            <div style="display:flex;align-items:center;gap:6px;"><div style="width:12px;height:12px;border-radius:3px;background:var(--surf2);"></div>Available</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><h3>This Week's Schedule</h3></div>
+        <div class="card-body">
+          <div class="bk-item">
+            <div class="bkav" style="background:rgba(34,197,94,0.12);color:var(--green2);">JM</div>
+            <div class="bk-info"><div class="bk-name">John Michaels</div><div class="bk-desc">Thu 20 Mar · 9:00am – 11:00am · Sandton</div></div>
+            <span class="bk-status s-ok">Confirmed</span>
+          </div>
+          <div class="bk-item">
+            <div class="bkav" style="background:rgba(245,158,11,0.1);color:var(--amber2);">NP</div>
+            <div class="bk-info"><div class="bk-name">Nomsa Petersen</div><div class="bk-desc">Fri 21 Mar · 2:00pm – 5:00pm · Randburg</div></div>
+            <span class="bk-status s-pend">Pending</span>
+          </div>
+          <div style="background:rgba(26,143,255,0.07);border:1px solid var(--bd2);border-radius:10px;padding:14px;margin-top:6px;font-size:12px;color:var(--t2);line-height:1.9;">
+            Mon 24 Mar: Deon Cronje · Leak inspection · 10:00am<br>
+            Tue 25 Mar: Available — no bookings scheduled<br>
+            Wed 26 Mar: Available — no bookings scheduled
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px;" onclick="openAvailability()">Set Availability</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MESSAGES TAB -->
+  <div class="tab-content" id="tab-messages">
+    <div style="display:grid;grid-template-columns:240px 1fr;border:1px solid var(--bd);border-radius:14px;overflow:hidden;min-height:460px;height:calc(100vh - 180px);">
+      <div style="background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--bd);font-size:14px;font-weight:700;">Messages</div>
+        <div style="flex:1;overflow-y:auto;" id="convList"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;background:var(--bg);">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--bd);background:var(--bg2);display:flex;align-items:center;gap:12px;">
+          <div id="msgAv" style="width:36px;height:36px;border-radius:50%;background:rgba(34,197,94,0.12);color:var(--green2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">JM</div>
+          <div>
+            <div id="msgName" style="font-size:14px;font-weight:700;">John Michaels</div>
+            <div id="msgStatus" style="font-size:11px;color:var(--t3);">Customer · Online</div>
+          </div>
+          <div style="margin-left:auto;display:flex;gap:8px;">
+            <button onclick="toast('Calling John Michaels...','success')" style="background:var(--surf);border:1px solid var(--bd);color:var(--t2);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:15px;">📞</button>
+            <button onclick="toast('Starting video call...','success')" style="background:var(--surf);border:1px solid var(--bd);color:var(--t2);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:15px;">📹</button>
+          </div>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:10px;" id="msgArea"></div>
+        <div style="padding:12px 18px;border-top:1px solid var(--bd);background:var(--bg2);display:flex;gap:10px;align-items:center;">
+          <input style="flex:1;background:var(--surf);border:1px solid var(--bd2);border-radius:20px;padding:10px 16px;color:var(--t);font-size:13px;outline:none;font-family:Arial,sans-serif;" id="msgInput" placeholder="Type a message…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendProvMsg();}">
+          <button class="btn btn-primary" style="padding:10px 18px;" onclick="sendProvMsg()">Send ➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE TAB -->
+  <div class="tab-content" id="tab-profile">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-hdr"><h3>Personal Information</h3></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label>First Name</label><input value="Thabo"></div>
+            <div class="form-group"><label>Last Name</label><input value="Mokoena"></div>
+          </div>
+          <div class="form-group"><label>Business Name</label><input value="Thabo Mokoena Plumbing"></div>
+          <div class="form-group"><label>Phone</label><input value="+27 82 555 0100"></div>
+          <div class="form-group"><label>Email</label><input type="email" value="thabo@test.co.za"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label>City</label><input value="Sandton"></div>
+            <div class="form-group"><label>Province</label>
+              <select><option selected>Gauteng</option><option>Western Cape</option><option>KwaZulu-Natal</option><option>Eastern Cape</option></select>
+            </div>
+          </div>
+          <div class="form-group"><label>ID / PIRB Number</label><input value="PIRB-2021-44829" placeholder="Trade registration number"></div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="savePersonalInfo(this)">Save Changes</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><h3>Public Profile</h3></div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--bd);">
+            <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue2));display:flex;align-items:center;justify-content:center;color:white;font-size:22px;font-weight:700;flex-shrink:0;">TM</div>
+            <div>
+              <div style="font-size:15px;font-weight:700;">Thabo Mokoena</div>
+              <div style="font-size:12px;color:var(--t3);">Plumber · Sandton, Gauteng</div>
+              <div style="color:var(--gold);font-size:13px;margin-top:4px;">★★★★★ 4.9 · 248 reviews</div>
+            </div>
+          </div>
+          <div class="form-group"><label>Bio / About You</label><textarea>PIRB-registered plumber with 12 years experience. Emergency repairs, geyser installations and full bathroom renovations. Available 7 days a week.</textarea></div>
+          <div class="form-group"><label>Trade Qualifications</label><input value="PIRB Registered · City &amp; Guilds Plumbing Level 3"></div>
+          <div class="form-group"><label>Years of Experience</label><input type="number" value="12"></div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="savePublicProfile()">Update Public Profile</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAN TAB -->
+  <div class="tab-content" id="tab-plan">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-hdr"><h3>Current Subscription</h3></div>
+        <div class="card-body">
+          <div style="background:rgba(26,143,255,0.07);border:1px solid var(--bd2);border-radius:12px;padding:18px;margin-bottom:18px;">
+            <div style="font-size:20px;font-weight:700;margin-bottom:5px;">Professional Plan</div>
+            <div style="font-size:28px;font-weight:700;color:var(--blue3);">R499<span style="font-size:14px;color:var(--t3);font-weight:400;">/month</span></div>
+            <div style="font-size:12px;color:var(--t3);margin-top:5px;">Renews 1 April 2025 · Auto-renewal ON</div>
+            <div style="font-size:12px;color:var(--green2);margin-top:8px;">✓ Active</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0;margin-bottom:18px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding:10px 0;border-bottom:1px solid var(--bd);"><span style="color:var(--t3);">Commission rate</span><span style="font-weight:700;">8% per job</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding:10px 0;border-bottom:1px solid var(--bd);"><span style="color:var(--t3);">Active listings</span><span style="font-weight:700;">Unlimited</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding:10px 0;border-bottom:1px solid var(--bd);"><span style="color:var(--t3);">Featured profile placement</span><span style="color:var(--green2);">✓ Included</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding:10px 0;border-bottom:1px solid var(--bd);"><span style="color:var(--t3);">Analytics dashboard</span><span style="color:var(--green2);">✓ Included</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding:10px 0;"><span style="color:var(--t3);">Banner ad per month</span><span style="color:var(--green2);">✓ 1 included</span></div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-danger" style="flex:1;justify-content:center;" onclick="cancelPlan(this)">Cancel Plan</button>
+            <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="showTab('plan',null);setTimeout(function(){toast('Business plan details shown on the right','success')},100)">Upgrade Plan</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><h3>Upgrade to Business</h3></div>
+        <div class="card-body">
+          <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:16px;">
+            <div style="font-size:16px;font-weight:700;margin-bottom:4px;">Business Plan</div>
+            <div style="font-size:26px;font-weight:700;color:var(--gold);">R999<span style="font-size:13px;color:var(--t3);font-weight:400;">/month</span></div>
+            <div style="font-size:12px;color:var(--t3);margin-top:4px;">Save approximately R890/month in commission at your current volume</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;">
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--green2);flex-shrink:0;">✓</span>5% commission (save 3% vs your current 8%)</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--green2);flex-shrink:0;">✓</span>Full shop/store setup for your business</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--green2);flex-shrink:0;">✓</span>5 team member accounts</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--green2);flex-shrink:0;">✓</span>3 banner ads per month</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--green2);flex-shrink:0;">✓</span>API access and webhooks</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--green2);flex-shrink:0;">✓</span>Dedicated TaskSA account manager</div>
+          </div>
+          <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--t2);line-height:1.7;">
+            💡 At 34 bookings/month × avg R1,200 = R40,800 revenue.<br>
+            Current 8% = <strong style="color:var(--red2);">R3,264/month</strong> in commission.<br>
+            Business 5% = <strong style="color:var(--green2);">R2,040/month</strong> — saving <strong style="color:var(--green2);">R1,224/month</strong>.
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;" onclick="upgradePlan(this)">Upgrade Now — R999/month</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────
+var BOOKINGS_DATA = [
+  {id:'B-008821',name:'John Michaels',  ini:'JM',bg:'rgba(34,197,94,0.12)', col:'#4ade80', service:'Burst pipe fix',      date:'Thu 20 Mar · 9:00am · Sandton',   amount:'R750',   status:'confirmed'},
+  {id:'B-008820',name:'Nomsa Petersen', ini:'NP',bg:'rgba(245,158,11,0.1)',  col:'#fbbf24', service:'Bathroom install',     date:'Fri 21 Mar · 2:00pm · Randburg',  amount:'R1,200', status:'pending'},
+  {id:'B-008819',name:'Deon Cronje',    ini:'DC',bg:'rgba(26,143,255,0.15)',col:'#4db0ff', service:'Leak inspection',      date:'Mon 24 Mar · 10:00am · Fourways', amount:'R350',   status:'pending'},
+  {id:'B-008818',name:'Ayesha Salie',   ini:'AS',bg:'rgba(212,83,126,0.12)',col:'#f472b6', service:'Geyser replacement',   date:'Wed 18 Mar · completed',           amount:'R1,200', status:'completed'},
+  {id:'B-008817',name:'Sipho Petersen', ini:'SP',bg:'rgba(167,139,250,0.12)',col:'#c4b5fd',service:'Leak inspection',      date:'Tue 12 Mar · completed',           amount:'R350',   status:'completed'},
+  {id:'B-008816',name:'Priya Naidoo',   ini:'PN',bg:'rgba(20,184,166,0.1)', col:'#2dd4bf', service:'Emergency pipe repair', date:'Mon 10 Mar · completed',          amount:'R450',   status:'completed'},
+  {id:'B-008815',name:'Rudi Smit',      ini:'RS',bg:'rgba(239,68,68,0.1)',  col:'#f87171', service:'Bathroom install',     date:'Thu 6 Mar · confirmed',            amount:'R2,100', status:'confirmed'},
+];
+
+var CONVS = [
+  {ini:'JM',name:'John Michaels',   bg:'rgba(34,197,94,0.12)', col:'#4ade80', role:'Customer', last:'See you at 2pm today!',            unread:true},
+  {ini:'NP',name:'Nomsa Petersen',  bg:'rgba(245,158,11,0.1)',  col:'#fbbf24', role:'Customer', last:'Can you bring extra seals?',        unread:true},
+  {ini:'DC',name:'Deon Cronje',     bg:'rgba(26,143,255,0.15)',col:'#4db0ff', role:'Customer', last:'What time works on Monday?',        unread:true},
+  {ini:'AS',name:'Ayesha Salie',    bg:'rgba(212,83,126,0.12)',col:'#f472b6', role:'Customer', last:'Thank you for the great work!',     unread:false},
+  {ini:'TS',name:'TaskSA Support',  bg:'rgba(167,139,250,0.12)',col:'#c4b5fd',role:'Support',  last:'Your payout has been processed.',   unread:false},
+];
+
+var MSGS_BY_CONV = {
+  0:[
+    {from:'them',text:'Hi Thabo! I have a burst pipe under my kitchen sink. Water is turned off. Are you available today?'},
+    {from:'me',  text:'Hi John! Yes I can be there this afternoon. What time works for you?'},
+    {from:'them',text:'2pm would be perfect. I am at 14 Sandton Drive, Sandton.'},
+    {from:'me',  text:'Great, I will be there at 2pm sharp. I will bring all the necessary parts.'},
+    {from:'them',text:'See you at 2pm today!'},
+  ],
+  1:[
+    {from:'them',text:'Hi Thabo, I need a full bathroom install. Kitchen and main bathroom.'},
+    {from:'me',  text:'Hi Nomsa! I can do that. Do you have the fittings already or must I supply?'},
+    {from:'them',text:'I have all the fittings. Can you bring extra seals just in case?'},
+  ],
+  2:[
+    {from:'them',text:'Hi, I have a slow leak coming from behind the wall. Not sure where it is.'},
+    {from:'me',  text:'That could be the pipe joints. I will bring a detector. What time works Monday?'},
+    {from:'them',text:'What time works on Monday?'},
+  ],
+  3:[
+    {from:'them',text:'Thabo you did such a great job with the geyser! Hot water again finally!'},
+    {from:'me',  text:'So glad to hear that Ayesha! Let me know if you ever need anything else.'},
+    {from:'them',text:'Thank you for the great work!'},
+  ],
+  4:[
+    {from:'them',text:'Hi Thabo, this is TaskSA Support. Your payout of R6,200 has been processed.'},
+    {from:'them',text:'Funds should arrive in your FNB account within 24 hours.'},
+    {from:'them',text:'Your payout has been processed.'},
+  ],
+};
+
+var activeConv = 0;
+var statusOn   = true;
+
+// ── TOAST ──────────────────────────────────────────────────────────
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = '✓ ' + msg;
+  t.className   = 'show ' + (type || '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.className = ''; }, 3200);
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────────────
+
+// ── LOCALSTORAGE ─────────────────────────────────────────────────────
+function lsGet(key,def){try{var v=localStorage.getItem('tasksa_'+key);return v!==null?JSON.parse(v):def;}catch(e){return def;}}
+function lsSet(key,val){try{localStorage.setItem('tasksa_'+key,JSON.stringify(val));}catch(e){}}
+function getListings(){
+  var session=lsGet('session',null);
+  var email=session?session.email:'thabo@test.co.za';
+  return lsGet('listings_'+email.replace('@','_at_'),[]);
+}
+function saveMyListings(arr){
+  var session=lsGet('session',null);
+  var email=session?session.email:'thabo@test.co.za';
+  lsSet('listings_'+email.replace('@','_at_'),arr);
+}
+function getMyProfile(){
+  var session=lsGet('session',null);
+  var email=session?session.email:'thabo@test.co.za';
+  return lsGet('profile_'+email.replace('@','_at_'),{});
+}
+function saveMyProfile(obj){
+  var session=lsGet('session',null);
+  var email=session?session.email:'thabo@test.co.za';
+  lsSet('profile_'+email.replace('@','_at_'),obj);
+}
+
+function backToSite() {
+  // Try to go back to index.html in the same folder
+  var base = window.location.href.replace(/\/[^\/]*$/, '/');
+  var target = base + 'index.html';
+  toast('Returning to TaskSA website...', 'success');
+  setTimeout(function(){
+    window.location.href = target;
+  }, 600);
+}
+
+function showTab(id, navEl) {
+  // Hide all tabs
+  document.querySelectorAll('.tab-content').forEach(function(t){
+    t.classList.remove('active');
+  });
+  // Show requested tab
+  var pg = document.getElementById('tab-' + id);
+  if(pg) pg.classList.add('active');
+
+  // Update sidebar active state
+  document.querySelectorAll('.si').forEach(function(s){ s.classList.remove('active'); });
+  if(navEl) {
+    navEl.classList.add('active');
+  } else {
+    // Find and activate matching sidebar item
+    document.querySelectorAll('.si').forEach(function(s){
+      var oc = s.getAttribute('onclick') || '';
+      if(oc.indexOf("'" + id + "'") !== -1) s.classList.add('active');
+    });
+  }
+
+  // Update topbar title and subtitle
+  var titles = {
+    overview: 'Good morning, Thabo \uD83D\uDC4B',
+    bookings: 'My Bookings',
+    earnings: 'Earnings & Payouts',
+    listings: 'My Listings',
+    reviews:  'Reviews & Ratings',
+    calendar: 'Availability Calendar',
+    messages: 'Messages',
+    profile:  'My Profile',
+    plan:     'Subscription Plan',
+  };
+  var subs = {
+    overview: 'Wednesday, 18 March 2025 \xB7 Professional Plan',
+    bookings: 'Manage and respond to booking requests',
+    earnings: 'Track your income and request payouts',
+    listings: 'Manage your active service listings',
+    reviews:  'See what customers are saying about you',
+    calendar: 'View and manage your availability',
+    messages: 'Chat with your customers',
+    profile:  'Update your personal and public business info',
+    plan:     'Manage your TaskSA subscription',
+  };
+  var titleEl = document.getElementById('tabTitle');
+  var subEl   = document.getElementById('tabSub');
+  if(titleEl) titleEl.textContent = titles[id] || id;
+  if(subEl)   subEl.textContent   = subs[id]   || '';
+
+  // Render dynamic content
+  if(id === 'bookings') renderBookings('all');
+  if(id === 'messages') { renderConvList(); renderMsgs(); }
+  if(id === 'calendar') renderCalendar();
+}
+
+// ── STATUS TOGGLE ──────────────────────────────────────────────────
+function toggleStatus(el) {
+  statusOn = !statusOn;
+  var st = document.getElementById('statusText');
+  if(st) st.textContent = statusOn ? 'Available for bookings' : 'Set to Busy';
+  toast(statusOn ? 'Status: Available for bookings' : 'Status: Busy - new bookings paused', statusOn ? 'success' : 'error');
+}
+
+// ── BOOKINGS ───────────────────────────────────────────────────────
+function filterBk(filter, btn) {
+  document.querySelectorAll('#bkFilters .btn').forEach(function(b){
+    b.className = 'btn btn-ghost btn-sm';
+  });
+  btn.className = 'btn btn-primary btn-sm';
+  renderBookings(filter);
+}
+
+function renderBookings(filter) {
+  filter = filter || 'all';
+  var container = document.getElementById('bookingsList');
+  if(!container) return;
+
+  var data = BOOKINGS_DATA.filter(function(b){
+    if(filter === 'all')       return true;
+    if(filter === 'pending')   return b.status === 'pending';
+    if(filter === 'confirmed') return b.status === 'confirmed';
+    if(filter === 'completed') return b.status === 'completed';
+    return true;
+  });
+
+  if(data.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;font-size:14px;color:var(--t3);">No bookings in this category</div>';
+    return;
+  }
+
+  container.innerHTML = data.map(function(b){
+    var sLabel = {confirmed:'Confirmed',pending:'Pending',completed:'Completed',cancelled:'Cancelled'}[b.status] || b.status;
+    var sCls   = {confirmed:'s-ok',pending:'s-pend',completed:'s-done',cancelled:'s-done'}[b.status] || 's-done';
+    var btns   = '';
+    if(b.status === 'pending') {
+      btns = '<button class="btn btn-success btn-sm" onclick="acceptBk(\'' + b.id + '\')">Accept</button>'
+           + '<button class="btn btn-danger btn-sm" onclick="declineBk(\'' + b.id + '\')">Decline</button>';
+    } else if(b.status === 'confirmed') {
+      btns = '<button class="btn btn-ghost btn-sm" onclick="markStarted(b.id)">Mark Started</button>'
+           + '<button class="btn btn-success btn-sm" onclick="completeBk(\'' + b.id + '\')">Mark Complete</button>';
+    } else {
+      btns = '<button class="btn btn-ghost btn-sm" onclick="viewBookingDetail(b.id)">View Details</button>';
+    }
+    return '<div id="bk-' + b.id + '" style="background:var(--surf);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:12px;">'
+      + '<div style="display:flex;align-items:center;gap:14px;">'
+        + '<div style="width:44px;height:44px;border-radius:50%;background:' + b.bg + ';color:' + b.col + ';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;">' + b.ini + '</div>'
+        + '<div style="flex:1;min-width:0;">'
+          + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">'
+            + '<div><div style="font-size:14px;font-weight:700;">' + b.name + '</div><div style="font-size:12px;color:var(--t3);margin-top:2px;">' + b.service + '</div></div>'
+            + '<span class="bk-status ' + sCls + '">' + sLabel + '</span>'
+          + '</div>'
+          + '<div style="font-size:12px;color:var(--t2);margin-top:5px;">' + b.date + '</div>'
+        + '</div>'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--bd);">'
+        + '<span style="font-size:16px;font-weight:700;color:var(--blue3);">' + b.amount + '</span>'
+        + '<div style="display:flex;gap:8px;">' + btns + '</div>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+}
+
+function acceptBk(id) {
+  var b = BOOKINGS_DATA.find(function(x){ return x.id === id; });
+  if(!b) return;
+  b.status = 'confirmed';
+  renderBookings('all');
+  document.querySelectorAll('#bkFilters .btn').forEach(function(b,i){
+    b.className = i === 0 ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+  });
+  toast(b.name + ' booking accepted! They have been notified via SMS.', 'success');
+}
+
+function declineBk(id) {
+  var b = BOOKINGS_DATA.find(function(x){ return x.id === id; });
+  if(!b) return;
+  var name = b.name;
+  BOOKINGS_DATA = BOOKINGS_DATA.filter(function(x){ return x.id !== id; });
+  renderBookings('all');
+  toast('Booking declined. ' + name + ' has been notified.', 'error');
+}
+
+function completeBk(id) {
+  var b = BOOKINGS_DATA.find(function(x){ return x.id === id; });
+  if(!b) return;
+  b.status = 'completed';
+  renderBookings('all');
+  toast('Job complete! Payment released from escrow. ' + b.amount + ' queued to your account.', 'success');
+}
+
+// ── CALENDAR ───────────────────────────────────────────────────────
+function renderCalendar() {
+  var g = document.getElementById('calGrid');
+  if(!g) return;
+  var booked = [3,7,10,12,14,18,20,21,24,25];
+  var today  = 18;
+  var days   = ['M','T','W','T','F','S','S'];
+  var html   = days.map(function(d){ return '<div class="cal-day hdr">' + d + '</div>'; }).join('');
+  for(var i = 1; i <= 31; i++) {
+    var cls  = i === today ? 'today' : booked.indexOf(i) !== -1 ? 'booked' : '';
+    var tip  = (booked.indexOf(i) !== -1 ? 'Booking on ' : 'Available on ') + 'March ' + i;
+    html += '<div class="cal-day ' + cls + '" onclick="toast(\'' + tip + '\',\'success\')">' + i + '</div>';
+  }
+  g.innerHTML = html;
+}
+
+// ── MESSAGES ──────────────────────────────────────────────────────
+function renderConvList() {
+  var cl = document.getElementById('convList');
+  if(!cl) return;
+  cl.innerHTML = CONVS.map(function(c, i){
+    return '<div class="conv-item' + (i === activeConv ? ' active' : '') + '" onclick="switchConv(' + i + ')">'
+      + '<div class="conv-av" style="background:' + c.bg + ';color:' + c.col + ';">' + c.ini + '</div>'
+      + '<div style="flex:1;min-width:0;">'
+        + '<div class="conv-name">' + c.name + '</div>'
+        + '<div class="conv-prev">' + c.last + '</div>'
+      + '</div>'
+      + (c.unread ? '<div class="unread-dot"></div>' : '')
+    + '</div>';
+  }).join('');
+}
+
+function switchConv(i) {
+  activeConv   = i;
+  CONVS[i].unread = false;
+  var c = CONVS[i];
+  var av = document.getElementById('msgAv');
+  if(av){ av.textContent = c.ini; av.style.background = c.bg; av.style.color = c.col; }
+  var nm = document.getElementById('msgName');     if(nm) nm.textContent = c.name;
+  var st = document.getElementById('msgStatus');   if(st) st.textContent = c.role + ' \xB7 Online';
+  renderConvList();
+  renderMsgs();
+}
+
+function renderMsgs() {
+  var area = document.getElementById('msgArea');
+  if(!area) return;
+  var msgs = MSGS_BY_CONV[activeConv] || [];
+  area.innerHTML = msgs.map(function(m){
+    var sent = m.from === 'me';
+    return '<div class="bubble ' + (sent ? 'sent' : 'recv') + '">' + m.text + '</div>';
+  }).join('');
+  area.scrollTop = area.scrollHeight;
+}
+
+function sendProvMsg() {
+  var input = document.getElementById('msgInput');
+  var text  = (input ? input.value : '').trim();
+  if(!text) return;
+  if(!MSGS_BY_CONV[activeConv]) MSGS_BY_CONV[activeConv] = [];
+  MSGS_BY_CONV[activeConv].push({from:'me', text:text});
+  var c = CONVS[activeConv];
+  if(c) c.last = text;
+  if(input) input.value = '';
+  renderMsgs();
+  renderConvList();
+  setTimeout(function(){
+    var replies = ['Got it, thanks!', 'Sounds good!', 'I will confirm shortly.', 'No problem at all.', 'Perfect, appreciate the update.'];
+    var reply   = replies[Math.floor(Math.random() * replies.length)];
+    MSGS_BY_CONV[activeConv].push({from:'them', text:reply});
+    if(CONVS[activeConv]) CONVS[activeConv].last = reply;
+    renderMsgs();
+    renderConvList();
+  }, 1200);
+}
+
+// ── EARNINGS BAR ───────────────────────────────────────────────────
+function buildBar() {
+  var bar = document.getElementById('overviewBar');
+  if(!bar) return;
+  var vals = [320, 580, 240, 450, 180, 370, 0];
+  var mx   = Math.max.apply(null, vals);
+  bar.innerHTML = vals.map(function(v){
+    return '<div class="bar" style="height:' + Math.round(v / mx * 100) + '%;" title="R' + v + '"></div>';
+  }).join('');
+}
+
+// ── NEW WORKING FUNCTIONS ──────────────────────────────────────────
+var BOOKINGS_DATA_STORE; // reference to main BOOKINGS array from renderBookings
+
+function requestPayout() {
+  var amount = prompt('Request Payout\n\nAvailable balance: R6,200\nMinimum payout: R100\n\nEnter amount to withdraw (R):','6200');
+  if(!amount) return;
+  var n = parseFloat(amount);
+  if(isNaN(n) || n < 100) { toast('Minimum payout is R100','error'); return; }
+  if(n > 6200) { toast('Amount exceeds available balance','error'); return; }
+  toast('✓ Payout of R' + n.toFixed(0) + ' requested! Arrives in 1-2 business days.','success');
+}
+
+var addListingOpen = false;
+function openAddListingForm() {
+  if(addListingOpen) return;
+  addListingOpen = true;
+  var panel = document.getElementById('addListingPanel');
+  if(!panel) {
+    // Find the listings tab content and prepend a form
+    var container = document.querySelector('#tab-listings > div');
+    if(!container) { toast('Switch to My Listings tab first','error'); addListingOpen=false; return; }
+    panel = document.createElement('div');
+    panel.id = 'addListingPanel';
+    panel.style.cssText = 'background:var(--surf2);border:1px solid var(--bd2);border-radius:14px;padding:22px;margin-bottom:20px;';
+    panel.innerHTML = '<h4 style="font-size:15px;font-weight:800;margin-bottom:16px;">📝 New Listing</h4>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+        + '<div class="form-group"><label class="form-label">Service Title *</label><input class="form-control" id="nlTitle" placeholder="e.g. Emergency Plumbing"></div>'
+        + '<div class="form-group"><label class="form-label">Your Rate (R)</label><input class="form-control" type="number" id="nlRate" placeholder="350"></div>'
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+        + '<div class="form-group"><label class="form-label">Category</label><select class="form-control" id="nlCat"><option>Plumbing</option><option>Electrical</option><option>Cleaning</option><option>Gardening</option><option>Painting</option><option>Handyman</option></select></div>'
+        + '<div class="form-group"><label class="form-label">Rate Type</label><select class="form-control" id="nlType"><option>Per Hour</option><option>Per Job</option><option>Per Day</option></select></div>'
+      + '</div>'
+      + '<div class="form-group"><label class="form-label">Description</label><textarea class="form-control" id="nlDesc" placeholder="Describe your service..." style="min-height:70px;resize:vertical;"></textarea></div>'
+      + '<div style="display:flex;gap:10px;justify-content:flex-end;">'
+        + '<button class="btn btn-ghost" onclick="cancelAddListing()">Cancel</button>'
+        + '<button class="btn btn-primary" onclick="submitNewListing()">Publish Listing</button>'
+      + '</div>';
+    container.insertBefore(panel, container.firstChild);
+  }
+  panel.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+function cancelAddListing() {
+  var p = document.getElementById('addListingPanel');
+  if(p) p.remove();
+  addListingOpen = false;
+}
+function submitNewListing() {
+  var title = (document.getElementById('nlTitle').value || '').trim();
+  var rate  = document.getElementById('nlRate').value;
+  var cat   = (document.getElementById('nlCat')||{}).value||'General';
+  var type  = (document.getElementById('nlType')||{}).value||'Per Hour';
+  var desc  = (document.getElementById('nlDesc')||{}).value||'';
+  if(!title) { toast('Please enter a service title','error'); return; }
+  if(!rate)  { toast('Please enter your rate','error'); return; }
+  var listings=getListings();
+  listings.push({id:Date.now(),title:title,rate:rate,cat:cat,type:type,desc:desc,created:new Date().toLocaleDateString('en-ZA'),active:true});
+  saveMyListings(listings);
+  cancelAddListing();
+  toast('✓ "' + title + '" published at R' + rate + '/' + type + '!','success');
+}
+
+function openListingEditor(btn) {
+  var card = btn.closest('.listing-card') || btn.closest('[style]');
+  var name = card ? (card.querySelector('h4') || card.querySelector('h3') || {}).textContent : 'Listing';
+  toast('Opening editor for "' + (name || 'Listing') + '"…','success');
+  // In a real app this would open a modal with the listing data pre-filled
+}
+
+function pauseListing(btn) {
+  var card = btn.closest('.listing-card') || btn.closest('div[style]');
+  var h = card ? (card.querySelector('h4') || card.querySelector('h3') || {}).textContent : 'Listing';
+  var isPaused = btn.textContent.indexOf('Resume') !== -1;
+  if(isPaused) {
+    btn.innerHTML = '⏸ Pause';
+    toast('Listing "' + h + '" is now active again.','success');
+  } else {
+    btn.innerHTML = '▶ Resume';
+    toast('"' + h + '" paused. No new bookings will be accepted.','error');
+  }
+}
+
+function shareListing() {
+  var url = 'https://tasksa.co.za/provider/thabo-mokoena';
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function(){ toast('Profile link copied: ' + url,'success'); });
+  } else {
+    toast('Profile link: ' + url,'success');
+  }
+}
+
+function openAvailability() {
+  var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  var sel = prompt('Set Availability\n\nEnter working days (comma-separated):\ne.g. Monday,Tuesday,Wednesday,Thursday,Friday', 'Monday,Tuesday,Wednesday,Thursday,Friday');
+  if(sel !== null) toast('✓ Availability updated: ' + (sel || 'none').trim(),'success');
+}
+
+function savePersonalInfo(btn) {
+  var form = btn.closest('.dash-card')||btn.closest('div');
+  var inputs = form ? form.querySelectorAll('input, select, textarea') : [];
+  var empty = false;
+  var profile=getMyProfile();
+  inputs.forEach(function(el,i){
+    if(el.required && !el.value.trim()) empty=true;
+    if(el.id) profile[el.id]=el.value; else profile['p_'+i]=el.value;
+  });
+  if(empty) { toast('Please fill in all required fields','error'); return; }
+  saveMyProfile(profile);
+  toast('✓ Personal information saved!','success');
+}
+
+function savePublicProfile() {
+  var profile=getMyProfile();
+  var inputs=document.querySelectorAll('#tab-profile input, #tab-profile textarea, #tab-profile select');
+  inputs.forEach(function(el,i){ if(el.id) profile[el.id]=el.value; else profile['pub_'+i]=el.value; });
+  saveMyProfile(profile);
+  toast('✓ Public profile updated and now live!','success');
+}
+
+function cancelPlan(btn) {
+  if(!confirm('Cancel your Professional Plan?\n\nYour plan will remain active until 1 April 2025, then you will revert to the free tier.')) return;
+  btn.textContent = '✓ Cancellation Scheduled';
+  btn.disabled = true;
+  btn.style.opacity = '0.5';
+  toast('Plan cancellation scheduled. Active until 1 April 2025.','error');
+}
+
+function upgradePlan(btn) {
+  if(!confirm('Upgrade to Business Plan for R999/month?\n\n• Commission drops from 8% → 5%\n• 5 team accounts\n• 3 banner ads included\n• API access')) return;
+  btn.textContent = '✓ Upgraded to Business!';
+  btn.disabled = true;
+  toast('✓ Upgraded to Business plan! Commission is now 5%.','success');
+  var planLabel = document.querySelector('.current-plan-label');
+  if(planLabel) planLabel.textContent = 'Business Plan';
+}
+
+function markStarted(id) {
+  toast('Job ' + id + ' marked as started! Customer notified by SMS.','success');
+  var btns = document.querySelectorAll('[onclick="markStarted(\'' + id + '\')"]');
+  btns.forEach(function(b){ b.textContent = '▶ In Progress'; b.disabled = true; b.style.opacity = '0.5'; });
+}
+
+function viewBookingDetail(id) {
+  var booking = (window.PROV_BOOKINGS || []).find(function(b){ return b.id === id; });
+  if(booking) {
+    alert('Booking Details\n\nID: ' + id + '\nCustomer: ' + booking.customer + '\nService: ' + booking.service + '\nDate: ' + booking.date + '\nAmount: ' + booking.amount + '\nStatus: ' + booking.status);
+  } else {
+    toast('Viewing booking ' + id,'success');
+  }
+}
+
+function acceptBk(id) {
+  if(window.PROV_BOOKINGS) {
+    var b = PROV_BOOKINGS.find(function(x){ return x.id===id; });
+    if(b){ b.status='Confirmed'; renderBookings(window._curFilter||'all'); toast('Booking ' + id + ' accepted! Customer notified.','success'); }
+  }
+}
+function declineBk(id) {
+  if(window.PROV_BOOKINGS) {
+    var b = PROV_BOOKINGS.find(function(x){ return x.id===id; });
+    if(b){ b.status='Declined'; renderBookings(window._curFilter||'all'); toast('Booking ' + id + ' declined.','error'); }
+  }
+}
+function completeBk(id) {
+  if(window.PROV_BOOKINGS) {
+    var b = PROV_BOOKINGS.find(function(x){ return x.id===id; });
+    if(b){ b.status='Completed'; renderBookings(window._curFilter||'all'); toast('Booking ' + id + ' marked complete! Payment released from escrow.','success'); }
+  }
+}
+
+// ── INIT ───────────────────────────────────────────────────────────
+window.onload = function() {
+  buildBar();
+  renderBookings('all');
+  renderCalendar();
+  renderConvList();
+  renderMsgs();
+};
+</script>
+</body>
+</html>
