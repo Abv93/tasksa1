@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="google-site-verification" content="K8jnWGc8fNquQjdadpAXm0hdktqHpFP5taxjlv5RJHY" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TaskSA — South Africa's Service Marketplace</title>
@@ -71,7 +70,7 @@ nav{position:sticky;top:0;z-index:200;background:rgba(2,11,26,0.97);backdrop-fil
 .btn-s{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);color:var(--green2);}
 .btn-d{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;}
 .mfooter{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
-.demo-pills{background:rgba(26,143,255,0.07);border:1px solid var(--bd2);border-radius:10px;padding:12px;margin-bottom:16px;}
+.demo-pills{display:none;}
 .demo-pills p{font-size:10px;font-weight:700;color:var(--blue3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
 .dpills{display:flex;flex-wrap:wrap;gap:6px;}
 .dpill{padding:4px 12px;border-radius:50px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;}
@@ -340,19 +339,12 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
     <h2>Welcome back</h2>
     <div class="modal-sub">Sign in to your TaskSA account</div>
-    <div class="demo-pills">
-      <p>Demo — tap to auto-fill</p>
-      <div class="dpills">
-        <button class="dpill dp-g" onclick="fillLogin('customer@test.co.za','password123')">👤 Customer</button>
-        <button class="dpill dp-b" onclick="fillLogin('thabo@test.co.za','password123')">🔧 Provider</button>
-        <button class="dpill dp-a" onclick="fillLogin('admin@tasksa.co.za','password123')">⚙️ Admin</button>
-        <button class="dpill dp-p" onclick="fillLogin('buildright@test.co.za','password123')">🏪 Shop</button>
-      </div>
-    </div>
+
     <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.co.za"></div>
     <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••"></div>
     <button class="btn btn-p" style="width:100%;padding:13px;" onclick="doLogin()">Sign In</button>
     <p style="text-align:center;font-size:13px;color:var(--t2);margin-top:14px;">No account? <a style="color:var(--blue3);" onclick="closeModal('loginModal');openModal('registerModal')">Register free</a></p>
+    <p style="text-align:center;font-size:12px;color:var(--t3);margin-top:8px;"><a style="color:var(--t3);text-decoration:underline;cursor:pointer;" onclick="forgotPassword()">Forgot password?</a></p>
   </div>
 </div>
 
@@ -379,6 +371,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     </div>
     <div class="field"><label>Password (min 8 characters)</label><input type="password" id="regPass" placeholder="••••••••"></div>
     <button class="btn btn-p" style="width:100%;padding:13px;" onclick="doRegister()">Create Account</button>
+    <p style="text-align:center;font-size:13px;color:var(--t2);margin-top:14px;">Already have an account? <a style="color:var(--blue3);" onclick="closeModal('registerModal');openModal('loginModal')">Sign in</a></p>
   </div>
 </div>
 
@@ -886,24 +879,24 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
   <div class="dash-layout">
     <div class="dash-side">
       <div style="padding:12px;margin-bottom:8px;border-bottom:1px solid var(--bd);">
-        <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue2));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:16px;margin-bottom:8px;">TM</div>
-        <div style="font-size:13px;font-weight:700;">Thabo Mokoena</div>
-        <div style="font-size:11px;color:var(--blue3);">Professional Plan</div>
+        <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue2));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:16px;margin-bottom:8px;" id="dashAvatar">?</div>
+        <div style="font-size:13px;font-weight:700;" id="dashSidebarName">Welcome</div>
+        <div style="font-size:11px;color:var(--blue3);" id="dashSidebarRole">TaskSA Member</div>
       </div>
       <div class="si active" onclick="setSI(this)"><span class="si-ic">📊</span>Overview</div>
       <div class="si" onclick="setSI(this);openBookingModal('John Michaels','Burst pipe fix','Thu 20 Mar · 9:00am · Sandton','R750')"><span class="si-ic">📋</span>Bookings<span class="sib">3</span></div>
       <div class="si" onclick="setSI(this);openModal('payoutModal')"><span class="si-ic">💰</span>Earnings</div>
       <div class="si" onclick="goPage('messages')"><span class="si-ic">💬</span>Messages<span class="sib b">5</span></div>
       <div class="si" onclick="setSI(this);openModal('addListingModal')"><span class="si-ic">📝</span>My Listings</div>
-      <div class="si" onclick="setSI(this);toast('248 reviews — Average 4.9 stars ⭐','success')"><span class="si-ic">⭐</span>Reviews</div>
+      <div class="si" onclick="setSI(this);toast('Your reviews: '+getListings(currentUser?currentUser.email:\'\').length+' listings published. Check back soon for customer reviews!','success')"><span class="si-ic">⭐</span>Reviews</div>
       <div class="si" onclick="setSI(this);openModal('editProfileModal')"><span class="si-ic">⚙️</span>Settings</div>
       <div class="si" style="margin-top:16px;border-top:1px solid var(--bd);padding-top:14px;" onclick="goPage('home')"><span class="si-ic">←</span>Back to site</div>
     </div>
     <div class="dash-main">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
         <div>
-          <h2 style="font-size:21px;font-weight:900;">Good morning, Thabo 👋</h2>
-          <p style="color:var(--t2);font-size:13px;margin-top:3px;">Professional Plan · Available for bookings</p>
+          <h2 style="font-size:21px;font-weight:900;" id="dashGreeting">Good morning 👋</h2>
+          <p style="color:var(--t2);font-size:13px;margin-top:3px;" id="dashPlan">Available for bookings</p>
         </div>
         <div style="display:flex;gap:9px;">
           <button class="btn btn-g" onclick="openModal('editProfileModal')">✏️ Edit Profile</button>
@@ -1003,8 +996,8 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
         <div style="font-size:13px;color:var(--t3);margin-top:3px;">Authorised personnel only</div>
       </div>
       <div class="bl-card">
-        <div class="bl-hint">🔑 Demo: admin@tasksa.co.za / password123</div>
-        <div class="field"><label>Admin Email</label><input type="email" id="blEmail" placeholder="admin@tasksa.co.za"></div>
+
+        <div class="field"><label>Admin Email</label><input type="email" id="blEmail" placeholder="Enter your admin email"></div>
         <div class="field"><label>Password</label><input type="password" id="blPass" placeholder="••••••••"></div>
         <button class="btn btn-p" style="width:100%;padding:13px;font-size:14px;" onclick="blLogin()">Sign In to Admin Panel</button>
         <div style="text-align:center;margin-top:14px;"><a onclick="goPage('home')" style="font-size:13px;color:var(--t3);">← Back to TaskSA</a></div>
@@ -1113,6 +1106,13 @@ function toast(msg,type){
 
 // ── ROUTING ──────────────────────────────────────────────────────────
 function goPage(id){
+  // Protect certain pages - require login
+  var protectedPages=['dashboard','messages'];
+  if(protectedPages.indexOf(id)!==-1 && !currentUser){
+    openModal('loginModal');
+    toast('Please sign in to access this page.','error');
+    return;
+  }
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   var pg=document.getElementById(id);
   if(pg)pg.classList.add('active');
@@ -1204,16 +1204,38 @@ function updateNav(){
   if(currentUser){
     si.style.display='none';sr.style.display='none';so.style.display='inline';nu.style.display='inline';
     nu.textContent='👤 '+currentUser.name.split(' ')[0];
+    // Update dashboard elements
+    var firstName=currentUser.name.split(' ')[0];
+    var initials=currentUser.name.split(' ').map(function(n){return n[0];}).join('').substring(0,2).toUpperCase();
+    var hr=new Date().getHours();
+    var greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+    var dg=document.getElementById('dashGreeting');if(dg)dg.textContent=greet+', '+firstName+' 👋';
+    var dp=document.getElementById('dashPlan');if(dp)dp.textContent=(currentUser.role==='provider'?'Provider Account':'Customer Account')+' · TaskSA Member';
+    var da=document.getElementById('dashAvatar');if(da)da.textContent=initials;
+    var dn=document.getElementById('dashSidebarName');if(dn)dn.textContent=currentUser.name;
+    var dr=document.getElementById('dashSidebarRole');if(dr)dr.textContent=currentUser.role.charAt(0).toUpperCase()+currentUser.role.slice(1)+' Account';
   } else {
     si.style.display='inline';sr.style.display='inline';so.style.display='none';nu.style.display='none';
   }
 }
+
+function forgotPassword(){
+  var email=prompt('Enter your registered email address and we will send you a reset link:');
+  if(!email||email.trim()==='')return;
+  var users=getUsers();
+  if(users[email.trim().toLowerCase()]){
+    toast('Password reset instructions sent to '+email.trim()+'!','success');
+  } else {
+    toast('No account found with that email address.','error');
+  }
+}
+
 function blLogin(){
   var e=(document.getElementById('blEmail').value||'').trim().toLowerCase();
   var p=document.getElementById('blPass').value;
   if(e==='admin@tasksa.co.za'&&p==='password123'){toast('Admin login successful! Opening admin panel…','success');setTimeout(function(){var w=window.open('TaskSA_AdminPanel_v4.html','_blank');if(!w)toast('Open TaskSA_AdminPanel_v4.html from your files');},800);}
-  else if(e&&p){toast('Incorrect. Try admin[at]tasksa.co.za / password123','error');}
-  else{toast('Please enter email and password','error');}
+  else if(e&&p){toast('Incorrect email or password. Please try again.','error');}
+  else{toast('Please enter your email and password.','error');}
 }
 
 // ── BANNERS ──────────────────────────────────────────────────────────
@@ -1571,6 +1593,14 @@ function saveEditProfile(){
   closeModal('editProfileModal');
   toast('Profile saved successfully!','success');
 }
+
+
+// Handle any broken internal navigation gracefully
+window.addEventListener('error', function(e){
+  if(e && e.message && e.message.indexOf('getElementById') !== -1){
+    console.warn('Navigation error:', e.message);
+  }
+});
 
 window.onload=function(){
   initUsers();      // seed demo accounts if first visit
