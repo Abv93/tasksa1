@@ -341,7 +341,12 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     <div class="modal-sub">Sign in to your TaskSA account</div>
 
     <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.co.za"></div>
-    <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+    <div class="field"><label>Password</label>
+      <div style="position:relative;">
+        <input type="password" id="loginPass" placeholder="••••••••" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 42px 10px 13px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+        <button type="button" onclick="togglePw('loginPass','loginPassEye')" id="loginPassEye" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--t3);padding:0;line-height:1;">👁</button>
+      </div>
+    </div>
     <button class="btn btn-p" style="width:100%;padding:13px;" onclick="doLogin()">Sign In</button>
     <p style="text-align:center;font-size:13px;color:var(--t2);margin-top:14px;">No account? <a style="color:var(--blue3);" onclick="closeModal('loginModal');openModal('registerModal')">Register free</a></p>
     <p style="text-align:center;font-size:12px;color:var(--t3);margin-top:8px;"><a style="color:var(--t3);text-decoration:underline;cursor:pointer;" onclick="forgotPassword()">Forgot password?</a></p>
@@ -369,7 +374,12 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     <div class="field"><label>Province</label>
       <select id="regProv"><option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option><option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option><option>North West</option><option>Free State</option><option>Northern Cape</option></select>
     </div>
-    <div class="field"><label>Password (min 8 characters)</label><input type="password" id="regPass" placeholder="••••••••"></div>
+    <div class="field"><label>Password (min 8 characters)</label>
+      <div style="position:relative;">
+        <input type="password" id="regPass" placeholder="••••••••" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 42px 10px 13px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+        <button type="button" onclick="togglePw('regPass','regPassEye')" id="regPassEye" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--t3);padding:0;line-height:1;">👁</button>
+      </div>
+    </div>
     <button class="btn btn-p" style="width:100%;padding:13px;" onclick="doRegister()">Create Account</button>
     <p style="text-align:center;font-size:13px;color:var(--t2);margin-top:14px;">Already have an account? <a style="color:var(--blue3);" onclick="closeModal('registerModal');openModal('loginModal')">Sign in</a></p>
   </div>
@@ -998,7 +1008,12 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
       <div class="bl-card">
 
         <div class="field"><label>Admin Email</label><input type="email" id="blEmail" placeholder="Enter your admin email"></div>
-        <div class="field"><label>Password</label><input type="password" id="blPass" placeholder="••••••••"></div>
+        <div class="field"><label>Password</label>
+          <div style="position:relative;">
+            <input type="password" id="blPass" placeholder="••••••••" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 42px 10px 13px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+            <button type="button" onclick="togglePw('blPass','blPassEye')" id="blPassEye" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--t3);padding:0;line-height:1;">👁</button>
+          </div>
+        </div>
         <button class="btn btn-p" style="width:100%;padding:13px;font-size:14px;" onclick="blLogin()">Sign In to Admin Panel</button>
         <div style="text-align:center;margin-top:14px;"><a onclick="goPage('home')" style="font-size:13px;color:var(--t3);">← Back to TaskSA</a></div>
       </div>
@@ -1219,12 +1234,34 @@ function updateNav(){
   }
 }
 
+
+function togglePw(inputId, btnId) {
+  var inp = document.getElementById(inputId);
+  var btn = document.getElementById(btnId);
+  if(!inp) return;
+  if(inp.type === 'password') {
+    inp.type = 'text';
+    if(btn) btn.textContent = '🙈';
+  } else {
+    inp.type = 'password';
+    if(btn) btn.textContent = '👁';
+  }
+}
+
 function forgotPassword(){
-  var email=prompt('Enter your registered email address and we will send you a reset link:');
+  var email=prompt('Enter your registered email address:');
   if(!email||email.trim()==='')return;
+  var e=email.trim().toLowerCase();
   var users=getUsers();
-  if(users[email.trim().toLowerCase()]){
-    toast('Password reset instructions sent to '+email.trim()+'!','success');
+  if(users[e]){
+    // Show the password directly since this is a local-storage based site with no email server
+    var newPass=prompt('Account found! Enter a new password (min 8 characters):');
+    if(!newPass||newPass.length<8){toast('Password must be at least 8 characters.','error');return;}
+    users[e].pass=newPass;
+    saveUsers(users);
+    // Update session if this is the currently logged in user
+    if(currentUser&&currentUser.email===e){currentUser.pass=newPass;saveSession();}
+    toast('Password updated successfully! You can now sign in.','success');
   } else {
     toast('No account found with that email address.','error');
   }

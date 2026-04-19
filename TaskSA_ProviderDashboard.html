@@ -636,6 +636,21 @@ function saveMyProfile(obj){
   lsSet('profile_'+email.replace('@','_at_'),obj);
 }
 
+
+function getProviderGreeting(){
+  var session=lsGet('session',null);
+  var name=session?session.name.split(' ')[0]:'Provider';
+  var hr=new Date().getHours();
+  var greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+  return greet+', '+name+' \u{1F44B}';
+}
+function getProviderSub(){
+  var d=new Date();
+  var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return days[d.getDay()]+', '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear()+' \u00B7 Professional Plan';
+}
+
 function backToSite() {
   // Try to go back to index.html in the same folder
   var base = window.location.href.replace(/\/[^\/]*$/, '/');
@@ -669,7 +684,7 @@ function showTab(id, navEl) {
 
   // Update topbar title and subtitle
   var titles = {
-    overview: 'Good morning, Thabo \uD83D\uDC4B',
+    overview: getProviderGreeting(),
     bookings: 'My Bookings',
     earnings: 'Earnings & Payouts',
     listings: 'My Listings',
@@ -680,7 +695,7 @@ function showTab(id, navEl) {
     plan:     'Subscription Plan',
   };
   var subs = {
-    overview: 'Wednesday, 18 March 2025 \xB7 Professional Plan',
+    overview: getProviderSub(),
     bookings: 'Manage and respond to booking requests',
     earnings: 'Track your income and request payouts',
     listings: 'Manage your active service listings',
@@ -1060,6 +1075,10 @@ window.onload = function() {
   renderCalendar();
   renderConvList();
   renderMsgs();
+  var titleEl=document.getElementById('tabTitle');
+  if(titleEl)titleEl.textContent=getProviderGreeting();
+  var subEl=document.getElementById('tabSub');
+  if(subEl)subEl.textContent=getProviderSub();
 };
 </script>
 </body>
