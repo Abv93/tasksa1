@@ -459,6 +459,22 @@ textarea.form-control{resize:vertical;min-height:80px;}
   </div>
 </div>
 
+
+<!-- Add Category Modal -->
+<div class="modal-overlay" id="addCategoryModal">
+  <div class="modal-box" style="max-width:440px;">
+    <button class="modal-close" onclick="closeModal('addCategoryModal')">✕</button>
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:6px;">Add Service Category</h2>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px;">New category appears immediately on the website and in provider listings.</p>
+    <div class="form-group"><label class="form-label">Category Name *</label><input class="form-control" id="newCatName" placeholder="e.g. Baby Sitting"></div>
+    <div class="form-group"><label class="form-label">Emoji Icon</label><input class="form-control" id="newCatIcon" placeholder="e.g. 👶" maxlength="4" style="font-size:24px;"></div>
+    <div class="form-group"><label class="form-label">Description</label><input class="form-control" id="newCatDesc" placeholder="e.g. Trusted childcare and babysitting services"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-ghost" onclick="closeModal('addCategoryModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addCategory()">Add Category</button>
+    </div>
+  </div>
+</div>
 <!-- Create User Modal -->
 <div class="modal-overlay" id="createUserModal">
   <div class="modal-box" style="max-width:460px;">
@@ -573,6 +589,10 @@ textarea.form-control{resize:vertical;min-height:80px;}
       <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
       <span class="nav-label">Subscriptions</span>
       <span class="nav-badge green">Trial</span>
+    </div>
+    <div class="nav-item" onclick="showPage('categories',this)">
+      <span class="nav-icon">🗂️</span>
+      <span class="nav-label">Categories</span>
     </div>
     <div class="nav-item" onclick="showPage('ads',this)">
       <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
@@ -1023,6 +1043,26 @@ textarea.form-control{resize:vertical;min-height:80px;}
     </div>
 
     <!-- ════ BANNER ADS PAGE ════ -->
+
+    <!-- ════ CATEGORIES PAGE ════ -->
+    <div class="page-content hidden" id="page-categories">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Service Categories</div>
+          <div class="page-sub">Add, edit or remove service categories. Changes reflect immediately on the website.</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('addCategoryModal')">+ Add Category</button>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <table class="table" style="width:100%">
+            <thead><tr><th>Icon</th><th>Category Name</th><th>Description</th><th>Providers</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="categoriesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <div class="page-content hidden" id="page-ads">
       <div class="page-header">
         <div><div class="page-title">Banner Advertisements</div><div class="page-sub">R14,970 ad revenue this month</div></div>
@@ -1587,11 +1627,17 @@ function toggleUserStatus(id) {
 function deleteUser(id) {
   var u = USERS.find(function(x){ return x.id === id; });
   if(!u) return;
-  if(!confirm('Permanently delete ' + u.name + '? This cannot be undone.')) return;
+  if(!confirm('Permanently delete ' + u.name + '?\n\nThis cannot be undone. They will need to re-register.')) return;
   USERS = USERS.filter(function(x){ return x.id !== id; });
   persistUsers();
+  // Also remove from webapp users
+  try {
+    var wu = JSON.parse(localStorage.getItem('tasksa_users') || '{}');
+    if(wu[u.email]){ delete wu[u.email]; localStorage.setItem('tasksa_users', JSON.stringify(wu)); }
+  } catch(e){}
+  try{ closeModal('userModal'); }catch(e){}
   renderUsers();
-  toast(u.name + ' account permanently deleted.', 'error');
+  toast(u.name + ' permanently deleted from the platform.', 'error');
 }
 
 function openUserModal(id) {
@@ -2188,122 +2234,38 @@ function updateDate() {
 
 // ── SETTINGS SAVE ────────────────────────────────────────────────
 function saveSettings() {
-  // Read every field
-  var fields = {
-    'Starter Commission':     {id:'set_comm_starter',   min:0,   max:30,  type:'number'},
-    'Professional Commission':{id:'set_comm_pro',        min:0,   max:30,  type:'number'},
-    'Business Commission':    {id:'set_comm_biz',        min:0,   max:30,  type:'number'},
-    'Base Delivery Fee':      {id:'set_delivery_fee',   min:0,   max:500, type:'number'},
-    'Minimum Payout':         {id:'set_min_payout',     min:1,   max:9999,type:'number'},
-    'Starter Plan Price':     {id:'set_price_starter',  min:1,   max:9999,type:'number'},
-    'Professional Plan Price':{id:'set_price_pro',       min:1,   max:9999,type:'number'},
-    'Business Plan Price':    {id:'set_price_biz',       min:1,   max:9999,type:'number'},
-    'Banner Ad Price':        {id:'set_price_banner',   min:1,   max:9999,type:'number'},
-    'Max Login Attempts':     {id:'set_max_login',      min:1,   max:20,  type:'number'},
-    'Lockout Duration':       {id:'set_lockout_mins',   min:1,   max:1440,type:'number'},
-    'Platform Name':          {id:'set_platform_name',  type:'text'},
-    'Support Phone':          {id:'set_support_phone',  type:'text'},
-  };
-
-  // Validate all numeric fields
-  var errors = [];
-  Object.keys(fields).forEach(function(label) {
-    var f  = fields[label];
-    var el = document.getElementById(f.id);
-    if(!el) return;
-    if(f.type === 'number') {
-      var val = parseInt(el.value);
-      if(isNaN(val) || val < f.min || val > f.max) {
-        errors.push(label + ' must be between ' + f.min + ' and ' + f.max);
-        el.style.borderColor = 'var(--red2)';
-      } else {
-        el.style.borderColor = '';
-      }
-    } else {
-      if(!el.value.trim()) {
-        errors.push(label + ' cannot be empty');
-        el.style.borderColor = 'var(--red2)';
-      } else {
-        el.style.borderColor = '';
-      }
+  var numIds=['set_comm_starter','set_comm_pro','set_comm_biz','set_delivery_fee',
+    'set_min_payout','set_price_starter','set_price_pro','set_price_biz',
+    'set_price_banner','set_max_login','set_lockout_mins'];
+  for(var i=0;i<numIds.length;i++){
+    var el=document.getElementById(numIds[i]);
+    if(el&&(el.value===''||isNaN(parseInt(el.value)))){
+      el.style.borderColor='var(--red2)';
+      toast('Please enter a valid number for all fields','error');
+      return;
     }
-  });
-
-  if(errors.length > 0) {
-    toast('Please fix: ' + errors[0], 'error');
-    return;
+    if(el) el.style.borderColor='';
   }
+  var allIds=['set_comm_starter','set_comm_pro','set_comm_biz','set_delivery_fee',
+    'set_min_payout','set_price_starter','set_price_pro','set_price_biz','set_price_banner',
+    'set_max_login','set_lockout_mins','set_platform_name','set_support_phone',
+    'set_jwt_expiry','set_otp_payouts','set_2fa','set_currency','set_timezone'];
+  var saved={};
+  allIds.forEach(function(id){var el=document.getElementById(id);if(el)saved[id]=el.value;});
+  lsSet('platform_settings',saved);
+  var map={'set_price_starter':'starter-price','set_price_pro':'pro-price','set_price_biz':'biz-price',
+    'set_comm_starter':'starter-comm','set_comm_pro':'pro-comm','set_comm_biz':'biz-comm'};
+  Object.keys(map).forEach(function(k){var el=document.getElementById(map[k]);if(el&&saved[k])el.value=saved[k];});
+  var banner=document.getElementById('settingsSavedBanner');
+  if(banner){banner.style.display='flex';setTimeout(function(){banner.style.display='none';},6000);}
+  if(typeof recalcMRR==='function') recalcMRR();
+  toast('\u2713 Settings saved successfully!','success');
+}
 
-  // Business logic checks
-  var cs = parseInt(document.getElementById('set_comm_starter').value);
-  var cp = parseInt(document.getElementById('set_comm_pro').value);
-  var cb = parseInt(document.getElementById('set_comm_biz').value);
-  if(cp >= cs) {
-    toast('Professional commission should be lower than Starter commission', 'error');
-    document.getElementById('set_comm_pro').style.borderColor = 'var(--red2)';
-    return;
-  }
-  if(cb >= cp) {
-    toast('Business commission should be lower than Professional commission', 'error');
-    document.getElementById('set_comm_biz').style.borderColor = 'var(--red2)';
-    return;
-  }
-
-  var ps = parseInt(document.getElementById('set_price_starter').value);
-  var pp = parseInt(document.getElementById('set_price_pro').value);
-  var pb = parseInt(document.getElementById('set_price_biz').value);
-  if(ps >= pp) {
-    toast('Professional plan price should be higher than Starter price', 'error');
-    return;
-  }
-  if(pp >= pb) {
-    toast('Business plan price should be higher than Professional price', 'error');
-    return;
-  }
-
-  // All valid — store in memory and update the Subscriptions plan editor if it has those fields
-  var saved = {
-    comm_starter:   cs,
-    comm_pro:       cp,
-    comm_biz:       cb,
-    delivery_fee:   parseInt(document.getElementById('set_delivery_fee').value),
-    min_payout:     parseInt(document.getElementById('set_min_payout').value),
-    price_starter:  ps,
-    price_pro:      pp,
-    price_biz:      pb,
-    price_banner:   parseInt(document.getElementById('set_price_banner').value),
-    platform_name:  document.getElementById('set_platform_name').value.trim(),
-    support_phone:  document.getElementById('set_support_phone').value.trim(),
-    jwt_expiry:     (document.getElementById('set_jwt_expiry') || {}).value || '15 minutes',
-    otp_payouts:    (document.getElementById('set_otp_payouts') || {}).value || 'Yes',
-    admin_2fa:      (document.getElementById('set_2fa') || {}).value || 'Enabled',
-  };
-
-  // Sync values to the Subscriptions plan editor if those inputs exist
-  var starterPriceEl = document.getElementById('starter-price');
-  var proPriceEl     = document.getElementById('pro-price');
-  var bizPriceEl     = document.getElementById('biz-price');
-  var starterCommEl  = document.getElementById('starter-comm');
-  var proCommEl      = document.getElementById('pro-comm');
-  var bizCommEl      = document.getElementById('biz-comm');
-  if(starterPriceEl) starterPriceEl.value = saved.price_starter;
-  if(proPriceEl)     proPriceEl.value     = saved.price_pro;
-  if(bizPriceEl)     bizPriceEl.value     = saved.price_biz;
-  if(starterCommEl)  starterCommEl.value  = saved.comm_starter;
-  if(proCommEl)      proCommEl.value      = saved.comm_pro;
-  if(bizCommEl)      bizCommEl.value      = saved.comm_biz;
-
-  // Show the saved banner
-  var banner = document.getElementById('settingsSavedBanner');
-  if(banner) {
-    banner.style.display = 'flex';
-    setTimeout(function(){ banner.style.display = 'none'; }, 6000);
-  }
-
-  // Recalc MRR if on subscriptions page
-  if(typeof recalcMRR === 'function') recalcMRR();
-
-  toast('✓ Settings saved — ' + Object.keys(saved).length + ' values updated', 'success');
+function loadSettings(){
+  var saved=lsGet('platform_settings',null);
+  if(!saved)return;
+  Object.keys(saved).forEach(function(id){var el=document.getElementById(id);if(el)el.value=saved[id];});
 }
 
 // ── INIT ─────────────────────────────────────────────────────────
@@ -2454,6 +2416,100 @@ function submitBannerAd() {
   toast('✓ Banner ad for "' + name + '" is now live!', 'success');
 }
 
+
+// ── CATEGORIES MANAGEMENT ─────────────────────────────────────────
+var DEFAULT_CATEGORIES = [
+  {id:1, name:'Plumbing',     icon:'🔧', desc:'Emergency repairs, installations & maintenance'},
+  {id:2, name:'Electrical',   icon:'⚡', desc:'Wiring, DB boards, fault finding & installations'},
+  {id:3, name:'Cleaning',     icon:'🧹', desc:'Home, office & deep cleaning services'},
+  {id:4, name:'Gardening',    icon:'🌿', desc:'Lawn care, pruning, landscaping & maintenance'},
+  {id:5, name:'Painting',     icon:'🎨', desc:'Interior & exterior painting, touch-ups'},
+  {id:6, name:'Handyman',     icon:'🔨', desc:'General repairs, assembly & odd jobs'},
+  {id:7, name:'Dog Sitting',  icon:'🐕', desc:'Dog walking, sitting & pet care services'},
+  {id:8, name:'Moving',       icon:'🚛', desc:'Home & office relocation services'},
+  {id:9, name:'Ironing',      icon:'👔', desc:'Ironing, laundry & textile care'},
+  {id:10,name:'Baby Sitting', icon:'👶', desc:'Trusted childcare & babysitting services'},
+  {id:11,name:'Tutoring',     icon:'📚', desc:'Private tuition for all ages & subjects'},
+  {id:12,name:'Caretaking',   icon:'🏥', desc:'Elderly care, disability support & caretaking'},
+  {id:13,name:'Security',     icon:'🔒', desc:'Security guards, monitoring & safety services'},
+  {id:14,name:'Photography',  icon:'📷', desc:'Events, portraits & product photography'},
+  {id:15,name:'Delivery',     icon:'📦', desc:'Local delivery & errand running services'},
+];
+
+function getAdminCategories() {
+  return lsGet('categories', DEFAULT_CATEGORIES);
+}
+function saveAdminCategories(cats) {
+  lsSet('categories', cats);
+}
+
+function renderCategories() {
+  var cats = getAdminCategories();
+  var tbody = document.getElementById('categoriesBody');
+  if(!tbody) return;
+  tbody.innerHTML = cats.map(function(c) {
+    var provCount = PROVIDERS.filter(function(p){ return p.cat === c.name; }).length;
+    return '<tr>'
+      + '<td style="font-size:22px;">' + c.icon + '</td>'
+      + '<td style="font-weight:600;">' + c.name + '</td>'
+      + '<td style="font-size:12px;color:var(--text2);">' + c.desc + '</td>'
+      + '<td><span class="badge badge-blue">' + provCount + ' providers</span></td>'
+      + '<td><span class="badge badge-green">Active</span></td>'
+      + '<td>'
+        + '<button class="btn btn-ghost btn-sm" onclick="editCategory(' + c.id + ')">✏️ Edit</button> '
+        + '<button class="btn btn-danger btn-sm" onclick="deleteCategory(' + c.id + ')" style="background:rgba(239,68,68,0.08);">Delete</button>'
+      + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function addCategory() {
+  var name = (document.getElementById('newCatName').value || '').trim();
+  var icon = (document.getElementById('newCatIcon').value || '').trim() || '🔧';
+  var desc = (document.getElementById('newCatDesc').value || '').trim() || name + ' services';
+  if(!name) { toast('Please enter a category name', 'error'); return; }
+  var cats = getAdminCategories();
+  if(cats.find(function(c){ return c.name.toLowerCase() === name.toLowerCase(); })) {
+    toast('A category with that name already exists', 'error'); return;
+  }
+  var newId = Math.max.apply(null, cats.map(function(c){ return c.id; })) + 1;
+  cats.push({id: newId, name: name, icon: icon, desc: desc});
+  saveAdminCategories(cats);
+  closeModal('addCategoryModal');
+  renderCategories();
+  document.getElementById('newCatName').value = '';
+  document.getElementById('newCatIcon').value = '';
+  document.getElementById('newCatDesc').value = '';
+  toast('\u2713 Category "' + name + '" added! Now visible on the website.', 'success');
+}
+
+function editCategory(id) {
+  var cats = getAdminCategories();
+  var c = cats.find(function(x){ return x.id === id; });
+  if(!c) return;
+  var newName = prompt('Edit category name:', c.name);
+  if(!newName || !newName.trim()) return;
+  var newIcon = prompt('Edit icon (emoji):', c.icon);
+  var newDesc = prompt('Edit description:', c.desc);
+  c.name = newName.trim();
+  if(newIcon) c.icon = newIcon.trim();
+  if(newDesc) c.desc = newDesc.trim();
+  saveAdminCategories(cats);
+  renderCategories();
+  toast('\u2713 Category updated!', 'success');
+}
+
+function deleteCategory(id) {
+  var cats = getAdminCategories();
+  var c = cats.find(function(x){ return x.id === id; });
+  if(!c) return;
+  if(!confirm('Delete category "' + c.name + '"?\n\nThis will remove it from the website. Providers in this category will still exist but the category filter will be gone.')) return;
+  cats = cats.filter(function(x){ return x.id !== id; });
+  saveAdminCategories(cats);
+  renderCategories();
+  toast('Category "' + c.name + '" deleted.', 'error');
+}
+
 function createBannerAd() {
   var name   = (document.getElementById('newAdName').value || '').trim();
   var pos    = document.getElementById('newAdPos').value;
@@ -2518,8 +2574,8 @@ function openEditAdModal(btn) {
 
 
 // ── ADMIN LOCALSTORAGE PERSISTENCE ───────────────────────────────────
-function lsGet(key,def){try{var v=localStorage.getItem('tasksa_admin_'+key);return v!==null?JSON.parse(v):def;}catch(e){return def;}}
-function lsSet(key,val){try{localStorage.setItem('tasksa_admin_'+key,JSON.stringify(val));}catch(e){}}
+function lsGet(key,def){try{var v=localStorage.getItem('tasksa_'+key);return v!==null?JSON.parse(v):def;}catch(e){return def;}}
+function lsSet(key,val){try{localStorage.setItem('tasksa_'+key,JSON.stringify(val));}catch(e){}}
 
 function initAdminData(){
   // Load persisted data or use defaults
@@ -2562,6 +2618,8 @@ function adminLogout(){
 
 window.onload = function() {
   initAdminData();
+  loadSettings();
+  renderCategories();
   renderUsers();
   renderProviders();
   renderBookings();
@@ -2579,6 +2637,7 @@ window.onload = function() {
   showPage = function(id, navEl) {
     _orig(id, navEl);
     if(id === 'orders')    renderOrders();
+    if(id === 'categories') renderCategories();
     if(id === 'analytics') renderAnalyticsCharts();
   };
 };

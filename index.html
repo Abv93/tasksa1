@@ -120,11 +120,12 @@ nav{position:sticky;top:0;z-index:200;background:rgba(2,11,26,0.97);backdrop-fil
 
 /* ── CATEGORY CARDS ── */
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
-.cat-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:22px 18px;cursor:pointer;transition:all 0.25s;}
+.cat-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:22px 18px;cursor:pointer;transition:all 0.25s;display:flex;flex-direction:column;}
 .cat-card:hover{border-color:var(--bd2);transform:translateY(-3px);}
-.cat-icon{font-size:32px;margin-bottom:12px;}
+.cat-icon{font-size:40px;margin-bottom:14px;line-height:1;}
+.cat-img{width:100%;height:100px;object-fit:cover;border-radius:10px;margin-bottom:14px;}
 .cat-card h3{font-size:16px;font-weight:800;margin-bottom:5px;}
-.cat-card p{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:12px;}
+.cat-card p{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:12px;flex:1;}
 .cat-pills{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;}
 .cpill{background:rgba(26,143,255,0.1);border:1px solid var(--bd);color:var(--blue3);font-size:10px;padding:2px 9px;border-radius:50px;}
 .cat-btn{display:block;width:100%;padding:9px;border-radius:50px;border:none;font-weight:700;font-size:12px;cursor:pointer;text-align:center;color:white;font-family:'DM Sans',sans-serif;}
@@ -316,6 +317,11 @@ nav{position:sticky;top:0;z-index:200;background:rgba(2,11,26,0.97);backdrop-fil
 footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px;}
 .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:32px;}
 @media(max-width:700px){.footer-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:768px){
+  .about-split{grid-template-columns:1fr!important;}
+  .mvv-grid{grid-template-columns:1fr!important;}
+  .about-split img{min-height:250px!important;}
+}
 .footer-logo{font-family:'Sora',sans-serif;font-size:22px;font-weight:900;color:var(--blue2);margin-bottom:9px;}
 .footer-logo span{color:var(--gold);}
 .footer-about{font-size:13px;color:var(--t3);line-height:1.7;max-width:240px;}
@@ -392,7 +398,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     <div class="modal-sub">Create a service listing customers can find and book</div>
     <div class="field"><label>Service Title *</label><input id="listTitle" placeholder="e.g. Emergency Plumbing Repair"></div>
     <div class="g2">
-      <div class="field"><label>Category</label><select><option>Plumbing</option><option>Electrical</option><option>Cleaning</option><option>Gardening</option><option>Painting</option><option>Handyman</option><option>Dog Sitting</option><option>Moving</option></select></div>
+      <div class="field"><label>Category</label><select id="listCat" onchange=""></select></div>
       <div class="field"><label>Your Rate (R)</label><input id="listRate" type="number" placeholder="350"></div>
     </div>
     <div class="field"><label>Rate Type</label><select><option>Per Hour</option><option>Per Job</option><option>Per Day</option><option>Fixed Price</option></select></div>
@@ -543,6 +549,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     <a onclick="goPage('shop')" data-page="shop">Shop</a>
     <a onclick="goPage('courier')" data-page="courier">Courier</a>
     <a onclick="goPage('accommodation')" data-page="accommodation">🏡 Stays</a>
+    <a onclick="goPage('about')" data-page="about">About Us</a>
     <a onclick="goPage('messages')" data-page="messages">Messages</a>
     <a onclick="goPage('dashboard')" data-page="dashboard">Dashboard</a>
     <span id="navUser" style="display:none;font-size:13px;color:var(--blue3);font-weight:700;padding:0 6px;"></span>
@@ -595,18 +602,19 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     <div class="banner-scroll" id="bannerScroll"></div>
   </div>
 
-  <!-- CATEGORIES -->
+  <!-- CATEGORIES - DYNAMIC -->
   <div class="section">
-    <div class="sec-title">Browse by Category</div>
-    <p class="sec-sub">Everything you need in one platform</p>
+    <div class="sec-hdr">
+      <div class="sec-title">Browse by Category</div>
+      <a class="see-all" onclick="goPage('services')">All services →</a>
+    </div>
+    <p class="sec-sub">Book trusted verified professionals across South Africa</p>
+    <div class="cat-grid" id="homeCatGrid"></div>
+  </div>
+
+  <!-- PLATFORM CATEGORIES -->
+  <div class="section" style="padding-top:0;">
     <div class="cat-grid">
-      <div class="cat-card" onclick="goPage('services')">
-        <div class="cat-icon">🔧</div>
-        <h3>Home Services</h3>
-        <p>Book verified professionals for any task.</p>
-        <div class="cat-pills"><span class="cpill">Plumbing</span><span class="cpill">Electrical</span><span class="cpill">Cleaning</span><span class="cpill">Painting</span></div>
-        <button class="cat-btn" style="background:linear-gradient(135deg,var(--blue),var(--blue2));">Browse Services →</button>
-      </div>
       <div class="cat-card" onclick="goPage('shop')">
         <div class="cat-icon">🛒</div>
         <h3>Local Shops</h3>
@@ -697,7 +705,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
       <div><div class="footer-logo">Task<span>SA</span></div><p class="footer-about">South Africa's trusted marketplace for services, shops, courier and holiday accommodation. All 9 provinces covered.</p></div>
       <div class="fc"><h5>Services</h5><a onclick="goPage('services')">Browse Services</a><a onclick="goPage('services')">Plumbing</a><a onclick="goPage('services')">Cleaning</a><a onclick="goPage('services')">Electrical</a></div>
       <div class="fc"><h5>Platform</h5><a onclick="goPage('shop')">Shop</a><a onclick="goPage('courier')">Courier</a><a onclick="goPage('accommodation')">Holiday Stays</a><a onclick="goPage('dashboard')">Dashboard</a></div>
-      <div class="fc"><h5>Company</h5><a>About Us</a><a>Careers</a><a>Privacy Policy</a><a>Terms of Service</a></div>
+      <div class="fc"><h5>Company</h5><a onclick="goPage('about')">About Us</a><a>Careers</a><a>Privacy Policy</a><a>Terms of Service</a></div>
     </div>
     <div class="footer-bottom">
       <p>© 2025 TaskSA (Pty) Ltd · hello@tasksa.co.za · +27 21 000 0000</p>
@@ -712,31 +720,15 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     <div class="breadcrumb"><a onclick="goPage('home')">Home</a> / Services</div>
     <h2 style="font-size:24px;font-weight:900;">Home &amp; Local Services</h2>
     <p style="color:var(--t2);font-size:13px;margin-top:5px;">Book trusted verified professionals in your area</p>
-    <div class="sub-filters">
-      <button class="sfb active" onclick="setFilter(this)">All</button>
-      <button class="sfb" onclick="setFilter(this)">🔧 Plumbing</button>
-      <button class="sfb" onclick="setFilter(this)">⚡ Electrical</button>
-      <button class="sfb" onclick="setFilter(this)">🧹 Cleaning</button>
-      <button class="sfb" onclick="setFilter(this)">🌿 Gardening</button>
-      <button class="sfb" onclick="setFilter(this)">🎨 Painting</button>
-      <button class="sfb" onclick="setFilter(this)">🐕 Dog Sitting</button>
-      <button class="sfb" onclick="setFilter(this)">🔨 Handyman</button>
-      <button class="sfb" onclick="setFilter(this)">🚛 Moving</button>
-      <button class="sfb" onclick="setFilter(this)">👔 Ironing</button>
+    <div class="sub-filters" id="serviceFilters">
+      <button class="sfb active" onclick="setFilter(this)" data-cat="All">All</button>
     </div>
   </div>
   <div class="section">
-    <div class="prov-grid">
-      <div class="prov-card" onclick="goPage('messages')"><div class="pav" style="background:rgba(26,143,255,0.15);color:var(--blue3);">TM</div><div class="pname">Thabo Mokoena</div><div class="prole">Plumber · Johannesburg</div><div class="stars">★★★★★</div><div style="font-size:10px;color:var(--t3);">248 reviews</div><div class="pprice">From R350/hr</div><span class="vbadge">✓ Verified</span></div>
-      <div class="prov-card" onclick="goPage('messages')"><div class="pav" style="background:rgba(34,197,94,0.12);color:var(--green2);">SN</div><div class="pname">Sarah Ndlovu</div><div class="prole">Cleaner · Cape Town</div><div class="stars">★★★★★</div><div style="font-size:10px;color:var(--t3);">189 reviews</div><div class="pprice">From R280/session</div><span class="vbadge">✓ Verified</span></div>
-      <div class="prov-card" onclick="goPage('messages')"><div class="pav" style="background:rgba(245,166,35,0.12);color:var(--amber2);">KD</div><div class="pname">Kobus du Plessis</div><div class="prole">Electrician · Stellenbosch</div><div class="stars">★★★★★</div><div style="font-size:10px;color:var(--t3);">312 reviews</div><div class="pprice">From R450/hr</div><span class="vbadge">✓ Verified</span></div>
-      <div class="prov-card" onclick="goPage('messages')"><div class="pav" style="background:rgba(212,83,126,0.12);color:#f472b6;">LM</div><div class="pname">Lindiwe Mthembu</div><div class="prole">Dog Sitter · Durban</div><div class="stars">★★★★★</div><div style="font-size:10px;color:var(--t3);">97 reviews</div><div class="pprice">From R200/day</div><span class="vbadge">✓ Verified</span></div>
-      <div class="prov-card" onclick="goPage('messages')"><div class="pav" style="background:rgba(167,139,250,0.12);color:#c4b5fd;">AP</div><div class="pname">Ayanda Pillay</div><div class="prole">Gardener · Pretoria</div><div class="stars">★★★★★</div><div style="font-size:10px;color:var(--t3);">155 reviews</div><div class="pprice">From R300/day</div><span class="vbadge">✓ Verified</span></div>
-      <div class="prov-card" onclick="goPage('messages')"><div class="pav" style="background:rgba(34,197,94,0.12);color:var(--green2);">BJ</div><div class="pname">Brendan Jansen</div><div class="prole">Painter · Bloemfontein</div><div class="stars">★★★★☆</div><div style="font-size:10px;color:var(--t3);">78 reviews</div><div class="pprice">From R400/day</div><span class="vbadge">✓ Verified</span></div>
-      <div class="prov-card" onclick="goPage('messages')"><div class="pav" style="background:rgba(239,68,68,0.12);color:#f87171;">NZ</div><div class="pname">Nokuthula Zulu</div><div class="prole">Ironing · Durban</div><div class="stars">★★★★★</div><div style="font-size:10px;color:var(--t3);">210 reviews</div><div class="pprice">From R150/load</div><span class="vbadge">✓ Verified</span></div>
-      <div class="prov-card" onclick="goPage('messages')"><div class="pav" style="background:rgba(245,166,35,0.12);color:var(--amber2);">RS</div><div class="pname">Rudi Smit</div><div class="prole">Handyman · George</div><div class="stars">★★★★½</div><div style="font-size:10px;color:var(--t3);">134 reviews</div><div class="pprice">From R320/hr</div><span class="vbadge">✓ Verified</span></div>
+    <div class="prov-grid" id="servicesProviderGrid"></div>
+    <div style="text-align:center;margin-top:24px;" id="loadMoreWrap">
+      <button class="btn btn-g" onclick="loadMoreProviders()">Load More Providers</button>
     </div>
-    <div style="text-align:center;margin-top:24px;"><button class="btn btn-g" onclick="loadMoreProviders()">Load More Providers</button></div>
   </div>
 </div>
 
@@ -1021,6 +1013,142 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
   </div>
 </div>
 
+<!-- ════ ABOUT US ════ -->
+<div class="page" id="about">
+
+  <!-- Hero Banner -->
+  <div style="position:relative;min-height:480px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+    <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1400&h=500&fit=crop&q=80"
+         style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.35);" alt="TaskSA team">
+    <div style="position:relative;z-index:1;text-align:center;padding:60px 5%;max-width:800px;margin:0 auto;">
+      <p style="font-size:15px;color:var(--blue3);font-weight:700;letter-spacing:1px;margin-bottom:12px;font-family:'Sora',sans-serif;">Built on Trust. Driven by Connection.</p>
+      <h1 style="font-family:'Sora',sans-serif;font-size:clamp(28px,5vw,52px);font-weight:900;color:white;line-height:1.15;margin-bottom:20px;">Where Local Professionals<br>and Everyday People Meet</h1>
+      <p style="font-size:16px;color:rgba(255,255,255,0.85);line-height:1.8;max-width:640px;margin:0 auto 32px;">At TaskSA, we're redefining how South Africans connect with trusted service providers. From electricians to educators, we make it easy to find, compare, and connect — all in one seamless platform. Backed by real reviews and a growing community, we put the power of local service back into your hands.</p>
+      <button class="btn btn-p" onclick="goPage('services')" style="padding:14px 36px;font-size:15px;">View Our Services</button>
+    </div>
+  </div>
+
+  <!-- About Section -->
+  <div style="padding:72px 5%;background:var(--bg2);">
+    <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;" class="about-split">
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--blue3);margin-bottom:12px;">About Us</div>
+        <h2 style="font-family:'Sora',sans-serif;font-size:clamp(22px,3vw,34px);font-weight:900;line-height:1.25;margin-bottom:20px;color:var(--t);">Empowering South Africans to connect, collaborate, and grow through trusted service connections.</h2>
+        <p style="font-size:15px;color:var(--t2);line-height:1.85;margin-bottom:18px;">TaskSA was created with one goal in mind — to make it easier for everyday people to find reliable, verified service providers in their local area. We believe that trust, transparency, and accessibility are the foundation of any great service experience.</p>
+        <p style="font-size:15px;color:var(--t2);line-height:1.85;margin-bottom:28px;">Since launching, we've grown into a smart, intuitive platform that bridges the gap between service seekers and qualified professionals across a wide range of industries. Whether you're looking for a skilled plumber, an experienced tutor, or a caretaker near you — TaskSA brings the best options directly to your fingertips.</p>
+        <div style="display:flex;gap:28px;flex-wrap:wrap;">
+          <div><div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:900;color:var(--blue3);">12,400+</div><div style="font-size:13px;color:var(--t3);">Verified Providers</div></div>
+          <div><div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:900;color:var(--blue3);">340K+</div><div style="font-size:13px;color:var(--t3);">Tasks Completed</div></div>
+          <div><div style="font-family:'Sora',sans-serif;font-size:28px;font-weight:900;color:var(--blue3);">9</div><div style="font-size:13px;color:var(--t3);">Provinces</div></div>
+        </div>
+      </div>
+      <div style="border-radius:var(--r2);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+        <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=700&h=500&fit=crop&q=80"
+             style="width:100%;height:400px;object-fit:cover;display:block;" alt="South African team collaborating"
+             onerror="this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=700&h=500&fit=crop&q=80'">
+      </div>
+    </div>
+  </div>
+
+  <!-- Mission Vision Values -->
+  <div style="padding:72px 5%;background:var(--bg);">
+    <div style="max-width:1100px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:48px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--blue3);margin-bottom:10px;">Our Purpose</div>
+        <h2 style="font-family:'Sora',sans-serif;font-size:clamp(22px,3vw,36px);font-weight:900;color:var(--t);">Our Mission, Vision &amp; Values</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;" class="mvv-grid">
+
+        <!-- Mission -->
+        <div style="background:var(--surf);border:1px solid var(--bd2);border-radius:var(--r2);overflow:hidden;">
+          <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=500&h=240&fit=crop&q=80"
+               style="width:100%;height:200px;object-fit:cover;display:block;" alt="Our Mission"
+               onerror="this.style.background='linear-gradient(135deg,var(--blue),var(--blue2))';this.style.height='200px'">
+          <div style="padding:24px;">
+            <h3 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:800;margin-bottom:12px;color:var(--t);">Our Mission</h3>
+            <p style="font-size:13px;color:var(--t2);line-height:1.8;">At TaskSA, our mission is to simplify and modernise the way South Africans find and connect with trustworthy service providers. We aim to create a space where everyday individuals can quickly access reliable help, while empowering small businesses, independent contractors, and freelancers to grow their visibility, reputation, and client base.</p>
+          </div>
+        </div>
+
+        <!-- Vision -->
+        <div style="background:var(--surf);border:1px solid var(--bd2);border-radius:var(--r2);overflow:hidden;">
+          <img src="https://images.unsplash.com/photo-1551836022-4c4c79ecde51?w=500&h=240&fit=crop&q=80"
+               style="width:100%;height:200px;object-fit:cover;display:block;" alt="Our Vision"
+               onerror="this.style.background='linear-gradient(135deg,#6d28d9,#8b5cf6)';this.style.height='200px'">
+          <div style="padding:24px;">
+            <h3 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:800;margin-bottom:12px;color:var(--t);">Our Vision</h3>
+            <p style="font-size:13px;color:var(--t2);line-height:1.8;">We envision TaskSA becoming South Africa's most trusted and widely used platform for everyday services — a digital home where people and professionals meet with ease, transparency, and purpose. Through continuous innovation, local empowerment, and a deep commitment to quality, we're shaping the future of service in South Africa — one connection at a time.</p>
+          </div>
+        </div>
+
+        <!-- Values -->
+        <div style="background:var(--surf);border:1px solid var(--bd2);border-radius:var(--r2);overflow:hidden;">
+          <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=240&fit=crop&q=80"
+               style="width:100%;height:200px;object-fit:cover;display:block;" alt="Our Values"
+               onerror="this.style.background='linear-gradient(135deg,#059669,#22C55E)';this.style.height='200px'">
+          <div style="padding:24px;">
+            <h3 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:800;margin-bottom:12px;color:var(--t);">Our Values</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <span style="background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;font-size:10px;font-weight:800;padding:3px 9px;border-radius:50px;white-space:nowrap;margin-top:2px;">Trust</span>
+                <span style="font-size:13px;color:var(--t2);line-height:1.6;">Every provider is verified for your peace of mind.</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <span style="background:linear-gradient(135deg,#6d28d9,#8b5cf6);color:white;font-size:10px;font-weight:800;padding:3px 9px;border-radius:50px;white-space:nowrap;margin-top:2px;">Transparency</span>
+                <span style="font-size:13px;color:var(--t2);line-height:1.6;">Real reviews. Real people. No hidden surprises.</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <span style="background:linear-gradient(135deg,#059669,#22C55E);color:white;font-size:10px;font-weight:800;padding:3px 9px;border-radius:50px;white-space:nowrap;margin-top:2px;">Empowerment</span>
+                <span style="font-size:13px;color:var(--t2);line-height:1.6;">We support professionals and help small businesses grow.</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <span style="background:linear-gradient(135deg,#b45309,var(--gold));color:white;font-size:10px;font-weight:800;padding:3px 9px;border-radius:50px;white-space:nowrap;margin-top:2px;">Simplicity</span>
+                <span style="font-size:13px;color:var(--t2);line-height:1.6;">Easy to use, fast to connect, and designed for everyone.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Let's Build Something Great Together -->
+  <div style="background:var(--bg2);padding:0;">
+    <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;min-height:420px;" class="about-split">
+      <div style="overflow:hidden;">
+        <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=700&h=420&fit=crop&q=80"
+             style="width:100%;height:100%;min-height:420px;object-fit:cover;display:block;" alt="Build something great together"
+             onerror="this.style.background='var(--surf)';this.style.minHeight='420px'">
+      </div>
+      <div style="padding:56px 48px;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--blue3);margin-bottom:14px;">Join Us</div>
+        <h2 style="font-family:'Sora',sans-serif;font-size:clamp(22px,3vw,34px);font-weight:900;line-height:1.25;margin-bottom:20px;color:var(--t);">Let's Build Something Great Together</h2>
+        <p style="font-size:15px;color:var(--t2);line-height:1.85;margin-bottom:28px;">Whether you're searching for reliable help or offering professional services, TaskSA is your go-to platform for building real, trustworthy connections. By joining TaskSA, you become part of a growing community that values excellence, transparency, and support — where quality service isn't just expected, it's guaranteed.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn btn-p" onclick="openModal('registerModal')" style="padding:13px 28px;">Get Started Free</button>
+          <button class="btn btn-g" onclick="openModal('loginModal')" style="padding:13px 28px;">Sign In</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div><div class="footer-logo">Task<span>SA</span></div><p class="footer-about">South Africa's trusted marketplace for services, shops, courier and holiday accommodation. All 9 provinces covered.</p></div>
+      <div class="fc"><h5>Services</h5><a onclick="goPage('services')">Browse Services</a><a onclick="goPage('services')">Plumbing</a><a onclick="goPage('services')">Cleaning</a><a onclick="goPage('services')">Electrical</a></div>
+      <div class="fc"><h5>Platform</h5><a onclick="goPage('shop')">Shop</a><a onclick="goPage('courier')">Courier</a><a onclick="goPage('accommodation')">Holiday Stays</a><a onclick="goPage('about')">About Us</a></div>
+      <div class="fc"><h5>Company</h5><a onclick="goPage('about')">About Us</a><a>Careers</a><a>Privacy Policy</a><a>Terms of Service</a></div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 TaskSA (Pty) Ltd · hello@tasksa.co.za · +27 21 000 0000</p>
+      <span class="admin-link" onclick="goPage('backend-login')">⚙️ Admin Login</span>
+    </div>
+  </footer>
+
+</div>
+
 <script>
 // ── STATE ────────────────────────────────────────────────────────────
 var cart=[], splitOn=true, mobileOpen=false, activeConv=0, currentUser=null;
@@ -1030,12 +1158,37 @@ var selCourierName='', selCourierPrice='';
 function lsGet(key,def){try{var v=localStorage.getItem('tasksa_'+key);return v!==null?JSON.parse(v):def;}catch(e){return def;}}
 function lsSet(key,val){try{localStorage.setItem('tasksa_'+key,JSON.stringify(val));}catch(e){}}
 
+// ── SHARED CATEGORIES (synced with admin panel) ───────────────────
+var DEFAULT_CATEGORIES = [
+  {id:1, name:'Plumbing',      icon:'🔧', desc:'Emergency repairs, installations & maintenance'},
+  {id:2, name:'Electrical',    icon:'⚡', desc:'Wiring, DB boards, fault finding & installations'},
+  {id:3, name:'Cleaning',      icon:'🧹', desc:'Home, office & deep cleaning services'},
+  {id:4, name:'Gardening',     icon:'🌿', desc:'Lawn care, pruning, landscaping & maintenance'},
+  {id:5, name:'Painting',      icon:'🎨', desc:'Interior & exterior painting, touch-ups'},
+  {id:6, name:'Handyman',      icon:'🔨', desc:'General repairs, assembly & odd jobs'},
+  {id:7, name:'Dog Sitting',   icon:'🐕', desc:'Dog walking, sitting & pet care services'},
+  {id:8, name:'Moving',        icon:'🚛', desc:'Home & office relocation services'},
+  {id:9, name:'Ironing',       icon:'👔', desc:'Ironing, laundry & textile care'},
+  {id:10,name:'Baby Sitting',  icon:'👶', desc:'Trusted childcare & babysitting services'},
+  {id:11,name:'Tutoring',      icon:'📚', desc:'Private tuition for all ages & subjects'},
+  {id:12,name:'Caretaking',    icon:'🏥', desc:'Elderly care, disability support & caretaking'},
+  {id:13,name:'Security',      icon:'🔒', desc:'Security guards, monitoring & safety services'},
+  {id:14,name:'Photography',   icon:'📷', desc:'Events, portraits & product photography'},
+  {id:15,name:'Delivery',      icon:'📦', desc:'Local delivery & errand running services'},
+];
+
+function getCategories(){
+  return lsGet('categories', DEFAULT_CATEGORIES);
+}
+function saveCategories(cats){ lsSet('categories', cats); }
+
 function initUsers(){
   if(!lsGet('users',null)){
     lsSet('users',{
       'customer@test.co.za':{pass:'password123',name:'Sipho Dlamini',  role:'customer',dest:'home'},
       'thabo@test.co.za':   {pass:'password123',name:'Thabo Mokoena',  role:'provider',dest:'dashboard'},
       'admin@tasksa.co.za': {pass:'password123',name:'Admin User',      role:'admin',   dest:'dashboard'},
+      'albievisser2@gmail.com':{pass:'password123',name:'Albie Visser', role:'admin',   dest:'dashboard'},
       'buildright@test.co.za':{pass:'password123',name:'BuildRight Hardware',role:'shop',dest:'shop'},
       'lindiwe@test.co.za': {pass:'password123',name:'Lindiwe Mthembu',role:'provider',dest:'dashboard'}
     });
@@ -1098,17 +1251,78 @@ var MSGS_BY_CONV={
 };
 
 var ACCOMMODATIONS=[
-  {id:1,name:'Cape Hideaway',     loc:'Clifton, Cape Town',    type:'Beach House',    prov:'Western Cape',  price:3500, guests:8,  rooms:4, icon:'🏖️', bg:'linear-gradient(135deg,#041a3a,#1a5f8a)',badge:'Beachfront',amenities:['Pool','WiFi','BBQ','AC','Sea View']},
-  {id:2,name:'Kruger Bush Lodge', loc:'Hoedspruit, Limpopo',   type:'Game Lodge',     prov:'Limpopo',       price:2800, guests:6,  rooms:3, icon:'🦁', bg:'linear-gradient(135deg,#1a1a0a,#4a3a0a)',badge:'Big 5',     amenities:['Game Drives','Pool','WiFi','Meals Included']},
-  {id:3,name:'Winelands Retreat', loc:'Franschhoek, WC',       type:'Self-Catering',  prov:'Western Cape',  price:1800, guests:4,  rooms:2, icon:'🍷', bg:'linear-gradient(135deg,#1a0a0a,#6b2a2a)',badge:'Wine Country',amenities:['Wine Tasting','Mountain View','WiFi','Fireplace']},
-  {id:4,name:'Drakensberg Escape',loc:'Ukhahlamba, KZN',        type:'Eco-Retreat',    prov:'KwaZulu-Natal', price:1200, guests:6,  rooms:3, icon:'🏔️', bg:'linear-gradient(135deg,#0a1a0a,#1a3a1a)',badge:'Hiking',    amenities:['Hiking Trails','Waterfall','WiFi','BBQ']},
-  {id:5,name:'Sandton Suite',     loc:'Sandton, Gauteng',       type:'Apartment',      prov:'Gauteng',       price:950,  guests:2,  rooms:1, icon:'🏙️', bg:'linear-gradient(135deg,#041020,#0a6edb)',badge:'City Views', amenities:['Gym','Pool','WiFi','Parking','AC']},
-  {id:6,name:'Jeffrey\'s Bay Surf House',loc:'Jeffrey\'s Bay, EC',type:'Self-Catering',prov:'Eastern Cape',  price:1600, guests:8,  rooms:4, icon:'🏄', bg:'linear-gradient(135deg,#041a3a,#0a5f3a)',badge:'Surf Spot',  amenities:['Surf Board','BBQ','WiFi','Beach Access']},
-  {id:7,name:'Hermanus Cliffside',loc:'Hermanus, WC',           type:'Guesthouse',     prov:'Western Cape',  price:2200, guests:4,  rooms:2, icon:'🐋', bg:'linear-gradient(135deg,#041a3a,#0a3a5f)',badge:'Whale Watching',amenities:['Ocean View','Breakfast','WiFi','AC']},
-  {id:8,name:'Pilanesberg Lodge', loc:'Pilanesberg, NW',        type:'Game Lodge',     prov:'North West',    price:2400, guests:4,  rooms:2, icon:'🦏', bg:'linear-gradient(135deg,#1a1a0a,#3a2a0a)',badge:'Safari',     amenities:['Game Drives','Pool','Meals','WiFi']},
+  {id:1,name:'Cape Hideaway',img:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=300&fit=crop&q=80',     loc:'Clifton, Cape Town',    type:'Beach House',    prov:'Western Cape',  price:3500, guests:8,  rooms:4, icon:'🏖️', bg:'linear-gradient(135deg,#041a3a,#1a5f8a)',badge:'Beachfront',amenities:['Pool','WiFi','BBQ','AC','Sea View']},
+  {id:2,name:'Kruger Bush Lodge',img:'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600&h=300&fit=crop&q=80', loc:'Hoedspruit, Limpopo',   type:'Game Lodge',     prov:'Limpopo',       price:2800, guests:6,  rooms:3, icon:'🦁', bg:'linear-gradient(135deg,#1a1a0a,#4a3a0a)',badge:'Big 5',     amenities:['Game Drives','Pool','WiFi','Meals Included']},
+  {id:3,name:'Winelands Retreat',img:'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&h=300&fit=crop&q=80', loc:'Franschhoek, WC',       type:'Self-Catering',  prov:'Western Cape',  price:1800, guests:4,  rooms:2, icon:'🍷', bg:'linear-gradient(135deg,#1a0a0a,#6b2a2a)',badge:'Wine Country',amenities:['Wine Tasting','Mountain View','WiFi','Fireplace']},
+  {id:4,name:'Drakensberg Escape',img:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&h=300&fit=crop&q=80',loc:'Ukhahlamba, KZN',        type:'Eco-Retreat',    prov:'KwaZulu-Natal', price:1200, guests:6,  rooms:3, icon:'🏔️', bg:'linear-gradient(135deg,#0a1a0a,#1a3a1a)',badge:'Hiking',    amenities:['Hiking Trails','Waterfall','WiFi','BBQ']},
+  {id:5,name:'Sandton Suite',img:'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&h=300&fit=crop&q=80',     loc:'Sandton, Gauteng',       type:'Apartment',      prov:'Gauteng',       price:950,  guests:2,  rooms:1, icon:'🏙️', bg:'linear-gradient(135deg,#041020,#0a6edb)',badge:'City Views', amenities:['Gym','Pool','WiFi','Parking','AC']},
+  {id:6,name:'Jeffrey\'s Bay Surf House',img:'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=600&h=300&fit=crop&q=80',loc:'Jeffrey\'s Bay, EC',type:'Self-Catering',prov:'Eastern Cape',  price:1600, guests:8,  rooms:4, icon:'🏄', bg:'linear-gradient(135deg,#041a3a,#0a5f3a)',badge:'Surf Spot',  amenities:['Surf Board','BBQ','WiFi','Beach Access']},
+  {id:7,name:'Hermanus Cliffside',img:'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=600&h=300&fit=crop&q=80',loc:'Hermanus, WC',           type:'Guesthouse',     prov:'Western Cape',  price:2200, guests:4,  rooms:2, icon:'🐋', bg:'linear-gradient(135deg,#041a3a,#0a3a5f)',badge:'Whale Watching',amenities:['Ocean View','Breakfast','WiFi','AC']},
+  {id:8,name:'Pilanesberg Lodge',img:'https://images.unsplash.com/photo-1547970810-dc1eac37d174?w=600&h=300&fit=crop&q=80', loc:'Pilanesberg, NW',        type:'Game Lodge',     prov:'North West',    price:2400, guests:4,  rooms:2, icon:'🦏', bg:'linear-gradient(135deg,#1a1a0a,#3a2a0a)',badge:'Safari',     amenities:['Game Drives','Pool','Meals','WiFi']},
 ];
 
 var currentAccom=null;
+
+
+// ── DYNAMIC SERVICES / CATEGORIES ────────────────────────────────────
+var ALL_PROVIDERS = [
+  {ini:'TM',name:'Thabo Mokoena',   cat:'Plumbing',    loc:'Johannesburg',bg:'rgba(26,143,255,0.15)',col:'var(--blue3)', rev:248,price:'R350/hr'},
+  {ini:'SN',name:'Sarah Ndlovu',    cat:'Cleaning',    loc:'Cape Town',   bg:'rgba(34,197,94,0.12)', col:'var(--green2)',rev:189,price:'R280/session'},
+  {ini:'KD',name:'Kobus du Plessis',cat:'Electrical',  loc:'Stellenbosch',bg:'rgba(245,166,35,0.12)',col:'#fbbf24',      rev:312,price:'R450/hr'},
+  {ini:'LM',name:'Lindiwe Mthembu', cat:'Dog Sitting', loc:'Durban',      bg:'rgba(212,83,126,0.12)',col:'#f472b6',      rev:97, price:'R200/day'},
+  {ini:'AP',name:'Ayanda Pillay',   cat:'Gardening',   loc:'Pretoria',    bg:'rgba(167,139,250,0.12)',col:'#c4b5fd',     rev:155,price:'R300/day'},
+  {ini:'BJ',name:'Brendan Jansen',  cat:'Painting',    loc:'Bloemfontein',bg:'rgba(34,197,94,0.12)', col:'var(--green2)',rev:78, price:'R400/day'},
+  {ini:'NZ',name:'Nokuthula Zulu',  cat:'Ironing',     loc:'Durban',      bg:'rgba(239,68,68,0.12)', col:'#f87171',      rev:210,price:'R150/load'},
+  {ini:'RS',name:'Rudi Smit',       cat:'Handyman',    loc:'George',      bg:'rgba(245,166,35,0.12)',col:'#fbbf24',      rev:134,price:'R320/hr'},
+  {ini:'PM',name:'Priscilla Moyo',  cat:'Baby Sitting',loc:'Sandton',     bg:'rgba(236,72,153,0.12)',col:'#f472b6',      rev:67, price:'R120/hr'},
+  {ini:'JN',name:'James Nkosi',     cat:'Tutoring',    loc:'Pretoria',    bg:'rgba(99,102,241,0.12)',col:'#818cf8',      rev:89, price:'R200/hr'},
+  {ini:'GL',name:'Grace Louw',      cat:'Caretaking',  loc:'Cape Town',   bg:'rgba(20,184,166,0.12)',col:'#2dd4bf',      rev:45, price:'R180/hr'},
+  {ini:'DB',name:'David Botha',     cat:'Security',    loc:'Johannesburg',bg:'rgba(239,68,68,0.12)', col:'#f87171',      rev:112,price:'R250/hr'},
+];
+var servicesFilter = 'All';
+
+function renderServiceFilters(){
+  var f=document.getElementById('serviceFilters');
+  if(!f)return;
+  var cats=getCategories();
+  var allActive = servicesFilter==='All' ? ' active' : '';
+  var html = '<button class="sfb' + allActive + '" onclick="filterServices(\'All\')" data-cat="All">All</button>';
+  html += cats.map(function(c){
+    var active = servicesFilter===c.name ? ' active' : '';
+    return '<button class="sfb' + active + '" onclick="filterServices(\''+c.name+'\')" data-cat="'+c.name+'">'+c.icon+' '+c.name+'</button>';
+  }).join('');
+  f.innerHTML = html;
+  // Also update the listing category dropdown
+  var sel=document.getElementById('listCat');
+  if(sel)sel.innerHTML=cats.map(function(c){return '<option>'+c.name+'</option>';}).join('');
+}
+
+function filterServices(cat){
+  servicesFilter=cat;
+  renderServiceFilters();
+  renderServicesGrid();
+}
+
+function renderServicesGrid(){
+  var g=document.getElementById('servicesProviderGrid');
+  if(!g)return;
+  var filtered=servicesFilter==='All'?ALL_PROVIDERS:ALL_PROVIDERS.filter(function(p){return p.cat===servicesFilter;});
+  if(filtered.length===0){
+    g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--t3);">No providers found for this category yet.</div>';
+    return;
+  }
+  g.innerHTML=filtered.map(function(p){
+    return '<div class="prov-card" onclick="goPage(\'messages\')">'
+      +'<div class="pav" style="background:'+p.bg+';color:'+p.col+'">'+p.ini+'</div>'
+      +'<div class="pname">'+p.name+'</div>'
+      +'<div class="prole">'+p.cat+' · '+p.loc+'</div>'
+      +'<div class="stars">★★★★★</div>'
+      +'<div style="font-size:10px;color:var(--t3);">'+p.rev+' reviews</div>'
+      +'<div class="pprice">From '+p.price+'</div>'
+      +'<span class="vbadge">✓ Verified</span>'
+      +'</div>';
+  }).join('');
+}
 
 // ── TOAST ────────────────────────────────────────────────────────────
 function toast(msg,type){
@@ -1137,11 +1351,12 @@ function goPage(id){
   window.scrollTo({top:0,behavior:'smooth'});
   closeMobile();
   if(id==='shop')renderShop();
+  if(id==='services'){renderServiceFilters();renderServicesGrid();}
   if(id==='messages'){renderConvList();renderMsgs();}
   if(id==='dashboard')buildEarnBar();
   if(id==='checkout')updateCheckout();
   if(id==='accommodation')renderAccom(ACCOMMODATIONS);
-  if(id==='home'){renderBanners();renderHomeAccom();}
+  if(id==='home'){renderBanners();renderHomeAccom();renderHomeCats();}
 }
 
 // ── MODALS ───────────────────────────────────────────────────────────
@@ -1270,12 +1485,72 @@ function forgotPassword(){
 function blLogin(){
   var e=(document.getElementById('blEmail').value||'').trim().toLowerCase();
   var p=document.getElementById('blPass').value;
-  if(e==='admin@tasksa.co.za'&&p==='password123'){toast('Admin login successful! Opening admin panel…','success');setTimeout(function(){var w=window.open('TaskSA_AdminPanel_v4.html','_blank');if(!w)toast('Open TaskSA_AdminPanel_v4.html from your files');},800);}
-  else if(e&&p){toast('Incorrect email or password. Please try again.','error');}
-  else{toast('Please enter your email and password.','error');}
+  if(!e||!p){toast('Please enter your email and password.','error');return;}
+  // Check against all users with admin role, plus the default admin account
+  var users=getUsers();
+  var u=users[e];
+  var isAdmin=(u&&u.pass===p&&u.role==='admin') || (e==='admin@tasksa.co.za'&&p==='password123');
+  if(isAdmin){
+    toast('Admin login successful! Opening admin panel…','success');
+    setTimeout(function(){
+      var w=window.open('TaskSA_AdminPanel_v4.html','_blank');
+      if(!w)toast('Pop-up blocked. Allow pop-ups or open TaskSA_AdminPanel_v4.html directly.');
+    },800);
+  } else if(u&&u.pass===p){
+    toast('Access denied. Your account does not have admin privileges.','error');
+  } else {
+    toast('Incorrect email or password. Please try again.','error');
+  }
 }
 
 // ── BANNERS ──────────────────────────────────────────────────────────
+
+function renderHomeCats(){
+  var g=document.getElementById('homeCatGrid');
+  if(!g)return;
+  var cats=getCategories();
+  // Curated Unsplash photo IDs for each category type
+  var catImages={
+    'Plumbing':    'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400&h=200&fit=crop&q=80',
+    'Electrical':  'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=200&fit=crop&q=80',
+    'Cleaning':    'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=200&fit=crop&q=80',
+    'Gardening':   'https://images.unsplash.com/photo-1558904541-efa843a96f01?w=400&h=200&fit=crop&q=80',
+    'Painting':    'https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=400&h=200&fit=crop&q=80',
+    'Handyman':    'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=400&h=200&fit=crop&q=80',
+    'Dog Sitting': 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=200&fit=crop&q=80',
+    'Moving':      'https://images.unsplash.com/photo-1600518464441-9154a4dea21b?w=400&h=200&fit=crop&q=80',
+    'Ironing':     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=200&fit=crop&q=80',
+    'Baby Sitting':'https://images.unsplash.com/photo-1587614382346-4ec70e388b28?w=400&h=200&fit=crop&q=80',
+    'Tutoring':    'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=200&fit=crop&q=80',
+    'Caretaking':  'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=200&fit=crop&q=80',
+    'Security':    'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=400&h=200&fit=crop&q=80',
+    'Photography': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=200&fit=crop&q=80',
+    'Delivery':    'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=400&h=200&fit=crop&q=80',
+  };
+  var colors=['linear-gradient(135deg,var(--blue),var(--blue2))',
+    'linear-gradient(135deg,#059669,#22C55E)',
+    'linear-gradient(135deg,#b45309,var(--gold))',
+    'linear-gradient(135deg,#6d28d9,#8b5cf6)',
+    'linear-gradient(135deg,#db2777,#f472b6)',
+    'linear-gradient(135deg,#0891b2,#22d3ee)',
+    'linear-gradient(135deg,#dc2626,#f87171)',
+    'linear-gradient(135deg,#065f46,#34d399)'];
+  g.innerHTML=cats.slice(0,8).map(function(c,i){
+    var cn=c.name.replace(/'/g,"\\'");
+    var imgUrl=catImages[c.name];
+    var imgHtml=imgUrl
+      ?'<img class="cat-img" src="'+imgUrl+'" alt="'+c.name+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'block\'">'
+       +'<div class="cat-icon" style="display:none;">'+c.icon+'</div>'
+      :'<div class="cat-icon">'+c.icon+'</div>';
+    return '<div class="cat-card" onclick="filterServices(\''+cn+'\')">'
+      +imgHtml
+      +'<h3>'+c.name+'</h3>'
+      +'<p>'+c.desc+'</p>'
+      +'<button class="cat-btn" style="background:'+colors[i%colors.length]+';" onclick="event.stopPropagation();filterServices(\''+cn+'\')">Browse →</button>'
+      +'</div>';
+  }).join('');
+}
+
 function renderBanners(){
   var s=document.getElementById('bannerScroll');
   if(!s)return;
@@ -1412,8 +1687,12 @@ function renderAccom(data){
   var g=document.getElementById('accomGrid');if(!g)return;
   if(data.length===0){g.innerHTML='<p style="color:var(--t3);font-size:14px;">No properties match your search.</p>';return;}
   g.innerHTML=data.map(function(a){
+    var imgContent=a.img
+      ?'<img src="'+a.img+'" style="width:100%;height:160px;object-fit:cover;display:block;" alt="'+a.name+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+       +'<div style="display:none;height:160px;background:'+a.bg+';align-items:center;justify-content:center;font-size:54px;">'+a.icon+'</div>'
+      :'<div style="height:160px;background:'+a.bg+';display:flex;align-items:center;justify-content:center;font-size:54px;">'+a.icon+'</div>';
     return '<div class="accom-card" onclick="openAccomModal('+a.id+')">'
-      +'<div class="accom-img" style="background:'+a.bg+'">'+a.icon+'<span class="accom-badge">'+a.badge+'</span></div>'
+      +'<div style="position:relative;">'+imgContent+'<span class="accom-badge">'+a.badge+'</span></div>'
       +'<div class="accom-info">'
         +'<div class="accom-name">'+a.name+'</div>'
         +'<div class="accom-loc">📍 '+a.loc+' · Up to '+a.guests+' guests · '+a.rooms+' bedrooms</div>'
@@ -1426,8 +1705,12 @@ function renderAccom(data){
 function renderHomeAccom(){
   var g=document.getElementById('homeAccomGrid');if(!g)return;
   g.innerHTML=ACCOMMODATIONS.slice(0,4).map(function(a){
+    var imgContent=a.img
+      ?'<img src="'+a.img+'" style="width:100%;height:160px;object-fit:cover;display:block;" alt="'+a.name+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+       +'<div style="display:none;height:160px;background:'+a.bg+';align-items:center;justify-content:center;font-size:54px;">'+a.icon+'</div>'
+      :'<div style="height:160px;background:'+a.bg+';display:flex;align-items:center;justify-content:center;font-size:54px;">'+a.icon+'</div>';
     return '<div class="accom-card" onclick="openAccomModal('+a.id+')">'
-      +'<div class="accom-img" style="background:'+a.bg+'">'+a.icon+'<span class="accom-badge">'+a.badge+'</span></div>'
+      +'<div style="position:relative;">'+imgContent+'<span class="accom-badge">'+a.badge+'</span></div>'
       +'<div class="accom-info">'
         +'<div class="accom-name">'+a.name+'</div>'
         +'<div class="accom-loc">📍 '+a.loc+'</div>'
@@ -1641,9 +1924,10 @@ window.addEventListener('error', function(e){
 
 window.onload=function(){
   initUsers();      // seed demo accounts if first visit
+  renderServiceFilters();  // load dynamic categories
   loadSession();    // restore logged-in user from localStorage
   loadCart();       // restore cart from localStorage
-  renderShop();renderBanners();renderHomeAccom();renderConvList();renderMsgs();buildEarnBar();
+  renderShop();renderBanners();renderHomeAccom();renderHomeCats();renderConvList();renderMsgs();buildEarnBar();
   updateCartUI();updateNav();
 };
 </script>
