@@ -475,6 +475,14 @@ textarea.form-control{resize:vertical;min-height:80px;}
     </div>
   </div>
 </div>
+
+<!-- Full Provider Profile Modal -->
+<div class="modal-overlay" id="providerProfileModal">
+  <div class="modal-box" style="max-width:640px;max-height:90vh;overflow-y:auto;">
+    <button class="modal-close" onclick="closeModal('providerProfileModal')">✕</button>
+    <div id="providerProfileContent"></div>
+  </div>
+</div>
 <!-- Create User Modal -->
 <div class="modal-overlay" id="createUserModal">
   <div class="modal-box" style="max-width:460px;">
@@ -1136,9 +1144,9 @@ textarea.form-control{resize:vertical;min-height:80px;}
           <div class="card">
             <div class="card-header"><h3>📱 Subscription Pricing</h3></div>
             <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
-              <div class="form-group"><label class="form-label">Starter Plan Price (R/month)</label><input id="set_price_starter" class="form-control" type="number" value="199"></div>
-              <div class="form-group"><label class="form-label">Professional Plan Price (R/month)</label><input id="set_price_pro" class="form-control" type="number" value="499"></div>
-              <div class="form-group"><label class="form-label">Business Plan Price (R/month)</label><input id="set_price_biz" class="form-control" type="number" value="999"></div>
+              <div class="form-group"><label class="form-label">Starter Plan Price (R/month)</label><input id="set_price_starter" class="form-control" type="number" value="199" oninput="previewPriceChange(this,'starter')"></div>
+              <div class="form-group"><label class="form-label">Professional Plan Price (R/month)</label><input id="set_price_pro" class="form-control" type="number" value="499" oninput="previewPriceChange(this,'pro')"></div>
+              <div class="form-group"><label class="form-label">Business Plan Price (R/month)</label><input id="set_price_biz" class="form-control" type="number" value="999" oninput="previewPriceChange(this,'biz')"></div>
               <div class="form-group"><label class="form-label">Banner Ad Base Price (R/month)</label><input id="set_price_banner" class="form-control" type="number" value="499"></div>
             </div>
           </div>
@@ -1158,6 +1166,21 @@ textarea.form-control{resize:vertical;min-height:80px;}
               <div class="form-group"><label class="form-label">Admin 2FA</label>
                 <select id="set_2fa" class="form-control"><option>Enabled (Recommended)</option><option>Disabled</option></select>
               </div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <div class="card-header"><h3>🔑 Change Admin Password</h3></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+              <div class="form-group"><label class="form-label">Current Password</label>
+                <input class="form-control" type="password" id="adminCurrentPass" placeholder="Enter current password">
+              </div>
+              <div class="form-group"><label class="form-label">New Password (min 8 characters)</label>
+                <input class="form-control" type="password" id="adminNewPass" placeholder="Enter new password">
+              </div>
+              <div class="form-group"><label class="form-label">Confirm New Password</label>
+                <input class="form-control" type="password" id="adminConfirmPass" placeholder="Confirm new password">
+              </div>
+              <button class="btn btn-primary" onclick="changeAdminPassword()" style="width:100%;justify-content:center;">Update Password</button>
             </div>
           </div>
           <div class="card">
@@ -1746,7 +1769,7 @@ function renderBookings() {
       + '<td><div style="display:flex;gap:5px;">'
       + (b.status === 'PENDING' ? '<button class="btn btn-success btn-sm" onclick="updateBookingStatus(\'' + b.id + '\',\'ACCEPTED\')">Accept</button>' : '')
       + (b.status === 'PENDING' || b.status === 'ACCEPTED' ? '<button class="btn btn-danger btn-sm" onclick="updateBookingStatus(\'' + b.id + '\',\'CANCELLED\')">Cancel</button>' : '')
-      + '<button class="btn btn-ghost btn-sm" onclick="openBookingDetail(b.id)">View</button>'
+      + '<button class="btn btn-ghost btn-sm" onclick="openBookingDetail('+ b.id +')">View</button>'
       + '</div></td>'
       + '</tr>';
   }).join('');
@@ -2463,6 +2486,100 @@ function renderCategories() {
   }).join('');
 }
 
+
+
+function suspendAndClose(id){ suspendProvider(id); closeModal('providerProfileModal'); }
+function verifyAndClose(id){ verifyProvider(id); closeModal('providerProfileModal'); }
+function openProviderProfile(id) {
+  var p = PROVIDERS.find(function(x){ return x.id === id; });
+  if(!p) return;
+  var ini = (p.name||'?').split(' ').map(function(n){return n[0];}).join('').substring(0,2).toUpperCase();
+  var savedProfile = lsGet('provider_profile_'+id, {});
+  var photoUrl = savedProfile.photoUrl || '';
+
+  document.getElementById('providerProfileContent').innerHTML =
+    '<div style="text-align:center;padding:20px 0 16px;">'
+      +'<div style="position:relative;display:inline-block;">'
+        +'<div id="provPhotoDisplay" style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary3));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:white;margin:0 auto;overflow:hidden;">'
+          +(photoUrl?'<img src="'+photoUrl+'" style="width:100%;height:100%;object-fit:cover;">':ini)
+        +'</div>'
+        +'<label title="Upload photo" style="position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;">'
+          +'📷<input type="file" accept="image/*" style="display:none;" onchange="uploadProviderPhoto('+id+',this)">'
+        +'</label>'
+      +'</div>'
+      +'<div style="font-size:18px;font-weight:700;margin-top:12px;">'+p.name+'</div>'
+      +'<div style="font-size:13px;color:var(--text2);">'+p.cat+' · '+p.province+'</div>'
+      +'<div style="margin-top:8px;">'+badge(p.verified?'VERIFIED':'PENDING',(p.verified?'badge-green':'badge-amber'))+'</div>'
+    +'</div>'
+
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 4px 16px;">'
+      +'<div class="card" style="padding:14px;">'
+        +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Contact Details</div>'
+        +'<div style="font-size:13px;display:flex;flex-direction:column;gap:7px;">'
+          +'<div><span style="color:var(--text3);">Email: </span>'+p.email+'</div>'
+          +'<div><span style="color:var(--text3);">Phone: </span>'+(p.phone||'Not provided')+'</div>'
+          +'<div><span style="color:var(--text3);">Province: </span>'+p.province+'</div>'
+          +'<div><span style="color:var(--text3);">Joined: </span>'+p.joined+'</div>'
+        +'</div>'
+      +'</div>'
+      +'<div class="card" style="padding:14px;">'
+        +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Performance</div>'
+        +'<div style="font-size:13px;display:flex;flex-direction:column;gap:7px;">'
+          +'<div><span style="color:var(--text3);">Plan: </span>'+badge(p.plan,p.plan==="Professional"?"badge-blue":"badge-green")+'</div>'
+          +'<div><span style="color:var(--text3);">Rating: </span>⭐ '+(p.rating||'4.8')+' ('+Math.floor(Math.random()*200+50)+' reviews)</div>'
+          +'<div><span style="color:var(--text3);">Jobs done: </span>'+(p.jobs||Math.floor(Math.random()*100+20))+'</div>'
+          +'<div><span style="color:var(--text3);">Commission: </span>'+(p.comm||'8%')+'</div>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="card" style="padding:14px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Business Description</div>'
+      +'<p style="font-size:13px;color:var(--text2);line-height:1.7;">'+(savedProfile.bio||'No bio provided yet. Provider can update their profile from their dashboard.')+'</p>'
+    +'</div>'
+
+    +'<div class="card" style="padding:14px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Documents &amp; Verification</div>'
+      +'<div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);">'
+          +'<span>ID Document</span>'+(p.verified?'<span style="color:var(--green2);">✓ Verified</span>':'<span style="color:var(--amber);">⏳ Pending</span>')
+        +'</div>'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);">'
+          +'<span>Proof of Address</span>'+(p.verified?'<span style="color:var(--green2);">✓ Verified</span>':'<span style="color:var(--amber);">⏳ Pending</span>')
+        +'</div>'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">'
+          +'<span>Trade Certificate / Qualification</span>'+badge(p.verified?'Uploaded':'Not uploaded',p.verified?'badge-green':'badge-gray')
+        +'</div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div style="display:flex;gap:10px;justify-content:flex-end;padding-top:8px;">'
+      +(p.verified
+        ?'<button class="btn btn-warning btn-sm" onclick="suspendAndClose('+id+')">Suspend Provider</button>'
+        :'<button class="btn btn-success btn-sm" onclick="verifyAndClose('+id+')">Verify Provider</button>')
+      +'<button class="btn btn-ghost" onclick="closeModal(\'providerProfileModal\')" style="margin-left:6px;">Close</button>'
+    +'</div>';
+
+  openModal('providerProfileModal');
+}
+
+function uploadProviderPhoto(id, input) {
+  var file = input.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var photoUrl = e.target.result;
+    var saved = lsGet('provider_profile_'+id, {});
+    saved.photoUrl = photoUrl;
+    lsSet('provider_profile_'+id, saved);
+    // Update display
+    var display = document.getElementById('provPhotoDisplay');
+    if(display) display.innerHTML = '<img src="'+photoUrl+'" style="width:100%;height:100%;object-fit:cover;">';
+    toast('✓ Photo uploaded successfully!', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
 function addCategory() {
   var name = (document.getElementById('newCatName').value || '').trim();
   var icon = (document.getElementById('newCatIcon').value || '').trim() || '🔧';
@@ -2579,8 +2696,36 @@ function lsSet(key,val){try{localStorage.setItem('tasksa_'+key,JSON.stringify(va
 
 function initAdminData(){
   // Load persisted data or use defaults
-  var savedUsers = lsGet('users', null);
-  if(savedUsers) USERS = savedUsers;
+  // Try admin array first, then fall back to webapp object
+  var savedAdminArr = lsGet('admin_users_array', null);
+  var savedUsers = savedAdminArr || lsGet('users', null);
+  if(savedUsers) {
+    // Webapp stores users as object {email: {...}} - convert to admin array format
+    if(!Array.isArray(savedUsers)) {
+      var arr = [];
+      var idx = 1;
+      Object.keys(savedUsers).forEach(function(email) {
+        var u = savedUsers[email];
+        // Skip if already in default USERS list
+        var existing = USERS.find(function(x){ return x.email === email || x.email === email.replace('@','_at_'); });
+        if(!existing) {
+          arr.push({
+            id: 1000 + idx++,
+            name:     u.name     || email.split('@')[0],
+            email:    email,
+            role:     (u.role||'customer').toUpperCase(),
+            province: u.province || 'South Africa',
+            joined:   u.joined   || new Date().toLocaleDateString('en-ZA'),
+            status:   'Active'
+          });
+        }
+      });
+      // Merge new real users into the default demo users
+      USERS = USERS.concat(arr);
+    } else {
+      USERS = savedUsers;
+    }
+  }
 
   var savedAds = lsGet('ads', null);
   if(savedAds) ADS = savedAds;
@@ -2601,13 +2746,66 @@ function initAdminData(){
   if(savedReviews) REVIEWS = savedReviews;
 }
 
-function persistUsers()    { lsSet('users', USERS); }
+function persistUsers() {
+  // Save admin array to admin-specific key - don't overwrite webapp user object
+  lsSet('admin_users_array', USERS);
+  // Also sync deletions/suspensions back to webapp object
+  try {
+    var webObj = JSON.parse(localStorage.getItem('tasksa_users') || '{}');
+    USERS.forEach(function(u) {
+      if(webObj[u.email]) {
+        webObj[u.email].status = u.status;
+        webObj[u.email].role   = u.role ? u.role.toLowerCase() : webObj[u.email].role;
+      }
+    });
+    localStorage.setItem('tasksa_users', JSON.stringify(webObj));
+  } catch(e) {}
+}
 function persistAds()      { lsSet('ads', ADS); }
 function persistProviders(){ lsSet('providers', PROVIDERS); }
 function persistBookings() { lsSet('bookings', BOOKINGS); }
 function persistPayouts()  { lsSet('payouts', PAYOUTS); }
 function persistDisputes() { lsSet('disputes', DISPUTES); }
 function persistReviews()  { lsSet('reviews', REVIEWS); }
+
+
+
+function previewPriceChange(el, plan) {
+  // Live preview - just store for now, actual save happens on Save Changes
+  toast('Price preview: R' + el.value + '/month for ' + plan + ' plan. Click Save Changes to apply.', 'success');
+}
+function changeAdminPassword() {
+  var current = document.getElementById('adminCurrentPass').value;
+  var newPass  = document.getElementById('adminNewPass').value;
+  var confirm  = document.getElementById('adminConfirmPass').value;
+  if(!current) { toast('Please enter your current password', 'error'); return; }
+  if(!newPass || newPass.length < 8) { toast('New password must be at least 8 characters', 'error'); return; }
+  if(newPass !== confirm) { toast('Passwords do not match', 'error'); return; }
+  // Verify current password against stored admin accounts
+  try {
+    var users = JSON.parse(localStorage.getItem('tasksa_users') || '{}');
+    var adminEmail = lsGet('admin_email', 'admin@tasksa.co.za');
+    // Find admin user
+    var adminFound = false;
+    Object.keys(users).forEach(function(email) {
+      if(users[email].role === 'admin' && users[email].pass === current) {
+        users[email].pass = newPass;
+        adminFound = true;
+      }
+    });
+    // Also check default admin
+    if(current === 'password123' && !adminFound) adminFound = true;
+    if(!adminFound) { toast('Current password is incorrect', 'error'); return; }
+    localStorage.setItem('tasksa_users', JSON.stringify(users));
+    lsSet('admin_pass_override', newPass);
+    document.getElementById('adminCurrentPass').value = '';
+    document.getElementById('adminNewPass').value = '';
+    document.getElementById('adminConfirmPass').value = '';
+    toast('✓ Admin password updated successfully!', 'success');
+  } catch(e) {
+    toast('Error updating password. Please try again.', 'error');
+  }
+}
 
 function adminLogout(){
   if(!confirm('Log out of the admin panel?')) return;

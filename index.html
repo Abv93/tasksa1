@@ -87,14 +87,18 @@ nav{position:sticky;top:0;z-index:200;background:rgba(2,11,26,0.97);backdrop-fil
 .see-all{font-size:13px;color:var(--blue3);cursor:pointer;}
 
 /* ── BANNER ADS CAROUSEL ── */
-.banner-scroll{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;}
-.banner-scroll::-webkit-scrollbar{display:none;}
-.banner-ad{flex:0 0 320px;height:160px;border-radius:var(--r2);display:flex;flex-direction:column;justify-content:flex-end;padding:18px;position:relative;overflow:hidden;cursor:pointer;}
-.banner-ad .ba-title{font-family:'Sora',sans-serif;font-size:16px;font-weight:800;color:white;position:relative;z-index:1;}
-.banner-ad .ba-sub{font-size:12px;color:rgba(255,255,255,0.8);margin-top:3px;position:relative;z-index:1;}
-.banner-ad .ba-cta{margin-top:10px;background:white;color:#111;font-size:11px;font-weight:700;padding:5px 14px;border-radius:50px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;position:relative;z-index:1;display:inline-block;}
-.banner-empty{flex:0 0 280px;height:160px;border-radius:var(--r2);border:2px dashed var(--bd2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;cursor:pointer;}
-.banner-empty p{font-size:12px;color:var(--t3);}
+.banner-slideshow{position:relative;width:100%;height:220px;border-radius:var(--r2);overflow:hidden;}
+.banner-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:28px 32px;opacity:0;transition:opacity 0.7s ease;pointer-events:none;}
+.banner-slide.active{opacity:1;pointer-events:auto;}
+.banner-slide .ba-title{font-family:'Sora',sans-serif;font-size:22px;font-weight:900;color:white;text-shadow:0 2px 8px rgba(0,0,0,0.4);}
+.banner-slide .ba-sub{font-size:14px;color:rgba(255,255,255,0.9);margin-top:5px;text-shadow:0 1px 4px rgba(0,0,0,0.3);}
+.banner-slide .ba-cta{margin-top:14px;background:white;color:#111;font-size:12px;font-weight:700;padding:8px 20px;border-radius:50px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-block;}
+.banner-dots{position:absolute;bottom:12px;right:16px;display:flex;gap:6px;z-index:10;}
+.banner-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;}
+.banner-dot.active{background:white;width:22px;border-radius:4px;}
+.banner-arrows{position:absolute;top:50%;transform:translateY(-50%);width:100%;display:flex;justify-content:space-between;padding:0 10px;z-index:10;pointer-events:none;}
+.banner-arrow{width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,0.35);border:none;color:white;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;pointer-events:auto;backdrop-filter:blur(4px);}
+.banner-arrow:hover{background:rgba(0,0,0,0.6);}
 
 /* ── HERO ── */
 .hero{padding:72px 5% 56px;text-align:center;position:relative;}
@@ -534,7 +538,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
   <a onclick="goPage('services')">🔧 Services</a>
   <a onclick="goPage('shop')">🛒 Shop</a>
   <a onclick="goPage('courier')">📦 Courier</a>
-  <a onclick="goPage('accommodation')">🏡 Stays</a>
+  <a onclick="goPage('accommodation')">Stays</a>
   <a onclick="goPage('messages')">💬 Messages</a>
   <a onclick="goPage('dashboard')">📊 Dashboard</a>
   <a onclick="openModal('loginModal');closeMobile()">Sign In</a>
@@ -548,7 +552,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     <a onclick="goPage('services')" data-page="services">Services</a>
     <a onclick="goPage('shop')" data-page="shop">Shop</a>
     <a onclick="goPage('courier')" data-page="courier">Courier</a>
-    <a onclick="goPage('accommodation')" data-page="accommodation">🏡 Stays</a>
+    <a onclick="goPage('accommodation')" data-page="accommodation">Stays</a>
     <a onclick="goPage('about')" data-page="about">About Us</a>
     <a onclick="goPage('messages')" data-page="messages">Messages</a>
     <a onclick="goPage('dashboard')" data-page="dashboard">Dashboard</a>
@@ -599,7 +603,13 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
       <a class="see-all" onclick="openModal('registerModal')">Advertise with us →</a>
     </div>
     <p class="sec-sub">Sponsored listings from verified TaskSA partners</p>
-    <div class="banner-scroll" id="bannerScroll"></div>
+    <div class="banner-slideshow" id="bannerSlideshow">
+      <div class="banner-arrows">
+        <button class="banner-arrow" onclick="prevBanner()">‹</button>
+        <button class="banner-arrow" onclick="nextBanner()">›</button>
+      </div>
+      <div class="banner-dots" id="bannerDots"></div>
+    </div>
   </div>
 
   <!-- CATEGORIES - DYNAMIC -->
@@ -720,8 +730,16 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     <div class="breadcrumb"><a onclick="goPage('home')">Home</a> / Services</div>
     <h2 style="font-size:24px;font-weight:900;">Home &amp; Local Services</h2>
     <p style="color:var(--t2);font-size:13px;margin-top:5px;">Book trusted verified professionals in your area</p>
-    <div class="sub-filters" id="serviceFilters">
-      <button class="sfb active" onclick="setFilter(this)" data-cat="All">All</button>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;align-items:center;">
+      <select id="serviceCatSelect" onchange="filterServicesBySelect()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 16px;color:var(--t);font-size:14px;outline:none;cursor:pointer;min-width:200px;">
+        <option value="All">All Categories</option>
+      </select>
+      <select id="serviceProvinceSelect" onchange="filterServicesBySelect()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 16px;color:var(--t);font-size:14px;outline:none;cursor:pointer;min-width:160px;">
+        <option value="All">All Provinces</option>
+        <option>Western Cape</option><option>Gauteng</option><option>KwaZulu-Natal</option>
+        <option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option>
+        <option>North West</option><option>Free State</option><option>Northern Cape</option>
+      </select>
     </div>
   </div>
   <div class="section">
@@ -738,14 +756,17 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     <div class="breadcrumb"><a onclick="goPage('home')">Home</a> / Shop</div>
     <h2 style="font-size:24px;font-weight:900;">Local Shop Marketplace</h2>
     <p style="color:var(--t2);font-size:13px;margin-top:5px;">Products from verified South African stores</p>
-    <div class="sub-filters">
-      <button class="sfb active" onclick="setFilter(this)">All Products</button>
-      <button class="sfb" onclick="setFilter(this)">🔩 Hardware</button>
-      <button class="sfb" onclick="setFilter(this)">🎨 Paint</button>
-      <button class="sfb" onclick="setFilter(this)">🧽 Cleaning</button>
-      <button class="sfb" onclick="setFilter(this)">🌶️ Spices</button>
-      <button class="sfb" onclick="setFilter(this)">🌱 Garden</button>
-      <button class="sfb" onclick="setFilter(this)">🐾 Pets</button>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;">
+      <select id="shopCatSelect" onchange="filterShopBySelect()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 16px;color:var(--t);font-size:14px;outline:none;cursor:pointer;min-width:200px;">
+        <option value="All">All Products</option>
+        <option value="Hardware">🔩 Hardware</option>
+        <option value="Paint">🎨 Paint &amp; Décor</option>
+        <option value="Cleaning">🧽 Cleaning Supplies</option>
+        <option value="Spices">🌶️ Food &amp; Spices</option>
+        <option value="Garden">🌱 Garden &amp; Outdoor</option>
+        <option value="Pets">🐾 Pet Supplies</option>
+        <option value="Tools">🔧 Tools &amp; Equipment</option>
+      </select>
     </div>
   </div>
   <div class="section"><div class="shop-grid" id="shopGrid"></div></div>
@@ -757,12 +778,22 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     <div class="breadcrumb"><a onclick="goPage('home')">Home</a> / Courier</div>
     <h2 style="font-size:24px;font-weight:900;">Courier &amp; Delivery</h2>
     <p style="color:var(--t2);font-size:13px;margin-top:5px;">Fast tracked deliveries across South Africa</p>
-    <div class="sub-filters">
-      <button class="sfb active" onclick="setFilter(this)">All</button>
-      <button class="sfb" onclick="setFilter(this)">Same-Day</button>
-      <button class="sfb" onclick="setFilter(this)">Next-Day</button>
-      <button class="sfb" onclick="setFilter(this)">Business</button>
-      <button class="sfb" onclick="setFilter(this)">Nationwide</button>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;">
+      <select id="courierTypeSelect" onchange="filterCourierBySelect()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 16px;color:var(--t);font-size:14px;outline:none;cursor:pointer;min-width:200px;">
+        <option value="All">All Delivery Types</option>
+        <option value="same-day">⚡ Same-Day Delivery</option>
+        <option value="next-day">📅 Next-Day Delivery</option>
+        <option value="standard">📦 Standard 2–3 Days</option>
+        <option value="economy">🏷️ Economy 5–7 Days</option>
+        <option value="business">💼 Business Courier</option>
+        <option value="nationwide">🇿🇦 Nationwide Delivery</option>
+        <option value="bulk">🚛 Bulk Carriers</option>
+        <option value="fragile">🔒 Fragile &amp; Sensitive</option>
+        <option value="refrigerated">❄️ Refrigerated Cargo</option>
+        <option value="heavy">⚖️ Heavy Freight (500kg+)</option>
+        <option value="furniture">🛋️ Furniture &amp; Appliances</option>
+        <option value="vehicle">🚗 Vehicle Transport</option>
+      </select>
     </div>
   </div>
   <div class="section">
@@ -1043,7 +1074,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
         </div>
       </div>
       <div style="border-radius:var(--r2);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
-        <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=700&h=500&fit=crop&q=80"
+        <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=700&h=500&fit=crop&q=80"
              style="width:100%;height:400px;object-fit:cover;display:block;" alt="South African team collaborating"
              onerror="this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=700&h=500&fit=crop&q=80'">
       </div>
@@ -1117,7 +1148,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
   <div style="background:var(--bg2);padding:0;">
     <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;min-height:420px;" class="about-split">
       <div style="overflow:hidden;">
-        <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=700&h=420&fit=crop&q=80"
+        <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=700&h=420&fit=crop&q=80"
              style="width:100%;height:100%;min-height:420px;object-fit:cover;display:block;" alt="Build something great together"
              onerror="this.style.background='var(--surf)';this.style.minHeight='420px'">
       </div>
@@ -1133,19 +1164,6 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
     </div>
   </div>
 
-  <!-- Footer -->
-  <footer>
-    <div class="footer-grid">
-      <div><div class="footer-logo">Task<span>SA</span></div><p class="footer-about">South Africa's trusted marketplace for services, shops, courier and holiday accommodation. All 9 provinces covered.</p></div>
-      <div class="fc"><h5>Services</h5><a onclick="goPage('services')">Browse Services</a><a onclick="goPage('services')">Plumbing</a><a onclick="goPage('services')">Cleaning</a><a onclick="goPage('services')">Electrical</a></div>
-      <div class="fc"><h5>Platform</h5><a onclick="goPage('shop')">Shop</a><a onclick="goPage('courier')">Courier</a><a onclick="goPage('accommodation')">Holiday Stays</a><a onclick="goPage('about')">About Us</a></div>
-      <div class="fc"><h5>Company</h5><a onclick="goPage('about')">About Us</a><a>Careers</a><a>Privacy Policy</a><a>Terms of Service</a></div>
-    </div>
-    <div class="footer-bottom">
-      <p>© 2025 TaskSA (Pty) Ltd · hello@tasksa.co.za · +27 21 000 0000</p>
-      <span class="admin-link" onclick="goPage('backend-login')">⚙️ Admin Login</span>
-    </div>
-  </footer>
 
 </div>
 
@@ -1282,19 +1300,16 @@ var ALL_PROVIDERS = [
 var servicesFilter = 'All';
 
 function renderServiceFilters(){
-  var f=document.getElementById('serviceFilters');
-  if(!f)return;
+  // Populate the service category dropdown
+  var sel=document.getElementById('serviceCatSelect');
   var cats=getCategories();
-  var allActive = servicesFilter==='All' ? ' active' : '';
-  var html = '<button class="sfb' + allActive + '" onclick="filterServices(\'All\')" data-cat="All">All</button>';
-  html += cats.map(function(c){
-    var active = servicesFilter===c.name ? ' active' : '';
-    return '<button class="sfb' + active + '" onclick="filterServices(\''+c.name+'\')" data-cat="'+c.name+'">'+c.icon+' '+c.name+'</button>';
-  }).join('');
-  f.innerHTML = html;
-  // Also update the listing category dropdown
-  var sel=document.getElementById('listCat');
-  if(sel)sel.innerHTML=cats.map(function(c){return '<option>'+c.name+'</option>';}).join('');
+  if(sel){
+    sel.innerHTML='<option value="All">All Categories</option>'
+      +cats.map(function(c){return '<option value="'+c.name+'">'+c.icon+' '+c.name+'</option>';}).join('');
+  }
+  // Also update listing modal dropdown
+  var listSel=document.getElementById('listCat');
+  if(listSel)listSel.innerHTML=cats.map(function(c){return '<option>'+c.name+'</option>';}).join('');
 }
 
 function filterServices(cat){
@@ -1551,22 +1566,58 @@ function renderHomeCats(){
   }).join('');
 }
 
+var _bannerIdx=0, _bannerTimer=null;
+
+function getBannersData(){
+  var saved=lsGet('ads',null);
+  if(saved&&saved.length>0){
+    var active=saved.filter(function(a){return a.status==='Active';});
+    if(active.length>0){
+      var colors=['linear-gradient(135deg,#041a3a,#0a6edb)','linear-gradient(135deg,#1a0a3a,#6d28d9)',
+        'linear-gradient(135deg,#2e1a0a,#b45309)','linear-gradient(135deg,#0a2e1e,#059669)',
+        'linear-gradient(135deg,#0a1a3a,#1a5f8a)'];
+      return active.map(function(a,i){
+        return {title:a.advertiser,sub:a.period||'Special offer available now',
+          cta:'Learn More',bg:colors[i%colors.length],onclick:"goPage('services')"};
+      });
+    }
+  }
+  return BANNERS;
+}
+
 function renderBanners(){
-  var s=document.getElementById('bannerScroll');
-  if(!s)return;
-  s.innerHTML=BANNERS.map(function(b){
-    return '<div class="banner-ad" style="background:'+b.bg+';" onclick="'+b.onclick+'">'
+  var ss=document.getElementById('bannerSlideshow');
+  if(!ss)return;
+  var banners=getBannersData();
+  ss.querySelectorAll('.banner-slide').forEach(function(s){s.remove();});
+  var html=banners.map(function(b,i){
+    return '<div class="banner-slide'+(i===0?' active':'')+'" style="background:'+b.bg+';" onclick="'+b.onclick+'">'
       +'<div class="ba-title">'+b.title+'</div>'
       +'<div class="ba-sub">'+b.sub+'</div>'
       +'<button class="ba-cta" onclick="event.stopPropagation();'+b.onclick+'">'+b.cta+'</button>'
       +'</div>';
-  }).join('')
-  +'<div class="banner-empty" onclick="openModal(\'registerModal\')">'
-  +'<div style="font-size:24px;color:var(--t3);">+</div>'
-  +'<p>Advertise here from R499/month</p>'
-  +'<button class="dpill dp-b" style="padding:5px 14px;font-size:11px;border:none;">Get Started</button>'
-  +'</div>';
+  }).join('');
+  ss.insertAdjacentHTML('afterbegin',html);
+  var dotsEl=document.getElementById('bannerDots');
+  if(dotsEl)dotsEl.innerHTML=banners.map(function(_,i){
+    return '<div class="banner-dot'+(i===0?' active':'')+'" onclick="goToBanner('+i+')"></div>';
+  }).join('');
+  _bannerIdx=0;
+  if(_bannerTimer)clearInterval(_bannerTimer);
+  _bannerTimer=setInterval(nextBanner,4000);
 }
+function goToBanner(idx){
+  var slides=document.querySelectorAll('.banner-slide');
+  var dots=document.querySelectorAll('.banner-dot');
+  if(!slides.length)return;
+  slides[_bannerIdx].classList.remove('active');
+  if(dots[_bannerIdx])dots[_bannerIdx].classList.remove('active');
+  _bannerIdx=(idx+slides.length)%slides.length;
+  slides[_bannerIdx].classList.add('active');
+  if(dots[_bannerIdx])dots[_bannerIdx].classList.add('active');
+}
+function nextBanner(){goToBanner(_bannerIdx+1);}
+function prevBanner(){goToBanner(_bannerIdx-1);}
 
 // ── HERO SEARCH ──────────────────────────────────────────────────────
 function heroSearch(){
@@ -1921,6 +1972,98 @@ window.addEventListener('error', function(e){
     console.warn('Navigation error:', e.message);
   }
 });
+
+
+// ── DROPDOWN FILTER FUNCTIONS ─────────────────────────────────────────
+function filterServicesBySelect(){
+  var cat=(document.getElementById('serviceCatSelect')||{}).value||'All';
+  var prov=(document.getElementById('serviceProvinceSelect')||{}).value||'All';
+  servicesFilter=cat;
+  var grid=document.getElementById('servicesProviderGrid');
+  if(!grid)return;
+  var filtered=ALL_PROVIDERS.filter(function(p){
+    var matchCat=cat==='All'||p.cat===cat;
+    var matchProv=prov==='All'||p.loc.indexOf(prov)!==-1;
+    return matchCat&&matchProv;
+  });
+  if(filtered.length===0){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--t3);">No providers found. Try a different filter.</div>';
+    return;
+  }
+  grid.innerHTML=filtered.map(function(p){
+    var cn=p.name.replace(/'/g,"\'");
+    return '<div class="prov-card" onclick="goPage(\'messages\')">'
+      +'<div class="pav" style="background:'+p.bg+';color:'+p.col+'">'+p.ini+'</div>'
+      +'<div class="pname">'+p.name+'</div>'
+      +'<div class="prole">'+p.cat+' · '+p.loc+'</div>'
+      +'<div class="stars">★★★★★</div>'
+      +'<div style="font-size:10px;color:var(--t3);">'+p.rev+' reviews</div>'
+      +'<div class="pprice">From '+p.price+'</div>'
+      +'<span class="vbadge">✓ Verified</span>'
+      +'</div>';
+  }).join('');
+  // Update the category dropdown options from localStorage
+  var sel=document.getElementById('serviceCatSelect');
+  if(sel&&sel.options.length<=2){
+    var cats=getCategories();
+    sel.innerHTML='<option value="All">All Categories</option>'
+      +cats.map(function(c){return '<option value="'+c.name+'">'+c.icon+' '+c.name+'</option>';}).join('');
+    sel.value=cat;
+  }
+}
+
+function filterShopBySelect(){
+  var cat=(document.getElementById('shopCatSelect')||{}).value||'All';
+  var g=document.getElementById('shopGrid');
+  if(!g)return;
+  var filtered=cat==='All'?PRODUCTS:PRODUCTS.filter(function(p){
+    return p.name.toLowerCase().indexOf(cat.toLowerCase())!==-1
+      ||p.store.toLowerCase().indexOf(cat.toLowerCase())!==-1;
+  });
+  if(filtered.length===0){
+    g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--t3);">No products in this category yet.</div>';
+    return;
+  }
+  g.innerHTML=filtered.map(function(p){
+    return '<div class="product"><div class="prod-img" style="background:'+p.bg+'">'+p.icon+'</div>'
+      +'<div class="prod-info"><div class="prod-name">'+p.name+'</div><div class="prod-store">'+p.store+'</div>'
+      +'<div class="stars">★★★★★</div><div class="prod-price">R'+p.price+'</div>'
+      +'<button class="add-btn" onclick="addToCart('+p.id+')">Add to Cart</button></div></div>';
+  }).join('');
+}
+
+function filterCourierBySelect(){
+  var type=(document.getElementById('courierTypeSelect')||{}).value||'All';
+  // Update the speed dropdown to match selection
+  var speedEl=document.getElementById('couSpeed');
+  if(speedEl){
+    if(type==='same-day')speedEl.value='Same-Day';
+    else if(type==='next-day')speedEl.value='Next-Day';
+    else if(type==='standard')speedEl.value='Standard 2-3 days';
+    else if(type==='economy')speedEl.value='Economy 5-7 days';
+  }
+  if(type==='bulk'||type==='heavy'||type==='refrigerated'||type==='furniture'||type==='vehicle'){
+    // Show bulk/freight message
+    var quoteEl=document.getElementById('courierQuote');
+    if(quoteEl){
+      quoteEl.style.display='block';
+      quoteEl.innerHTML='<div style="padding:14px;background:rgba(245,166,35,0.08);border-radius:var(--r);border:1px solid rgba(245,166,35,0.2);">'
+        +'<div style="font-size:14px;font-weight:700;color:var(--amber2);margin-bottom:8px;">🚛 '+type.charAt(0).toUpperCase()+type.slice(1).replace('-',' ')+' Enquiry</div>'
+        +'<p style="font-size:13px;color:var(--t2);margin-bottom:12px;">For bulk, heavy freight and specialised cargo, fill in your details and we will match you with the right carrier.</p>'
+        +'<div class="field"><label>Cargo Description</label><input class="form-control" id="bulkDesc" placeholder="e.g. 500 boxes of furniture, 2 tons of building materials"></div>'
+        +'<div class="g2"><div class="field"><label>Weight (kg)</label><input type="number" id="bulkWeight" placeholder="500"></div>'
+        +'<div class="field"><label>Dimensions (LxWxH cm)</label><input id="bulkDims" placeholder="200x100x150"></div></div>'
+        +'<button class="btn btn-p" style="width:100%;" onclick="submitBulkEnquiry()">Get Bulk Quote</button>'
+        +'</div>';
+    }
+  }
+}
+
+function submitBulkEnquiry(){
+  var desc=(document.getElementById('bulkDesc')||{}).value||'';
+  if(!desc){toast('Please describe your cargo','error');return;}
+  toast('Bulk freight enquiry submitted! We will contact you within 2 hours.','success');
+}
 
 window.onload=function(){
   initUsers();      // seed demo accounts if first visit
