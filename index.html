@@ -2,7 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TaskSA">
+<meta name="application-name" content="TaskSA">
+<meta name="theme-color" content="#0a6edb">
+<meta name="description" content="South Africa's trusted marketplace — book service providers, shop local stores, arrange couriers and find holiday accommodation across all 9 provinces.">
+<meta name="keywords" content="TaskSA, South Africa, services, plumber, electrician, cleaner, marketplace, courier, holiday stays">
+<meta property="og:title" content="TaskSA — South Africa's Service Marketplace">
+<meta property="og:description" content="Book verified service providers, shop local stores and find holiday stays across South Africa.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tasksa.co.za">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230a6edb'/><text x='90' y='125' font-family='Arial Black' font-size='80' font-weight='900' text-anchor='middle' fill='white'>T</text></svg>">
 <title>TaskSA — South Africa's Service Marketplace</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -161,6 +175,31 @@ nav{position:sticky;top:0;z-index:200;background:rgba(2,11,26,0.97);backdrop-fil
 .plan-btn{width:100%;margin-top:14px;padding:11px;border-radius:50px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:var(--surf2);color:var(--t);font-family:'DM Sans',sans-serif;}
 .plan.featured .plan-btn{background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;}
 
+
+/* ── SHOPS ── */
+.store-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+.store-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:all 0.25s;}
+.store-card:hover{border-color:var(--bd2);transform:translateY(-3px);}
+.store-banner{height:120px;object-fit:cover;width:100%;display:block;}
+.store-banner-placeholder{height:120px;display:flex;align-items:center;justify-content:center;font-size:48px;}
+.store-info{padding:16px;}
+.store-name{font-size:15px;font-weight:800;margin-bottom:3px;}
+.store-cat{font-size:11px;color:var(--t3);margin-bottom:6px;}
+.store-desc{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:10px;}
+.store-meta{display:flex;align-items:center;justify-content:space-between;}
+.store-badge{font-size:10px;padding:3px 9px;border-radius:50px;font-weight:700;}
+.store-open{background:rgba(34,197,94,0.1);color:var(--green2);border:1px solid rgba(34,197,94,0.25);}
+.store-closed{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
+.store-page-header{background:var(--bg2);border-bottom:1px solid var(--bd);padding:0;}
+.store-page-banner{width:100%;height:200px;object-fit:cover;display:block;}
+.store-page-info{padding:20px 5%;}
+.product-cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:28px;}
+.product-cat-card{background:var(--surf);border:1px solid var(--bd);border-radius:14px;padding:18px;cursor:pointer;transition:all 0.2s;text-align:center;}
+.product-cat-card:hover{border-color:var(--bd2);transform:translateY(-2px);}
+.pcat-icon{font-size:32px;margin-bottom:8px;}
+.pcat-name{font-size:13px;font-weight:700;margin-bottom:3px;}
+.pcat-count{font-size:11px;color:var(--t3);}
+.product-list-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
 /* ── SHOP ── */
 .shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}
 .product{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:all 0.25s;}
@@ -339,6 +378,20 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
 </style>
 </head>
 <body>
+
+
+<!-- PWA Install Banner -->
+<div id="pwaInstallBanner" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9998;background:var(--surf2);border:1px solid var(--bd2);border-radius:16px;padding:14px 18px;max-width:340px;width:90%;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+  <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--blue2));display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:14px;font-weight:900;color:white;flex-shrink:0;">T<span style="color:var(--gold);font-size:10px;">SA</span></div>
+  <div style="flex:1;">
+    <div style="font-size:13px;font-weight:700;">Add TaskSA to your home screen</div>
+    <div style="font-size:11px;color:var(--t2);margin-top:2px;">Install for faster access — works offline too</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-shrink:0;">
+    <button onclick="installPWA()" style="background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border:none;border-radius:50px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Install</button>
+    <button onclick="dismissInstallBanner()" style="background:var(--surf);border:1px solid var(--bd);color:var(--t2);border-radius:50px;padding:7px 10px;font-size:12px;cursor:pointer;">✕</button>
+  </div>
+</div>
 
 <div id="toast"></div>
 <div id="cartOverlay" onclick="closeCart()"></div>
@@ -750,26 +803,39 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
   </div>
 </div>
 
-<!-- ════ SHOP ════ -->
+<!-- ════ SHOP — STORE MARKETPLACE ════ -->
 <div class="page" id="shop">
   <div class="cat-header">
-    <div class="breadcrumb"><a onclick="goPage('home')">Home</a> / Shop</div>
+    <div class="breadcrumb"><a onclick="goPage('home')">Home</a> / Shops</div>
     <h2 style="font-size:24px;font-weight:900;">Local Shop Marketplace</h2>
-    <p style="color:var(--t2);font-size:13px;margin-top:5px;">Products from verified South African stores</p>
+    <p style="color:var(--t2);font-size:13px;margin-top:5px;">Browse verified South African stores — click any store to see their full catalogue</p>
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;">
-      <select id="shopCatSelect" onchange="filterShopBySelect()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 16px;color:var(--t);font-size:14px;outline:none;cursor:pointer;min-width:200px;">
-        <option value="All">All Products</option>
-        <option value="Hardware">🔩 Hardware</option>
-        <option value="Paint">🎨 Paint &amp; Décor</option>
-        <option value="Cleaning">🧽 Cleaning Supplies</option>
-        <option value="Spices">🌶️ Food &amp; Spices</option>
-        <option value="Garden">🌱 Garden &amp; Outdoor</option>
-        <option value="Pets">🐾 Pet Supplies</option>
-        <option value="Tools">🔧 Tools &amp; Equipment</option>
+      <input id="storeSearch" placeholder="🔍 Search stores…" oninput="filterStores()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 16px;color:var(--t);font-size:14px;outline:none;min-width:200px;">
+      <select id="storeCatFilter" onchange="filterStores()" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 16px;color:var(--t);font-size:14px;outline:none;cursor:pointer;">
+        <option value="All">All Categories</option>
+        <option>Hardware &amp; Tools</option>
+        <option>Paint &amp; Décor</option>
+        <option>Food &amp; Spices</option>
+        <option>Garden &amp; Outdoor</option>
+        <option>Cleaning Supplies</option>
+        <option>Pet Supplies</option>
+        <option>Clothing &amp; Apparel</option>
+        <option>Electronics</option>
+        <option>Furniture</option>
+        <option>Health &amp; Beauty</option>
+        <option>Baby &amp; Kids</option>
+        <option>General</option>
       </select>
     </div>
   </div>
-  <div class="section"><div class="shop-grid" id="shopGrid"></div></div>
+  <div class="section">
+    <div class="store-grid" id="storeGrid"></div>
+  </div>
+</div>
+
+<!-- ════ STORE PAGE ════ -->
+<div class="page" id="store-page">
+  <div id="storePageContent"></div>
 </div>
 
 <!-- ════ COURIER ════ -->
@@ -923,6 +989,7 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
       <div class="si" onclick="setSI(this);openModal('addListingModal')"><span class="si-ic">📝</span>My Listings</div>
       <div class="si" onclick="setSI(this);toast('Your reviews: '+getListings(currentUser?currentUser.email:\'\').length+' listings published. Check back soon for customer reviews!','success')"><span class="si-ic">⭐</span>Reviews</div>
       <div class="si" onclick="setSI(this);openModal('editProfileModal')"><span class="si-ic">⚙️</span>Settings</div>
+      <div class="si" onclick="openVerification()"><span class="si-ic">✅</span>Get Verified</div>
       <div class="si" style="margin-top:16px;border-top:1px solid var(--bd);padding-top:14px;" onclick="goPage('home')"><span class="si-ic">←</span>Back to site</div>
     </div>
     <div class="dash-main">
@@ -1365,7 +1432,7 @@ function goPage(id){
   });
   window.scrollTo({top:0,behavior:'smooth'});
   closeMobile();
-  if(id==='shop')renderShop();
+  if(id==='shop'){renderStores();}
   if(id==='services'){renderServiceFilters();renderServicesGrid();}
   if(id==='messages'){renderConvList();renderMsgs();}
   if(id==='dashboard')buildEarnBar();
@@ -1442,6 +1509,9 @@ function doRegister(){
   document.getElementById('regPass').value='';
   toast('Account created! Welcome to TaskSA, '+first+' 🎉','success');
   goPage(dest);
+  if(regRole==='provider'||regRole==='shop'||regRole==='host'){
+    setTimeout(function(){ openModal('verificationModal'); }, 1500);
+  }
 }
 function doLogout(){currentUser=null;cart=[];persistCart();saveSession();updateNav();updateCartUI();goPage('home');toast('Signed out successfully','success');}
 function updateNav(){
@@ -1526,21 +1596,21 @@ function renderHomeCats(){
   var cats=getCategories();
   // Curated Unsplash photo IDs for each category type
   var catImages={
-    'Plumbing':    'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400&h=200&fit=crop&q=80',
-    'Electrical':  'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=200&fit=crop&q=80',
-    'Cleaning':    'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=200&fit=crop&q=80',
-    'Gardening':   'https://images.unsplash.com/photo-1558904541-efa843a96f01?w=400&h=200&fit=crop&q=80',
-    'Painting':    'https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=400&h=200&fit=crop&q=80',
-    'Handyman':    'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=400&h=200&fit=crop&q=80',
+    'Plumbing':    'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=200&fit=crop&q=80',
+    'Electrical':  'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&h=200&fit=crop&q=80',
+    'Cleaning':    'https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&h=200&fit=crop&q=80',
+    'Gardening':   'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=200&fit=crop&q=80',
+    'Painting':    'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=200&fit=crop&q=80',
+    'Handyman':    'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=200&fit=crop&q=80',
     'Dog Sitting': 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=200&fit=crop&q=80',
     'Moving':      'https://images.unsplash.com/photo-1600518464441-9154a4dea21b?w=400&h=200&fit=crop&q=80',
-    'Ironing':     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=200&fit=crop&q=80',
-    'Baby Sitting':'https://images.unsplash.com/photo-1587614382346-4ec70e388b28?w=400&h=200&fit=crop&q=80',
-    'Tutoring':    'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=200&fit=crop&q=80',
-    'Caretaking':  'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=200&fit=crop&q=80',
-    'Security':    'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=400&h=200&fit=crop&q=80',
-    'Photography': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=200&fit=crop&q=80',
-    'Delivery':    'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=400&h=200&fit=crop&q=80',
+    'Ironing':     'https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=400&h=200&fit=crop&q=80',
+    'Baby Sitting':'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=400&h=200&fit=crop&q=80',
+    'Tutoring':    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=200&fit=crop&q=80',
+    'Caretaking':  'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=200&fit=crop&q=80',
+    'Security':    'https://images.unsplash.com/photo-1605902711622-cfb43c4437d0?w=400&h=200&fit=crop&q=80',
+    'Photography': 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=400&h=200&fit=crop&q=80',
+    'Delivery':    'https://images.unsplash.com/photo-1614851099511-773084f6911d?w=400&h=200&fit=crop&q=80',
   };
   var colors=['linear-gradient(135deg,var(--blue),var(--blue2))',
     'linear-gradient(135deg,#059669,#22C55E)',
@@ -1910,6 +1980,258 @@ function submitListing(){
   if(document.getElementById('listDesc'))document.getElementById('listDesc').value='';
 }
 
+
+// ── STORES DATA ───────────────────────────────────────────────────────
+var STORES = [
+  {
+    id:1, name:'BuildRight Hardware', owner:'Jan van der Berg',
+    category:'Hardware & Tools', city:'Johannesburg', province:'Gauteng',
+    desc:'Your one-stop hardware store for all building, plumbing and electrical supplies.',
+    banner:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=200&fit=crop&q=80',
+    logo:'🔨', rating:4.8, reviews:124, open:true, verified:true,
+    phone:'+27 11 555 0100', email:'buildright@tasksa.co.za',
+    categories:[
+      {id:1, name:'Hand Tools',      icon:'🔧', count:45, desc:'Hammers, screwdrivers, spanners and more'},
+      {id:2, name:'Power Tools',     icon:'🔩', count:28, desc:'Drills, grinders, saws and accessories'},
+      {id:3, name:'Plumbing',        icon:'🚿', count:62, desc:'Pipes, fittings, taps and geysers'},
+      {id:4, name:'Electrical',      icon:'⚡', count:38, desc:'Wiring, plugs, DB boards and lighting'},
+      {id:5, name:'Paint & Finishes',icon:'🎨', count:31, desc:'Interior, exterior, primers and brushes'},
+      {id:6, name:'Tiles & Adhesive',icon:'🪣', count:19, desc:'Floor tiles, wall tiles and adhesives'},
+    ],
+    products:{
+      1:[
+        {id:101,name:'Stanley Hammer 16oz',price:189,img:'🔨',desc:'Professional claw hammer'},
+        {id:102,name:'Screwdriver Set 6pc',price:129,img:'🪛',desc:'Phillips and flat head set'},
+        {id:103,name:'Adjustable Spanner',price:95,img:'🔧',desc:'200mm adjustable spanner'},
+        {id:104,name:'Tape Measure 5m',price:69,img:'📏',desc:'Steel blade with lock'},
+        {id:105,name:'Spirit Level 60cm',price:145,img:'📐',desc:'Aluminium spirit level'},
+      ],
+      2:[
+        {id:201,name:'Makita Drill 18V',price:1299,img:'🔩',desc:'Cordless with 2 batteries'},
+        {id:202,name:'Angle Grinder 115mm',price:499,img:'⚙️',desc:'4.5 inch angle grinder'},
+        {id:203,name:'Jigsaw 500W',price:679,img:'🪚',desc:'Variable speed jigsaw'},
+      ],
+      3:[
+        {id:301,name:'15mm Copper Pipe 1m',price:89,img:'🚿',desc:'Pressure rated copper pipe'},
+        {id:302,name:'Geyser 100L',price:3200,img:'🛁',desc:'200kPa pressure rated'},
+        {id:303,name:'Mixer Tap Chrome',price:349,img:'🚰',desc:'Basin mixer tap'},
+      ]
+    }
+  },
+  {
+    id:2, name:'Cape Spice Market', owner:'Fatima Davids',
+    category:'Food & Spices', city:'Cape Town', province:'Western Cape',
+    desc:'Authentic Cape Malay spices, marinades and specialty foods delivered to your door.',
+    banner:'https://images.unsplash.com/photo-1506368249639-73a05d6f6488?w=600&h=200&fit=crop&q=80',
+    logo:'🌶️', rating:4.9, reviews:89, open:true, verified:true,
+    phone:'+27 21 555 0200', email:'capespice@tasksa.co.za',
+    categories:[
+      {id:1, name:'Spice Blends',   icon:'🌶️', count:32, desc:'Traditional Cape Malay blends'},
+      {id:2, name:'Marinades',      icon:'🍖', count:18, desc:'Ready-to-use marinades and rubs'},
+      {id:3, name:'Condiments',     icon:'🫙', count:24, desc:'Chutneys, atjars and sambals'},
+      {id:4, name:'Dried Goods',    icon:'🌾', count:41, desc:'Lentils, beans, rice and grains'},
+    ],
+    products:{
+      1:[
+        {id:401,name:'Cape Masala 500g',   price:79, img:'🌶️',desc:'Traditional Cape blend'},
+        {id:402,name:'Braai Spice 400g',   price:65, img:'🔥',desc:'Perfect for the braai'},
+        {id:403,name:'Mild Curry 300g',    price:55, img:'🍛',desc:'Mild family curry powder'},
+      ]
+    }
+  },
+  {
+    id:3, name:'GreenGrow Garden Centre', owner:'Ayanda Pillay',
+    category:'Garden & Outdoor', city:'Pretoria', province:'Gauteng',
+    desc:'Everything for your garden — plants, tools, soil, fertilizers and outdoor furniture.',
+    banner:'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=200&fit=crop&q=80',
+    logo:'🌱', rating:4.7, reviews:56, open:true, verified:true,
+    phone:'+27 12 555 0300', email:'greengrow@tasksa.co.za',
+    categories:[
+      {id:1, name:'Plants & Seeds',  icon:'🌱', count:78, desc:'Indoor, outdoor and indigenous plants'},
+      {id:2, name:'Garden Tools',    icon:'🪴', count:34, desc:'Spades, rakes, hoses and more'},
+      {id:3, name:'Soil & Compost',  icon:'🌍', count:22, desc:'Potting soil, compost and mulch'},
+      {id:4, name:'Fertilizers',     icon:'💧', count:19, desc:'Organic and chemical fertilizers'},
+      {id:5, name:'Outdoor Furniture',icon:'🪑',count:15, desc:'Garden sets, umbrellas and braais'},
+    ],
+    products:{
+      1:[
+        {id:501,name:'Lavender Plant',   price:45,  img:'🌿',desc:'Hardy lavender in 2L pot'},
+        {id:502,name:'Seedling Tray 6pk',price:25,  img:'🌱',desc:'Vegetable seedlings mixed'},
+        {id:503,name:'Aloe Vera 3L',     price:65,  img:'🪴',desc:'Large aloe in terracotta pot'},
+      ]
+    }
+  },
+  {
+    id:4, name:'PawPerfect Pet Supplies', owner:'Lindiwe Mthembu',
+    category:'Pet Supplies', city:'Durban', province:'KwaZulu-Natal',
+    desc:'Premium pet food, accessories and grooming products for all your beloved pets.',
+    banner:'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=200&fit=crop&q=80',
+    logo:'🐾', rating:4.8, reviews:71, open:true, verified:true,
+    phone:'+27 31 555 0400', email:'pawperfect@tasksa.co.za',
+    categories:[
+      {id:1, name:'Dog Food',       icon:'🐕', count:45, desc:'Dry, wet and raw dog food'},
+      {id:2, name:'Cat Food',       icon:'🐈', count:38, desc:'Dry and wet cat food'},
+      {id:3, name:'Grooming',       icon:'✂️', count:29, desc:'Shampoo, brushes and clippers'},
+      {id:4, name:'Accessories',    icon:'🦴', count:52, desc:'Leads, collars, beds and toys'},
+    ],
+    products:{
+      1:[
+        {id:601,name:'Dog Shampoo 500ml', price:89, img:'🛁',desc:'Hypoallergenic formula'},
+        {id:602,name:'Dog Collar Medium', price:149,img:'🐕',desc:'Padded leather collar'},
+        {id:603,name:'Dog Food 5kg',      price:289,img:'🦴',desc:'Adult formula'},
+      ]
+    }
+  },
+];
+
+var currentStore = null;
+var currentStoreCategory = null;
+
+// ── STORE FUNCTIONS ───────────────────────────────────────────────────
+function renderStores() {
+  var grid = document.getElementById('storeGrid');
+  if(!grid) return;
+  // Load saved stores from localStorage (shop owners add their own)
+  var savedStores = lsGet('stores', null);
+  var allStores = savedStores ? savedStores : STORES;
+  var search = (document.getElementById('storeSearch')||{}).value||'';
+  var cat = (document.getElementById('storeCatFilter')||{}).value||'All';
+  var filtered = allStores.filter(function(s){
+    var matchSearch = !search || s.name.toLowerCase().indexOf(search.toLowerCase())!==-1 || s.city.toLowerCase().indexOf(search.toLowerCase())!==-1;
+    var matchCat = cat==='All' || s.category===cat;
+    return matchSearch && matchCat;
+  });
+  if(filtered.length===0){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--t3);"><div style="font-size:40px;margin-bottom:12px;">🏪</div><p style="font-size:15px;">No stores found matching your search.</p><p style="font-size:13px;margin-top:6px;">Want to list your store? <a style="color:var(--blue3);cursor:pointer;" onclick="openModal(\'registerModal\')">Register as a Shop Owner</a></p></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(function(s){
+    var bannerHtml = s.banner
+      ? '<img class="store-banner" src="'+s.banner+'" alt="'+s.name+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+        +'<div class="store-banner-placeholder" style="display:none;background:var(--surf2);">'+s.logo+'</div>'
+      : '<div class="store-banner-placeholder" style="background:var(--surf2);">'+s.logo+'</div>';
+    return '<div class="store-card" onclick="openStore('+s.id+')">'
+      +'<div style="position:relative;">'+bannerHtml
+        +(s.verified?'<span style="position:absolute;top:8px;right:8px;background:rgba(34,197,94,0.9);color:white;font-size:10px;font-weight:700;padding:3px 9px;border-radius:50px;">✓ Verified</span>':'')
+      +'</div>'
+      +'<div class="store-info">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+          +'<div style="width:36px;height:36px;border-radius:8px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">'+s.logo+'</div>'
+          +'<div><div class="store-name">'+s.name+'</div><div class="store-cat">'+s.category+' · '+s.city+'</div></div>'
+        +'</div>'
+        +'<div class="store-desc">'+s.desc+'</div>'
+        +'<div class="store-meta">'
+          +'<div style="font-size:11px;color:var(--t3);">⭐ '+s.rating+' ('+s.reviews+' reviews)</div>'
+          +'<span class="store-badge '+(s.open?'store-open':'store-closed')+'">'+(s.open?'Open':'Closed')+'</span>'
+        +'</div>'
+        +'<div style="margin-top:10px;font-size:11px;color:var(--t3);">'+s.categories.length+' categories · Click to browse</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function filterStores(){ renderStores(); }
+
+function openStore(id){
+  var savedStores = lsGet('stores', null);
+  var allStores = savedStores ? savedStores : STORES;
+  var s = allStores.find(function(x){ return x.id===id; });
+  if(!s) return;
+  currentStore = s;
+  currentStoreCategory = null;
+  renderStorePage(s);
+  goPage('store-page');
+}
+
+function renderStorePage(s){
+  var el = document.getElementById('storePageContent');
+  if(!el) return;
+  el.innerHTML =
+    '<div class="store-page-header">'
+      +'<img src="'+(s.banner||'')+'" style="width:100%;height:180px;object-fit:cover;display:block;" alt="'+s.name+'" onerror="this.style.display=\'none\'">'
+      +'<div class="store-page-info">'
+        +'<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">'
+          +'<div style="width:64px;height:64px;border-radius:14px;background:var(--surf2);border:2px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;margin-top:-40px;position:relative;z-index:1;">'+s.logo+'</div>'
+          +'<div>'
+            +'<div style="font-family:\'Sora\',sans-serif;font-size:20px;font-weight:900;">'+s.name+'</div>'
+            +'<div style="font-size:12px;color:var(--t3);margin-top:2px;">'+s.category+' · 📍 '+s.city+', '+s.province+'</div>'
+            +'<div style="font-size:12px;color:var(--t3);margin-top:2px;">⭐ '+s.rating+' ('+s.reviews+' reviews) · '+(s.open?'<span style="color:var(--green2);">● Open now</span>':'<span style="color:#f87171;">● Closed</span>')+'</div>'
+          +'</div>'
+        +'</div>'
+        +'<p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:14px;">'+s.desc+'</p>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+          +'<a href="tel:'+s.phone+'" style="display:flex;align-items:center;gap:6px;background:var(--surf);border:1px solid var(--bd2);border-radius:50px;padding:7px 14px;font-size:12px;color:var(--t2);">📞 '+s.phone+'</a>'
+          +'<span style="display:flex;align-items:center;gap:6px;background:var(--surf);border:1px solid var(--bd2);border-radius:50px;padding:7px 14px;font-size:12px;color:var(--t2);">✉️ '+s.email+'</span>'
+        +'</div>'
+        +'<div style="margin-top:14px;">'
+          +'<button onclick="goPage(\'shop\')" style="background:none;border:none;color:var(--blue3);font-size:13px;cursor:pointer;padding:0;font-family:\'DM Sans\',sans-serif;">← Back to all stores</button>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div style="padding:28px 5%;">'
+      +'<h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">Shop by Category</h3>'
+      +'<p style="font-size:13px;color:var(--t3);margin-bottom:18px;">Click a category to see all products</p>'
+      +'<div class="product-cat-grid">'
+        +s.categories.map(function(c){
+          return '<div class="product-cat-card" onclick="openStoreCategory('+c.id+')">'
+            +'<div class="pcat-icon">'+c.icon+'</div>'
+            +'<div class="pcat-name">'+c.name+'</div>'
+            +'<div class="pcat-count">'+c.count+' products</div>'
+            +'<div style="font-size:11px;color:var(--t3);margin-top:4px;line-height:1.4;">'+c.desc+'</div>'
+            +'</div>';
+        }).join('')
+      +'</div>'
+    +'</div>'
+    +'<div id="storeCategoryProducts" style="padding:0 5% 28px;display:none;"></div>';
+}
+
+function openStoreCategory(catId){
+  if(!currentStore) return;
+  currentStoreCategory = catId;
+  var cat = currentStore.categories.find(function(c){ return c.id===catId; });
+  var products = (currentStore.products||{})[catId] || [];
+  var el = document.getElementById('storeCategoryProducts');
+  if(!el) return;
+  el.style.display = 'block';
+  el.innerHTML =
+    '<h3 style="font-size:16px;font-weight:800;margin-bottom:16px;">'+(cat?cat.icon+' '+cat.name:'Products')+'</h3>'
+    +(products.length===0
+      ? '<p style="color:var(--t3);font-size:13px;">No products listed in this category yet.</p>'
+      : '<div class="product-list-grid">'
+          +products.map(function(p){
+            return '<div class="product" style="cursor:default;">'
+              +'<div class="prod-img" style="background:var(--surf2);font-size:32px;">'+p.img+'</div>'
+              +'<div class="prod-info">'
+                +'<div class="prod-name">'+p.name+'</div>'
+                +'<div style="font-size:10px;color:var(--t3);margin-bottom:4px;">'+p.desc+'</div>'
+                +'<div class="prod-price">R'+p.price+'</div>'
+                +'<button class="add-btn" onclick="addToCart('+(10000+p.id)+',\''+p.name+'\','+p.price+',\''+currentStore.name+'\')">Add to Cart</button>'
+              +'</div>'
+              +'</div>';
+          }).join('')
+        +'</div>'
+    );
+  el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// Enhanced addToCart that accepts name/price/store directly
+function addToCart(id, name, price, store){
+  if(typeof id === 'number' && id < 10000){
+    // Old product-based call
+    var p=PRODUCTS.find(function(x){return x.id===id;});if(!p)return;
+    var ex=cart.find(function(x){return x.id===id;});
+    if(ex)ex.qty++;else cart.push(Object.assign({},p,{qty:1}));
+  } else {
+    // New store-based call
+    var ex2=cart.find(function(x){return x.id===id;});
+    if(ex2){ ex2.qty++; }
+    else { cart.push({id:id,name:name,price:price,store:store,icon:'🛍️',bg:'var(--surf2)',qty:1}); }
+  }
+  persistCart();updateCartUI();
+  toast((name||'Item')+' added to cart!','success');
+  openCartSidebar();
+}
+
 // ── INIT ─────────────────────────────────────────────────────────────
 function loadMoreProviders(){
   toast("12 more providers loaded!","success");
@@ -2065,12 +2387,125 @@ function submitBulkEnquiry(){
   toast('Bulk freight enquiry submitted! We will contact you within 2 hours.','success');
 }
 
+
+// ── PWA SERVICE WORKER ────────────────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('/sw.js')
+      .then(function(reg){ console.log('SW registered:', reg.scope); })
+      .catch(function(err){ console.log('SW failed:', err); });
+  });
+}
+
+// ── PWA INSTALL PROMPT ────────────────────────────────────────────────
+var _deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  _deferredPrompt = e;
+  // Show install banner after 3 seconds
+  setTimeout(showInstallBanner, 3000);
+});
+
+function showInstallBanner(){
+  if(!_deferredPrompt) return;
+  var banner = document.getElementById('pwaInstallBanner');
+  if(banner) banner.style.display = 'flex';
+}
+
+function installPWA(){
+  var banner = document.getElementById('pwaInstallBanner');
+  if(banner) banner.style.display = 'none';
+  if(!_deferredPrompt) return;
+  _deferredPrompt.prompt();
+  _deferredPrompt.userChoice.then(function(result){
+    if(result.outcome === 'accepted') toast('TaskSA installed! Find it on your home screen.', 'success');
+    _deferredPrompt = null;
+  });
+}
+
+function dismissInstallBanner(){
+  var banner = document.getElementById('pwaInstallBanner');
+  if(banner) banner.style.display = 'none';
+  lsSet('pwa_dismissed', true);
+}
+
+// Handle URL params for PWA shortcuts
+window.addEventListener('DOMContentLoaded', function(){
+  var params = new URLSearchParams(window.location.search);
+  var page = params.get('page');
+  if(page) setTimeout(function(){ goPage(page); }, 500);
+});
+
+
+function handleDocUpload(type, input){
+  var file = input.files[0];
+  if(!file) return;
+  if(file.size > 5*1024*1024){ toast('File too large. Max 5MB.','error'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    if(!window._uploadedDocs) window._uploadedDocs={};
+    window._uploadedDocs[type]={name:file.name,data:e.target.result,type:file.type};
+    var iconEl=document.getElementById(type==='id'?'idUploadIcon':'addressUploadIcon');
+    var textEl=document.getElementById(type==='id'?'idUploadText':'addressUploadText');
+    if(iconEl) iconEl.textContent='\u2705';
+    if(textEl){textEl.textContent=file.name;textEl.style.color='var(--green2)';}
+    toast(file.name+' uploaded!','success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function handlePhotoUpload(input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    if(!window._uploadedDocs)window._uploadedDocs={};
+    window._uploadedDocs.photo=e.target.result;
+    var p=document.getElementById('photoPreview');
+    if(p)p.innerHTML='<img src="'+e.target.result+'" style="width:100%;height:100%;object-fit:cover;">';
+    toast('Photo uploaded!','success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function setProviderType(type){
+  window._providerType=type;
+  var ind=document.getElementById('typeIndividual');
+  var biz=document.getElementById('typeBusiness');
+  var bizF=document.getElementById('bizRegField');
+  if(type==='individual'){
+    if(ind){ind.style.background='rgba(26,143,255,0.12)';ind.style.borderColor='var(--blue2)';}
+    if(biz){biz.style.background='var(--surf)';biz.style.borderColor='var(--bd)';}
+    if(bizF)bizF.style.display='none';
+  } else {
+    if(biz){biz.style.background='rgba(26,143,255,0.12)';biz.style.borderColor='var(--blue2)';}
+    if(ind){ind.style.background='var(--surf)';ind.style.borderColor='var(--bd)';}
+    if(bizF)bizF.style.display='block';
+  }
+}
+
+function submitVerification(){
+  if(!window._uploadedDocs||!window._uploadedDocs.id){toast('Please upload your ID document','error');return;}
+  if(!window._uploadedDocs.address){toast('Please upload proof of address','error');return;}
+  if(!currentUser){toast('Please sign in first','error');return;}
+  var profile=getProfile(currentUser.email)||{};
+  profile.verification={type:window._providerType||'individual',docs:window._uploadedDocs,status:'pending',submitted:new Date().toISOString()};
+  saveProfile(currentUser.email,profile);
+  var users=getUsers();
+  if(users[currentUser.email]){users[currentUser.email].verificationStatus='pending';saveUsers(users);}
+  closeModal('verificationModal');
+  toast('Documents submitted! We will review within 24 hours.','success');
+}
+
+function openVerification(){
+  if(!currentUser){openModal('loginModal');return;}
+  openModal('verificationModal');
+}
 window.onload=function(){
   initUsers();      // seed demo accounts if first visit
   renderServiceFilters();  // load dynamic categories
   loadSession();    // restore logged-in user from localStorage
   loadCart();       // restore cart from localStorage
-  renderShop();renderBanners();renderHomeAccom();renderHomeCats();renderConvList();renderMsgs();buildEarnBar();
+  renderStores();renderBanners();renderHomeAccom();renderHomeCats();renderConvList();renderMsgs();buildEarnBar();
   updateCartUI();updateNav();
 };
 </script>
