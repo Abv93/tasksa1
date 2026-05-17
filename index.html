@@ -567,6 +567,105 @@ footer{background:var(--bg2);border-top:1px solid var(--bd);padding:44px 5% 24px
   </div>
 </div>
 
+
+<!-- ════ BOOKING REQUEST MODAL ════ -->
+<div class="modal-overlay" id="bookingRequestModal">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('bookingRequestModal')">✕</button>
+    <h2>Request a Booking</h2>
+    <div class="modal-sub" id="bookingProviderName">Send a booking request to your provider</div>
+
+    <!-- Service details -->
+    <div class="field">
+      <label>What do you need help with? *</label>
+      <input id="bookingTitle" placeholder="e.g. Fix burst pipe under kitchen sink" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 13px;color:var(--t);font-size:13px;width:100%;outline:none;">
+    </div>
+
+    <div class="field">
+      <label>More details (optional)</label>
+      <textarea id="bookingDesc" rows="3" placeholder="Describe the problem, what you've tried, any special requirements..." style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 13px;color:var(--t);font-size:13px;width:100%;outline:none;resize:vertical;font-family:'DM Sans',sans-serif;"></textarea>
+    </div>
+
+    <!-- Date and time -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field">
+        <label>Preferred Date *</label>
+        <input type="date" id="bookingDate" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 13px;color:var(--t);font-size:13px;width:100%;outline:none;">
+      </div>
+      <div class="field">
+        <label>Preferred Time *</label>
+        <select id="bookingTime" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 13px;color:var(--t);font-size:13px;width:100%;outline:none;cursor:pointer;">
+          <option value="">Select time</option>
+          <option>07:00 – 09:00</option>
+          <option>09:00 – 11:00</option>
+          <option>11:00 – 13:00</option>
+          <option>13:00 – 15:00</option>
+          <option>15:00 – 17:00</option>
+          <option>17:00 – 19:00</option>
+          <option>Any time (flexible)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="field">
+      <label>Service Address *</label>
+      <input id="bookingAddress" placeholder="123 Main Street, Sandton, Johannesburg" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 13px;color:var(--t);font-size:13px;width:100%;outline:none;">
+    </div>
+
+    <!-- Budget -->
+    <div class="field">
+      <label>Your Budget (R)</label>
+      <input type="number" id="bookingBudget" placeholder="e.g. 500" min="0" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:10px 13px;color:var(--t);font-size:13px;width:100%;outline:none;">
+    </div>
+
+    <!-- Info box -->
+    <div style="background:rgba(26,143,255,0.07);border:1px solid rgba(26,143,255,0.2);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:16px;">
+      <strong style="color:var(--blue3);">How it works:</strong><br>
+      1. You send this booking request<br>
+      2. The provider reviews it and can <strong>Accept</strong>, <strong>Decline</strong>, or <strong>Propose a different time</strong><br>
+      3. Once accepted, you pay the deposit to confirm — funds held safely in escrow<br>
+      4. Provider does the job → you release payment when satisfied
+    </div>
+
+    <div class="mfooter">
+      <button class="btn btn-g" onclick="closeModal('bookingRequestModal')">Cancel</button>
+      <button class="btn btn-p" onclick="submitBookingRequest()">Send Booking Request →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ PROVIDER RESPONSE MODAL (for provider side) ════ -->
+<div class="modal-overlay" id="bookingResponseModal">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" onclick="closeModal('bookingResponseModal')">✕</button>
+    <h2>Respond to Booking</h2>
+    <div id="bookingResponseDetails" style="background:var(--surf);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--t2);line-height:1.8;"></div>
+
+    <div id="counterProposalFields" style="display:none;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--t);">Propose a different time:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div class="field"><label>New Date</label><input type="date" id="counterDate" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 12px;color:var(--t);font-size:13px;width:100%;outline:none;"></div>
+        <div class="field"><label>New Time</label>
+          <select id="counterTime" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 12px;color:var(--t);font-size:13px;width:100%;outline:none;">
+            <option>07:00 – 09:00</option><option>09:00 – 11:00</option><option>11:00 – 13:00</option>
+            <option>13:00 – 15:00</option><option>15:00 – 17:00</option><option>17:00 – 19:00</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Message to customer</label>
+        <textarea id="counterMessage" rows="2" placeholder="e.g. I have a job until 2pm, can we do 3pm instead?" style="background:var(--surf);border:1px solid var(--bd2);border-radius:8px;padding:9px 12px;color:var(--t);font-size:13px;width:100%;outline:none;resize:none;font-family:'DM Sans',sans-serif;"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+      <button class="btn btn-p" onclick="respondToBooking('accept')" style="flex:1;justify-content:center;">✓ Accept Booking</button>
+      <button class="btn btn-g" onclick="toggleCounterProposal()" style="flex:1;justify-content:center;">🕐 Propose New Time</button>
+      <button onclick="respondToBooking('counter')" id="sendCounterBtn" style="display:none;flex:1;background:var(--blue);color:white;border:none;border-radius:50px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;justify-content:center;">Send Proposal</button>
+      <button onclick="respondToBooking('decline')" style="width:100%;background:rgba(239,68,68,0.08);color:#f87171;border:1px solid rgba(239,68,68,0.2);border-radius:50px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">✕ Decline</button>
+    </div>
+  </div>
+</div>
 <!-- ════ CART SIDEBAR ════ -->
 <div id="cartSidebar">
   <div class="cart-hdr">
@@ -1381,8 +1480,16 @@ function renderServiceFilters(){
 
 function filterServices(cat){
   servicesFilter=cat;
-  renderServiceFilters();
-  renderServicesGrid();
+  // Navigate to services page and filter
+  goPage('services');
+  // Small delay to let page render first
+  setTimeout(function(){
+    renderServiceFilters();
+    renderServicesGrid();
+    // Also update the dropdown to match
+    var sel=document.getElementById('serviceCatSelect');
+    if(sel){sel.value=cat;}
+  }, 80);
 }
 
 function renderServicesGrid(){
@@ -1394,7 +1501,9 @@ function renderServicesGrid(){
     return;
   }
   g.innerHTML=filtered.map(function(p){
-    return '<div class="prov-card" onclick="goPage(\'messages\')">'
+    var pName=p.name.replace(/'/g,"\\'");
+    var pCat=p.cat.replace(/'/g,"\\'");
+    return '<div class="prov-card">'
       +'<div class="pav" style="background:'+p.bg+';color:'+p.col+'">'+p.ini+'</div>'
       +'<div class="pname">'+p.name+'</div>'
       +'<div class="prole">'+p.cat+' · '+p.loc+'</div>'
@@ -1402,6 +1511,10 @@ function renderServicesGrid(){
       +'<div style="font-size:10px;color:var(--t3);">'+p.rev+' reviews</div>'
       +'<div class="pprice">From '+p.price+'</div>'
       +'<span class="vbadge">✓ Verified</span>'
+      +'<div style="display:flex;gap:6px;margin-top:10px;">'
+        +'<button onclick="openBookingRequest(\''+pName+'\',\''+p.ini+'\',\''+pCat+'\')" style="flex:1;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border:none;border-radius:50px;padding:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">📋 Request Booking</button>'
+        +'<button onclick="goPage(\'messages\')" style="background:var(--surf);border:1px solid var(--bd2);color:var(--t2);border-radius:50px;padding:8px 10px;font-size:11px;cursor:pointer;">💬</button>'
+      +'</div>'
       +'</div>';
   }).join('');
 }
@@ -1596,7 +1709,7 @@ function renderHomeCats(){
   var cats=getCategories();
   // Curated Unsplash photo IDs for each category type
   var catImages={
-    'Plumbing':    'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=200&fit=crop&q=80',
+    'Plumbing':    'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=400&h=200&fit=crop&q=80',
     'Electrical':  'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&h=200&fit=crop&q=80',
     'Cleaning':    'https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&h=200&fit=crop&q=80',
     'Gardening':   'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=200&fit=crop&q=80',
@@ -1913,20 +2026,51 @@ function switchConv(i){
 }
 function renderMsgs(){
   var area=document.getElementById('chatMsgs');if(!area)return;
-  var msgs=MSGS_BY_CONV[activeConv]||[];
+  var staticMsgs=MSGS_BY_CONV[activeConv]||[];
+  var savedMsgs=lsGet('msgs',{});
+  var dynMsgs=savedMsgs[activeConv]||[];
+  var msgs=staticMsgs.concat(dynMsgs);
   area.innerHTML=msgs.map(function(m){
-    if(m.from==='book')return '<div class="book-card"><h5>'+m.service+'</h5>'
+    if(m.from==='book') return '<div class="book-card"><h5>'+m.service+'</h5>'
       +'<div style="font-size:12px;color:var(--t3);margin-bottom:4px;">'+m.date+'</div>'
       +'<div class="book-price">'+m.price+'</div>'
       +'<div style="font-size:11px;color:var(--t3);margin-top:3px;">'+m.escrow+'</div>'
-      +'<div class="bc-btns"><button class="bc-accept" onclick="acceptBooking(this)">Accept & Pay Deposit</button>'
+      +'<div class="bc-btns"><button class="bc-accept" onclick="acceptBooking(this)">Accept &amp; Pay Deposit</button>'
       +'<button class="bc-decline" onclick="declineBooking(this)">Decline</button></div></div>';
+    if(m.isBooking){
+      var bkgs=lsGet('bookings',[]);
+      var bk=bkgs.find(function(x){return x.id===m.bookingId;});
+      var status=bk?bk.status:'PENDING';
+      var badge=status==='ACCEPTED'?'<span style="color:var(--green2);font-weight:700;">&#10003; Accepted</span>'
+        :status==='DECLINED'?'<span style="color:#f87171;font-weight:700;">&#10007; Declined</span>'
+        :status==='COUNTER_PROPOSED'?'<span style="color:var(--amber2);font-weight:700;">&#8635; New time proposed</span>'
+        :'<span style="color:var(--t3);">&#8987; Awaiting response</span>';
+      var html='<div style="background:var(--surf2);border:1px solid var(--bd2);border-radius:14px;padding:14px;margin:8px 0;max-width:380px;">'
+        +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--blue3);margin-bottom:8px;">Booking Request</div>'
+        +'<div style="font-size:13px;font-weight:700;color:var(--t);margin-bottom:6px;">'+(bk?bk.title:'Service Request')+'</div>'
+        +'<div style="font-size:12px;color:var(--t2);line-height:1.8;">';
+      if(bk){
+        html+='Date: '+new Date(bk.date).toLocaleDateString('en-ZA',{weekday:'short',day:'numeric',month:'short'})+'<br>';
+        html+='Time: '+bk.time+'<br>';
+        html+='Address: '+bk.address+'<br>';
+        if(bk.budget&&bk.budget!=='Not specified') html+='Budget: '+bk.budget+'<br>';
+      }
+      html+='</div><div style="margin-top:8px;font-size:12px;">'+badge+'</div>';
+      if(status==='PENDING'){
+        html+='<div style="display:flex;gap:8px;margin-top:10px;">'
+          +'<button onclick="openBookingResponse(\''+m.bookingId+'\')" style="flex:1;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border:none;border-radius:50px;padding:8px;font-size:11px;font-weight:700;cursor:pointer;">Respond</button>'
+          +'<button onclick="toast(\'PayFast payment — Phase 4\',\'success\')" style="flex:1;background:rgba(34,197,94,0.15);color:var(--green2);border:1px solid rgba(34,197,94,0.3);border-radius:50px;padding:8px;font-size:11px;font-weight:700;cursor:pointer;">Accept &amp; Pay</button>'
+          +'</div>';
+      }
+      html+='</div>';
+      return html;
+    }
     var sent=m.from==='me';
     return '<div class="bubble '+(sent?'sent':'recv')+'">'+m.text+'</div>';
   }).join('');
   var qrs=document.getElementById('quickReplies');
   if(qrs)qrs.innerHTML=['Sounds good!','What is your availability?','Can you send a quote?','I will confirm shortly.'].map(function(q){
-    return '<div class="qr" onclick="fillQR(\''+q+'\')">'+q+'</div>';
+    return '<div class="qr" onclick="fillQR(\''+q+'\')">' + q + '</div>';
   }).join('');
   area.scrollTop=area.scrollHeight;
 }
@@ -2314,7 +2458,9 @@ function filterServicesBySelect(){
   }
   grid.innerHTML=filtered.map(function(p){
     var cn=p.name.replace(/'/g,"\'");
-    return '<div class="prov-card" onclick="goPage(\'messages\')">'
+    var pName=p.name.replace(/'/g,"\\'");
+    var pCat=p.cat.replace(/'/g,"\\'");
+    return '<div class="prov-card">'
       +'<div class="pav" style="background:'+p.bg+';color:'+p.col+'">'+p.ini+'</div>'
       +'<div class="pname">'+p.name+'</div>'
       +'<div class="prole">'+p.cat+' · '+p.loc+'</div>'
@@ -2322,6 +2468,10 @@ function filterServicesBySelect(){
       +'<div style="font-size:10px;color:var(--t3);">'+p.rev+' reviews</div>'
       +'<div class="pprice">From '+p.price+'</div>'
       +'<span class="vbadge">✓ Verified</span>'
+      +'<div style="display:flex;gap:6px;margin-top:10px;">'
+        +'<button onclick="openBookingRequest(\''+pName+'\',\''+p.ini+'\',\''+pCat+'\')" style="flex:1;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border:none;border-radius:50px;padding:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">📋 Request Booking</button>'
+        +'<button onclick="goPage(\'messages\')" style="background:var(--surf);border:1px solid var(--bd2);color:var(--t2);border-radius:50px;padding:8px 10px;font-size:11px;cursor:pointer;">💬</button>'
+      +'</div>'
       +'</div>';
   }).join('');
   // Update the category dropdown options from localStorage
@@ -2500,6 +2650,158 @@ function openVerification(){
   if(!currentUser){openModal('loginModal');return;}
   openModal('verificationModal');
 }
+
+// ── BOOKING REQUEST SYSTEM ────────────────────────────────────────────
+var _currentBookingProvider = null;
+
+function openBookingRequest(providerName, providerIni, providerCat) {
+  if(!currentUser){ openModal('loginModal'); toast('Please sign in to make a booking','error'); return; }
+  _currentBookingProvider = {name: providerName, ini: providerIni, cat: providerCat};
+  var nameEl = document.getElementById('bookingProviderName');
+  if(nameEl) nameEl.textContent = 'Booking request for: ' + providerName + ' · ' + providerCat;
+  // Set minimum date to today
+  var dateEl = document.getElementById('bookingDate');
+  if(dateEl){ var today=new Date().toISOString().split('T')[0]; dateEl.min=today; dateEl.value=''; }
+  document.getElementById('bookingTitle').value='';
+  document.getElementById('bookingDesc').value='';
+  document.getElementById('bookingAddress').value='';
+  document.getElementById('bookingBudget').value='';
+  openModal('bookingRequestModal');
+}
+
+function submitBookingRequest(){
+  var title   = (document.getElementById('bookingTitle')||{}).value||'';
+  var date    = (document.getElementById('bookingDate')||{}).value||'';
+  var time    = (document.getElementById('bookingTime')||{}).value||'';
+  var address = (document.getElementById('bookingAddress')||{}).value||'';
+  if(!title.trim()){ toast('Please describe what you need help with','error'); return; }
+  if(!date){ toast('Please select a preferred date','error'); return; }
+  if(!time){ toast('Please select a preferred time','error'); return; }
+  if(!address.trim()){ toast('Please enter your service address','error'); return; }
+
+  var desc    = (document.getElementById('bookingDesc')||{}).value||'';
+  var budget  = (document.getElementById('bookingBudget')||{}).value||'';
+  var provider = _currentBookingProvider || {name:'Provider'};
+
+  // Save booking to localStorage
+  var bookings = lsGet('bookings',[]);
+  var newBooking = {
+    id:       'BK'+Date.now(),
+    customer: currentUser.name,
+    email:    currentUser.email,
+    provider: provider.name,
+    provIni:  provider.ini||'??',
+    cat:      provider.cat||'Service',
+    title:    title,
+    desc:     desc,
+    date:     date,
+    time:     time,
+    address:  address,
+    budget:   budget?'R'+budget:'Not specified',
+    status:   'PENDING',
+    createdAt: new Date().toISOString()
+  };
+  bookings.push(newBooking);
+  lsSet('bookings', bookings);
+
+  closeModal('bookingRequestModal');
+
+  // Add booking request as a message in the conversation
+  var msgs = lsGet('msgs',{});
+  var convKey = provider.name;
+  if(!msgs[convKey]) msgs[convKey]=[];
+  msgs[convKey].push({
+    from:'system', 
+    text:'📋 BOOKING REQUEST\n' +
+         '━━━━━━━━━━━━━━━━━━━━\n' +
+         '📌 ' + title + '\n' +
+         '📅 ' + new Date(date).toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) + '\n' +
+         '🕐 ' + time + '\n' +
+         '📍 ' + address + '\n' +
+         (budget?'💰 Budget: R'+budget+'\n':'') +
+         (desc?'📝 '+desc+'\n':'') +
+         '\nStatus: ⏳ Awaiting provider response',
+    t: new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}),
+    bookingId: newBooking.id,
+    isBooking: true
+  });
+  lsSet('msgs', msgs);
+
+  toast('Booking request sent to '+provider.name+'! They will respond within 24 hours.','success');
+
+  // Show in messages
+  setTimeout(function(){
+    goPage('messages');
+    lsSet('activeConv', provider.name);
+    renderConvList();
+    renderMsgs();
+  }, 1000);
+}
+
+function openBookingResponse(bookingId){
+  var bookings = lsGet('bookings',[]);
+  var b = bookings.find(function(x){ return x.id===bookingId; });
+  if(!b) return;
+  window._respondingBooking = b;
+  var el = document.getElementById('bookingResponseDetails');
+  if(el) el.innerHTML =
+    '<strong style="color:var(--t);">'+b.title+'</strong><br>' +
+    '👤 Customer: '+b.customer+'<br>' +
+    '📅 Requested: '+new Date(b.date).toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long'})+' · '+b.time+'<br>' +
+    '📍 '+b.address+'<br>' +
+    (b.budget!=='Not specified'?'💰 Budget: '+b.budget+'<br>':'') +
+    (b.desc?'📝 '+b.desc:'');
+  var counterF = document.getElementById('counterProposalFields');
+  if(counterF) counterF.style.display='none';
+  var sendBtn = document.getElementById('sendCounterBtn');
+  if(sendBtn) sendBtn.style.display='none';
+  var dateEl = document.getElementById('counterDate');
+  if(dateEl){ var today=new Date().toISOString().split('T')[0]; dateEl.min=today; }
+  openModal('bookingResponseModal');
+}
+
+function toggleCounterProposal(){
+  var f = document.getElementById('counterProposalFields');
+  var btn = document.getElementById('sendCounterBtn');
+  if(!f) return;
+  var visible = f.style.display!=='none';
+  f.style.display = visible?'none':'block';
+  if(btn) btn.style.display = visible?'none':'flex';
+}
+
+function respondToBooking(action){
+  var b = window._respondingBooking;
+  if(!b) return;
+  var bookings = lsGet('bookings',[]);
+  var idx = bookings.findIndex(function(x){ return x.id===b.id; });
+  var msgs = lsGet('msgs',{});
+  var convKey = b.customer;
+  if(!msgs[convKey]) msgs[convKey]=[];
+
+  if(action==='accept'){
+    if(idx!==-1) bookings[idx].status='ACCEPTED';
+    msgs[convKey].push({from:'provider', text:'✅ Booking accepted! I will be there on '+new Date(b.date).toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long'})+' at '+b.time+'. Please pay the deposit to confirm.', t:new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'})});
+    toast('Booking accepted! Customer has been notified.','success');
+  } else if(action==='decline'){
+    if(idx!==-1) bookings[idx].status='DECLINED';
+    msgs[convKey].push({from:'provider', text:"Sorry, I'm unable to take this booking at the requested time. Please send a new request or contact another provider.", t:new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'})});
+    toast('Booking declined. Customer notified.','error');
+  } else if(action==='counter'){
+    var newDate = (document.getElementById('counterDate')||{}).value||'';
+    var newTime = (document.getElementById('counterTime')||{}).value||'';
+    var msg     = (document.getElementById('counterMessage')||{}).value||'';
+    if(!newDate||!newTime){ toast('Please select a new date and time','error'); return; }
+    if(idx!==-1){ bookings[idx].status='COUNTER_PROPOSED'; bookings[idx].counterDate=newDate; bookings[idx].counterTime=newTime; }
+    msgs[convKey].push({from:'provider', text:'🔄 Counter-proposal: I can do this on '+new Date(newDate).toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long'})+' at '+newTime+(msg?'. '+msg:''), t:new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'})});
+    toast('Counter-proposal sent to customer.','success');
+  }
+
+  lsSet('bookings', bookings);
+  lsSet('msgs', msgs);
+  closeModal('bookingResponseModal');
+  renderMsgs();
+}
+
 window.onload=function(){
   initUsers();      // seed demo accounts if first visit
   renderServiceFilters();  // load dynamic categories
