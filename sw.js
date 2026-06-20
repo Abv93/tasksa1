@@ -1,8 +1,9 @@
-const CACHE = 'tasksa-v1';
+const CACHE = 'tasksa-v3';
 const OFFLINE_URL = '/';
 const ASSETS = [
   '/',
   '/index.html',
+  '/manifest.json',
   'https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap'
 ];
 
@@ -21,12 +22,16 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // Skip API requests — always go to network
+  if (e.request.url.includes('/api/')) return;
+
   if (e.request.mode === 'navigate') {
     e.respondWith(
       fetch(e.request).catch(() => caches.match(OFFLINE_URL))
     );
     return;
   }
+
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;

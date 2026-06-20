@@ -1,7 +1,7 @@
 {
   "name": "TaskSA — South Africa's Service Marketplace",
   "short_name": "TaskSA",
-  "description": "Book trusted service providers, shop local stores, arrange couriers and find holiday stays across South Africa.",
+  "description": "Book trusted service providers, shop local stores and find holiday stays across South Africa.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#020b1a",
@@ -12,15 +12,15 @@
   "categories": ["business", "lifestyle", "utilities"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230a6edb'/><text x='96' y='130' font-family='Arial Black,sans-serif' font-size='90' font-weight='900' text-anchor='middle' fill='white'>T</text><text x='130' y='130' font-family='Arial Black,sans-serif' font-size='50' font-weight='900' text-anchor='middle' fill='%23F5A623'>SA</text></svg>",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%230a6edb'/><text x='256' y='340' font-family='Arial Black,sans-serif' font-size='240' font-weight='900' text-anchor='middle' fill='white'>T</text><text x='360' y='340' font-family='Arial Black,sans-serif' font-size='130' font-weight='900' text-anchor='middle' fill='%23F5A623'>SA</text></svg>",
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
@@ -38,10 +38,10 @@
       "description": "Shop from local SA stores"
     },
     {
-      "name": "Book Courier",
-      "short_name": "Courier",
-      "url": "/?page=courier",
-      "description": "Book a delivery"
+      "name": "Holiday Stays",
+      "short_name": "Stays",
+      "url": "/?page=accommodation",
+      "description": "Find holiday accommodation"
     }
   ],
   "screenshots": []
